@@ -135,7 +135,7 @@ label.f{display:block;margin:12px 0 4px;font-size:13px;color:var(--ink2)}
 .chartbox rect.gap{fill:var(--line)}
 .chartbox line.ref{stroke:var(--mute);stroke-dasharray:3 4;stroke-width:1;opacity:.7}
 .chartbox .lastv{position:absolute;right:0;top:-18px;font:700 14px var(--disp);color:var(--ink)}
-.chartbox .reflbl{position:absolute;left:0;font-size:10px;line-height:1;color:var(--ink2);background:var(--panel);padding:1px 4px 1px 0;border-radius:0 3px 3px 0;transform:translateY(-50%)}
+.axis .refkey{color:var(--mute)}
 .axis{display:flex;justify-content:space-between;font-size:11px;color:var(--mute);margin-top:4px}
 /* log entries: the whole row is the edit button */
 .seg{display:flex;gap:6px;margin:10px 0 4px}
@@ -341,10 +341,17 @@ const Store = {
   KEY: "pdm.v1",
   data: null,
   blank(){ return {readiness:{}, practices:{}, games:{}, assessments:[], goals:{purpose:"", habits:["","","","",""], primary:"", measure:"", supporting:["","","",""], blockStart:"", checkpoints:{}}, habitsDone:{}, notes:{}, answers:{}, read:{}, drafts:{}, meta:{}, standardCheck:{}}; },
+  /* every section gets its blank shape back if it is missing, null or the wrong type (typeof null is "object") */
   normalize(d){
-    const b = this.blank(), out = Object.assign(b, d || {});
-    out.goals = Object.assign(this.blank().goals, out.goals || {});
-    ["answers","read","drafts","meta","notes","habitsDone","standardCheck"].forEach(k => { if(!out[k] || typeof out[k] !== "object") out[k] = {}; });
+    const obj = v => !!v && typeof v === "object" && !Array.isArray(v);
+    const out = Object.assign(this.blank(), obj(d) ? d : {});
+    out.goals = Object.assign(this.blank().goals, obj(out.goals) ? out.goals : {});
+    if(!Array.isArray(out.goals.habits)) out.goals.habits = ["","","","",""];
+    if(!Array.isArray(out.goals.supporting)) out.goals.supporting = ["","","",""];
+    if(!obj(out.goals.checkpoints)) out.goals.checkpoints = {};
+    ["readiness","practices","games","answers","read","drafts","meta","notes","habitsDone","standardCheck"].forEach(k => { if(!obj(out[k])) out[k] = {}; });
+    if(!Array.isArray(out.assessments)) out.assessments = [];
+    out.assessments = out.assessments.filter(a => obj(a) && obj(a.r) && typeof a.day === "string");
     return out;
   },
   load(){
@@ -353,7 +360,8 @@ const Store = {
     this.data = this.normalize(d);
     return this.data;
   },
-  saveLocal(){ try{ localStorage.setItem(this.KEY, JSON.stringify(this.data)); }catch(e){} },
+  saveFailed: false,
+  saveLocal(){ try{ localStorage.setItem(this.KEY, JSON.stringify(this.data)); this.saveFailed = false; }catch(e){ this.saveFailed = true; } },
   save(){ this.saveLocal(); },
   /* readiness: one record per day */
   putReadiness(day, rec){ this.data.readiness[day] = Object.assign({}, this.data.readiness[day] || {}, rec, {at: Date.now()}); this.save(); },
@@ -393,7 +401,8 @@ const Store = {
   parseBackup(text){
     let o = null;
     try{ o = JSON.parse(text); }catch(e){ return {err:"That file could not be read as a backup."}; }
-    if(!o || o.app !== "pdm" || !o.data || typeof o.data.readiness !== "object" || !Array.isArray(o.data.assessments)) return {err:"That file is not a Player Development Manual backup."};
+    const obj = v => !!v && typeof v === "object" && !Array.isArray(v);
+    if(!o || o.app !== "pdm" || !obj(o.data) || !Array.isArray(o.data.assessments) || ["readiness","practices","games"].some(k => !obj(o.data[k])) || ["habitsDone","answers","notes","standardCheck","goals"].some(k => k in o.data && !obj(o.data[k]))) return {err:"That file is not a Player Development Manual backup, or it is damaged. Nothing was changed."};
     return {data:o.data, at:o.at};
   },
   restore(d){ this.data = this.normalize(JSON.parse(JSON.stringify(d))); this.save(); }
@@ -467,8 +476,7 @@ function bars(points, emptyText, opts){
   box.appendChild(svg);
   const lastReal = points.filter(p => p.v != null).pop();
   box.appendChild(el("div", {class:"lastv"}, lastReal.v + (opts.max ? " " + (opts.unit || "") : "%")));
-  if(!opts.max){ const rl = el("div", {class:"reflbl"}, "50%"); rl.style.top = (yRef / H * 100) + "%"; box.appendChild(rl); }
-  const ax = el("div", {class:"axis"}, el("span", null, points[0].label), el("span", null, points[n-1].label));
+  const ax = el("div", {class:"axis"}, el("span", null, points[0].label), opts.max ? null : el("span", {class:"refkey"}, "┄ 50%"), el("span", null, points[n-1].label));
   const wrap = el("div", null, box, ax);
   return wrap;
 }
@@ -497,6 +505,7 @@ function renderToday(){
   ht.appendChild(el("h1", {class:"t2"}, el("span", null, "Gavin"), el("span", null, "Andersen")));
   ht.appendChild(el("div", {class:"t3", id:"heroDate"}, niceDay(today) + (bp && bp.days >= 0 && bp.left ? " · Day " + (bp.days + 1) + " of " + BLOCK_DAYS : "")));
   const f = flashBox(); if(f) slot.appendChild(f);
+  if(Store.saveFailed) slot.appendChild(el("div", {class:"unsaved", id:"saveFail", role:"alert"}, "This phone refused to save (storage full or private browsing). Your last changes are NOT kept — tap Save backup file below now."));
   const colA = el("div"), colB = el("div");
   slot.appendChild(el("div", {class:"cols"}, colA, colB));
   /* state: ring + last 7 days */
@@ -510,6 +519,8 @@ function renderToday(){
     el("div", {class:"minis"},
       el("div", {class:"mini"}, el("div", {class:"lbl"}, "Habits today"), el("div", {class:"val", id:"kpiHabits"}, pctText(hp))),
       el("div", {class:"mini"}, el("div", {class:"lbl"}, "90-day block"), el("div", {class:"val", id:"kpiBlock"}, bp ? bp.pct + "%" : "—"))));
+  const eveDone = STANDARD_Q.filter(q => (Store.data.standardCheck[today] || {})[q.k] != null).length;
+  st.appendChild(el("button", {type:"button", class:"link", id:"jumpEvening", onclick: () => { const e = $("eveningCard"); if(e && e.scrollIntoView) e.scrollIntoView({behavior:"smooth", block:"start"}); }}, "End-of-day check · " + eveDone + " of " + STANDARD_Q.length + " ↓"));
   colA.appendChild(st);
   colA.appendChild(checkCard(today));
   /* habits */
@@ -1015,11 +1026,16 @@ Store.load();
     State.ratingsDraft.sk1 = 1; renderRatings();
     /* backup */
     const exported = Store.exportText();
-    ck("backup: a file that is not ours is refused with a reason, and nothing changes", /could not be read/.test(Store.parseBackup("{nope").err || "") && /not a Player Development Manual backup/.test(Store.parseBackup(JSON.stringify({app:"other", data:{readiness:{}, assessments:[]}})).err || "") && Store.data.assessments.length === 1);
+    ck("backup: a file that is not ours is refused with a reason, and nothing changes", /could not be read/.test(Store.parseBackup("{nope").err || "") && /not a Player Development Manual backup/.test(Store.parseBackup(JSON.stringify({app:"other", data:JSON.parse(exported).data})).err || "") && Store.data.assessments.length === 1);
+    ck("backup: a file with a null or wrong-typed section is refused (typeof null is 'object')", ["readiness","practices","games","habitsDone"].every(k => { const d = JSON.parse(exported).data; d[k] = null; return !!Store.parseBackup(JSON.stringify({app:"pdm", data:d})).err; }) && !!Store.parseBackup(JSON.stringify({app:"pdm", data:Object.assign(JSON.parse(exported).data, {practices:[]})})).err);
+    ck("store: a stored record with null sections loads as empty sections, never a crash", (() => { const n = Store.normalize({readiness:null, practices:null, games:[], assessments:null, goals:null}); return typeof n.readiness === "object" && n.readiness && !Array.isArray(n.games) && Array.isArray(n.assessments) && Array.isArray(n.goals.habits); })());
     const snap = JSON.stringify(Store.data);
     const parsed = Store.parseBackup(exported);
     Store.data = Store.blank(); Store.restore(parsed.data);
     ck("backup: export then restore gives back the same data", !parsed.err && JSON.stringify(Store.data) === snap);
+    Store.saveLocal = function(){ this.saveFailed = true; }; Store.save(); State.tab = "today"; renderToday();
+    ck("storage: when the phone refuses a save, Today says so loudly", !!$("saveFail"));
+    Store.saveFailed = false; Store.saveLocal = function(){};
     State.tab = "today"; renderToday();
     ck("backup: Today says when the last backup was (never, so far)", /Last backup: never/.test($("backupLine").textContent));
     State.tab = "ratings"; State.ratingsDraft = Object.assign({}, Store.data.assessments[0].r, {sk1: 5}); Store.saveAssessment(State.ratingsDraft); renderRatings();
