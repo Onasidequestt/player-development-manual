@@ -162,6 +162,14 @@ label.f{display:block;margin:12px 0 4px;font-size:13px;color:var(--ink2)}
 .sec .body{padding-top:6px}
 .chev{width:9px;height:9px;border-right:2px solid var(--mute);border-bottom:2px solid var(--mute);transform:rotate(-45deg);transition:transform .15s;flex:0 0 auto}
 .sec.open .chev{transform:rotate(45deg)}
+.sq{display:grid;grid-template-columns:1fr;gap:6px}
+.seg.yn{margin:2px 0 0}
+.seg.yn button{flex:1 1 0}
+.seg.yn button[aria-pressed="true"][data-v="2"]{background:var(--good);border-color:var(--good);color:#04200f}
+.seg.yn button[aria-pressed="true"][data-v="1"]{background:var(--gold);border-color:var(--gold);color:#1a1200}
+.seg.yn button[aria-pressed="true"][data-v="0"]{background:var(--ink2);border-color:var(--ink2);color:var(--bg)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 4px}
+.stats .mini .val{font-size:24px}
 .unsaved{background:rgba(224,166,44,.12);border:1px solid rgba(224,166,44,.4);border-radius:12px;padding:10px 12px;margin:10px 0;font-size:14px}
 /* habits */
 .habit{display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--line)}
@@ -269,6 +277,20 @@ const FIELDS = {
         {after:"The Three-Year Vision", k:"v3", label:"My three-year vision"},
         {after:"The Five-Year Vision", k:"v5", label:"My five-year vision"},
         {after:"My Long-Term Vision Statement", k:"vision", label:"My long-term vision statement"}]};
+/* the seven end-of-day questions, read from Chapter Three's own "Daily Standard Check" section */
+const STANDARD_Q = (() => {
+  const ch = CHAPTERS.find(c => c.n === "THREE"), b = ch && ch.blocks.find(x => x.h === "Daily Standard Check");
+  return b ? b.p.map(p => p.match(/^(\w+):\s*(.+?\?)\s*☐/)).filter(Boolean).map(m => ({k: m[1].toLowerCase(), nm: m[1], q: m[2]})) : [];
+})();
+const STANDARD_A = [[2,"Yes"],[1,"Partially"],[0,"No"]];
+/* season stats from the game log; a game with no numbers entered is a gap, never a zero */
+function gameNum(v){ return v === "" || v == null || isNaN(+v) ? null : +v; }
+function seasonStats(games){
+  const withStats = games.filter(g => gameNum(g.g) != null || gameNum(g.a) != null || gameNum(g.shots) != null);
+  const sum = k => withStats.reduce((a, g) => a + (gameNum(g[k]) || 0), 0);
+  const G = sum("g"), A = sum("a"), S = sum("shots");
+  return {gp: games.length, counted: withStats.length, g: G, a: A, p: G + A, shots: S, shPct: S ? Math.round(G / S * 1000) / 10 : null};
+}
 const NUM = {ONE:1,TWO:2,THREE:3,FOUR:4,FIVE:5,SIX:6,SEVEN:7,EIGHT:8,NINE:9};
 
 /* ================= helpers ================= */
@@ -318,11 +340,11 @@ function words(ch){ return ch.blocks.reduce((a,b) => a + b.p.join(" ").split(/\s
 const Store = {
   KEY: "pdm.v1",
   data: null,
-  blank(){ return {readiness:{}, practices:{}, games:{}, assessments:[], goals:{purpose:"", habits:["","","","",""], primary:"", measure:"", supporting:["","","",""], blockStart:"", checkpoints:{}}, habitsDone:{}, notes:{}, answers:{}, read:{}, drafts:{}, meta:{}}; },
+  blank(){ return {readiness:{}, practices:{}, games:{}, assessments:[], goals:{purpose:"", habits:["","","","",""], primary:"", measure:"", supporting:["","","",""], blockStart:"", checkpoints:{}}, habitsDone:{}, notes:{}, answers:{}, read:{}, drafts:{}, meta:{}, standardCheck:{}}; },
   normalize(d){
     const b = this.blank(), out = Object.assign(b, d || {});
     out.goals = Object.assign(this.blank().goals, out.goals || {});
-    ["answers","read","drafts","meta","notes","habitsDone"].forEach(k => { if(!out[k] || typeof out[k] !== "object") out[k] = {}; });
+    ["answers","read","drafts","meta","notes","habitsDone","standardCheck"].forEach(k => { if(!out[k] || typeof out[k] !== "object") out[k] = {}; });
     return out;
   },
   load(){
@@ -354,6 +376,13 @@ const Store = {
     let k = 0;
     for(let j=0;j<7;j++){ const d = this.data.habitsDone[addDays(endDay, -j)] || {}; s.forEach(h => { if(d[h.i]) k++; }); }
     return Math.round(k/(s.length*7)*100);
+  },
+  /* Chapter Three's daily standard check: Yes = 2, Partially = 1, No = 0; unanswered never counts */
+  putStandard(day, k, v){ const d = this.data.standardCheck[day] || (this.data.standardCheck[day] = {}); if(d[k] === v) delete d[k]; else d[k] = v; this.save(); },
+  standardPct(days){
+    let got = 0, n = 0;
+    days.forEach(day => { const d = this.data.standardCheck[day] || {}; STANDARD_Q.forEach(q => { if(d[q.k] === 0 || d[q.k] === 1 || d[q.k] === 2){ got += d[q.k]; n++; } }); });
+    return n ? Math.round(got / (2*n) * 100) : null;
   },
   setNote(ch, text){ this.data.notes[ch] = text; this.save(); },
   setAnswer(k, text){ this.data.answers[k] = text; this.save(); },
@@ -428,17 +457,17 @@ function bars(points, emptyText, opts){
   points.forEach((pt, i) => {
     const x = i*(cw+gap);
     if(pt.v == null){ svg.appendChild(svgEl("rect", {class:"gap", x:x, y:H-2, width:cw, height:2})); return; }
-    const h = Math.max(3, (H - padT) * (pt.v/100));
+    const h = Math.max(3, (H - padT) * (pt.v / (opts.max || 100)));
     const r = svgEl("rect", {class:"col" + (pt.alt ? " alt" : ""), x:x, y:H-h, width:cw, height:h, rx:2});
-    const t = svgEl("title", {}); t.textContent = pt.label + ": " + pt.v + "%"; r.appendChild(t);
+    const t = svgEl("title", {}); t.textContent = pt.label + ": " + pt.v + (opts.max ? "" : "%"); r.appendChild(t);
     svg.appendChild(r);
   });
   const yRef = padT + (H - padT) * .5;
-  svg.appendChild(svgEl("line", {class:"ref", x1:0, x2:W, y1:yRef, y2:yRef, "vector-effect":"non-scaling-stroke"}));
+  if(!opts.max) svg.appendChild(svgEl("line", {class:"ref", x1:0, x2:W, y1:yRef, y2:yRef, "vector-effect":"non-scaling-stroke"}));
   box.appendChild(svg);
   const lastReal = points.filter(p => p.v != null).pop();
-  box.appendChild(el("div", {class:"lastv"}, lastReal.v + "%"));
-  const rl = el("div", {class:"reflbl"}, "50%"); rl.style.top = (yRef / H * 100) + "%"; box.appendChild(rl);
+  box.appendChild(el("div", {class:"lastv"}, lastReal.v + (opts.max ? " " + (opts.unit || "") : "%")));
+  if(!opts.max){ const rl = el("div", {class:"reflbl"}, "50%"); rl.style.top = (yRef / H * 100) + "%"; box.appendChild(rl); }
   const ax = el("div", {class:"axis"}, el("span", null, points[0].label), el("span", null, points[n-1].label));
   const wrap = el("div", null, box, ax);
   return wrap;
@@ -503,8 +532,11 @@ function renderToday(){
     if(g.measure) bc.appendChild(el("p", {class:"sub"}, "Measured by: " + g.measure));
     [30,60,90].forEach(c => { if(bp.days >= c && !(g.checkpoints[c]||"").trim()) bc.appendChild(el("p", {class:"sub"}, "⚑ The " + c + "-day checkpoint is due. Write it on the Goals tab.")); });
   }
-  colB.appendChild(bc);
-  colB.appendChild(standardCard());
+  /* column A = the morning (state, check, habits, block, standard); column B = end of day + backup.
+     On a phone the two stack in that order, so the evening check reads last. */
+  colA.appendChild(bc);
+  colA.appendChild(standardCard());
+  colB.appendChild(eveningCard(today));
   colB.appendChild(backupCard());
 }
 /* the morning check: one question per screen, tapping an answer moves on */
@@ -535,6 +567,23 @@ function checkCard(today){
   }
   card.appendChild(el("p", {class:"sub", id:"readyLine"}, done === 7 ? "Today's readiness: " + rp + "%" : done + " of 7 answered" + (done ? " — readiness so far " + pctText(rp) : "")));
   return card;
+}
+/* Chapter Three's end-of-day check: seven questions, Yes / Partially / No, tap again to clear */
+function eveningCard(today){
+  const rec = Store.data.standardCheck[today] || {};
+  const done = STANDARD_Q.filter(q => rec[q.k] != null).length;
+  const c = el("div", {class:"card", id:"eveningCard"}, el("h2", null, "End-of-day standard"), el("p", {class:"mute"}, "Chapter Three's daily check. Answer honestly — Partially is a real answer."));
+  STANDARD_Q.forEach(q => {
+    const seg = el("div", {class:"seg yn"});
+    STANDARD_A.forEach(([v, nm]) => seg.appendChild(el("button", {type:"button", "aria-pressed": String(rec[q.k] === v), "data-v": v, onclick: () => { Store.putStandard(today, q.k, v); renderToday(); }}, nm)));
+    c.appendChild(el("div", {class:"item sq"}, el("div", {class:"nm"}, el("b", null, q.nm), el("div", {class:"mute"}, q.q)), seg));
+  });
+  const week = []; for(let j=6; j>=0; j--) week.push(addDays(today, -j));
+  const pts = week.map((d, j) => ({v: Store.standardPct([d]), label: j === 6 ? "Today" : shortDay(d)}));
+  const wp = Store.standardPct(week);
+  c.appendChild(el("p", {class:"sub", id:"eveningLine"}, done + " of " + STANDARD_Q.length + " answered today" + (Store.standardPct([today]) == null ? "" : " · " + Store.standardPct([today]) + "%") + " · this week " + pctText(wp)));
+  if(pts.some(p => p.v != null)) c.appendChild(bars(pts, "", {small:true}));
+  return c;
 }
 /* what he wrote in Chapters Two to Four, back in front of him every day */
 function standardCard(){
@@ -604,7 +653,23 @@ function renderLog(){
   const g10 = gm.slice(0,10).reverse().map(e => ({v: gameScore(e), label: shortDay(e.date), alt:true}));
   tc.appendChild(el("h3", null, "Practices")); tc.appendChild(bars(p10, "No practices logged yet."));
   tc.appendChild(el("h3", null, "Games")); tc.appendChild(bars(g10, "No games logged yet."));
-  cols.appendChild(tc);
+  const ss = seasonStats(gm);
+  const sc = el("div", {class:"card", id:"seasonStats"}, el("h2", null, "Season stats"));
+  if(!ss.counted) sc.appendChild(el("div", {class:"empty"}, gm.length ? "No goals, assists or shots entered yet. Add them when you log a game." : "No games logged yet."));
+  else {
+    const st = el("div", {class:"stats"});
+    [["Games", ss.gp + (ss.counted < ss.gp ? " (" + ss.counted + " with stats)" : "")], ["Goals", ss.g], ["Assists", ss.a], ["Points", ss.p], ["Shots", ss.shots], ["Shooting", ss.shPct == null ? "—" : ss.shPct + "%"]]
+      .forEach(([k, v]) => st.appendChild(el("div", {class:"mini"}, el("div", {class:"lbl"}, k), el("div", {class:"val num"}, v))));
+    sc.appendChild(st);
+    const last = gm.slice(0, 15).reverse();
+    const pp = last.map(g => { const G = gameNum(g.g), A = gameNum(g.a); return {v: G == null && A == null ? null : (G||0) + (A||0), label: shortDay(g.date), alt:true}; });
+    const sh = last.map(g => ({v: gameNum(g.shots), label: shortDay(g.date)}));
+    sc.appendChild(el("h3", null, "Points per game"));
+    sc.appendChild(bars(pp, "", {max: Math.max(3, ...pp.map(p => p.v || 0)), unit:"pts"}));
+    sc.appendChild(el("h3", null, "Shots per game"));
+    sc.appendChild(bars(sh, "", {max: Math.max(5, ...sh.map(p => p.v || 0)), unit:"shots"}));
+  }
+  cols.appendChild(el("div", null, tc, sc));
   const lc = el("div", {class:"card", id:"entries"}, el("h2", null, "Entries"));
   const seg = el("div", {class:"seg", role:"group", "aria-label":"Show"});
   [["all","All"],["practice","Practices"],["game","Games"]].forEach(([k, nm]) => seg.appendChild(el("button", {type:"button", "aria-pressed": String(State.logFilter === k), onclick: () => { State.logFilter = k; renderLog(); }}, nm)));
@@ -959,6 +1024,24 @@ Store.load();
     ck("backup: Today says when the last backup was (never, so far)", /Last backup: never/.test($("backupLine").textContent));
     State.tab = "ratings"; State.ratingsDraft = Object.assign({}, Store.data.assessments[0].r, {sk1: 5}); Store.saveAssessment(State.ratingsDraft); renderRatings();
     ck("ratings: after a second save the ring stays on the first (baseline) assessment, not the latest", $("sections").querySelectorAll(".sec")[0].querySelector(".dot.base").style.left === "50%" && $("sections").querySelectorAll(".sec")[0].querySelector(".dot.now").style.left === "100%");
+    /* end-of-day standard check */
+    ck("standard check: seven questions read from Chapter Three, Preparation first, Response last", STANDARD_Q.length === 7 && STANDARD_Q[0].nm === "Preparation" && STANDARD_Q[6].nm === "Response" && /prepare with purpose/.test(STANDARD_Q[0].q));
+    State.tab = "today"; renderToday();
+    ck("standard check fresh: seven rows, nothing pressed, this week —", $("eveningCard").querySelectorAll(".sq").length === 7 && !$("eveningCard").querySelector('button[aria-pressed="true"]') && /this week —/.test($("eveningLine").textContent));
+    $("eveningCard").querySelectorAll(".sq")[0].querySelectorAll("button")[0].onclick();
+    $("eveningCard").querySelectorAll(".sq")[1].querySelectorAll("button")[1].onclick();
+    ck("standard check: Yes + Partially = 75%, the other five unanswered don't count", Store.standardPct([today]) === 75 && /2 of 7 answered today · 75%/.test($("eveningLine").textContent));
+    $("eveningCard").querySelectorAll(".sq")[2].querySelectorAll("button")[2].onclick();
+    ck("standard check: adding a No makes 3 of 6 points = 50%", Store.standardPct([today]) === 50);
+    $("eveningCard").querySelectorAll(".sq")[2].querySelectorAll("button")[2].onclick();
+    ck("standard check: tapping the same answer again clears it", Store.data.standardCheck[today].coachability === undefined && Store.standardPct([today]) === 75);
+    Store.data.standardCheck[addDays(today, -2)] = {preparation: 0, effort: 0};
+    ck("standard check: the week pools answered questions across days (3 of 8 = 38%)", Store.standardPct(Array.from({length:7}, (_, j) => addDays(today, -j))) === 38);
+    /* season stats */
+    ck("stats: a game with no numbers is not a zero; totals, points and shooting % from the rest", (() => { const s = seasonStats([{g:"1",a:"2",shots:"4"},{g:"",a:"",shots:""},{g:"0",a:"1",shots:"6"}]); return s.gp === 3 && s.counted === 2 && s.g === 1 && s.a === 3 && s.p === 4 && s.shots === 10 && s.shPct === 10; })());
+    State.tab = "log"; Store.putGame({id:"s1", date: addDays(today, -3), at:1, opp:"Regina", g:"2", a:"1", shots:"5"}); Store.putGame({id:"s2", date: addDays(today, -1), at:2, opp:"Brandon", g:"", a:"", shots:""}); renderLog();
+    ck("log: the season stats card shows 3 points and one gap for the game with no numbers", /Points\s*3/.test($("seasonStats").textContent) && $("seasonStats").querySelectorAll("rect.gap").length === 2 && $("seasonStats").querySelectorAll("rect.col").length === 2);
+    Store.drop("games", "s1"); Store.drop("games", "s2");
     /* goals + read */
     State.tab = "goals"; renderGoals();
     ck("goals: five habit inputs carry the saved names", $("habitGoals").querySelectorAll("input").length === 5 && $("habitGoals").querySelectorAll("input")[0].value === "Bed by 10:30");
