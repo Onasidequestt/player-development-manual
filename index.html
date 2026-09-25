@@ -93,7 +93,10 @@ label.f{display:block;margin:12px 0 4px;font-size:13px;color:var(--ink2)}
 .ring .v b{font:800 38px/1 var(--disp);font-variant-numeric:tabular-nums}
 .ring .v small{font-size:11px;color:var(--mute);margin-top:2px}
 .state .lbl{font-size:12px;color:var(--mute)}
-.minis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.minis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+.mini.tap{text-align:left;border:0;color:inherit;font:inherit;cursor:pointer;min-height:0}
+.mini .dl{font:700 15px var(--disp);color:var(--good)}
+.mini .dl.neg{color:var(--warn)}
 .mini{background:var(--panel2);border-radius:12px;padding:10px 12px}
 .mini .lbl{font-size:12px;color:var(--mute)}
 .mini .val{font:800 26px/1.1 var(--disp);font-variant-numeric:tabular-nums}
@@ -105,7 +108,9 @@ label.f{display:block;margin:12px 0 4px;font-size:13px;color:var(--ink2)}
 .dots i.cur{background:var(--ink)}
 .stepper .scale button{min-height:58px;font-size:24px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
-.chip{font-size:12px;background:var(--panel2);border-radius:999px;padding:4px 10px;color:var(--ink2)}
+.chip{font-size:12px;background:var(--panel2);border-radius:999px;padding:4px 10px;color:var(--ink2);border:1px solid transparent}
+.chip.low{border-color:var(--warn);color:var(--ink)}
+.chip.low b{color:var(--warn)}
 .chip b{color:var(--ink);font-family:var(--disp);font-size:14px;margin-left:4px}
 /* percentage bars. Track + fill, a 2px surface gap to the baseline marker ring */
 .bar{position:relative;height:10px;background:var(--panel2);border-radius:5px;overflow:visible;margin:8px 0}
@@ -121,6 +126,7 @@ label.f{display:block;margin:12px 0 4px;font-size:13px;color:var(--ink2)}
 .dumb .dot{position:absolute;top:2px;width:14px;height:14px;margin-left:-7px;border-radius:50%}
 .dumb .dot.now{background:var(--gold)}
 .dumb .dot.base{background:var(--panel);border:2px solid var(--mark2)}
+.dumb.thin{opacity:.4}
 .delta{font:700 13px var(--disp);color:var(--ink2);min-width:30px;text-align:right}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin:2px 0 6px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
@@ -134,6 +140,8 @@ label.f{display:block;margin:12px 0 4px;font-size:13px;color:var(--ink2)}
 .chartbox rect.col.alt{fill:var(--mark3)}
 .chartbox rect.gap{fill:var(--line)}
 .chartbox line.ref{stroke:var(--mute);stroke-dasharray:3 4;stroke-width:1;opacity:.7}
+.chartbox .vals{position:relative;height:15px;font:700 12px/15px var(--disp);color:var(--ink)}
+.chartbox .vals span{position:absolute;top:0;text-align:center;white-space:nowrap}
 .chartbox .lastv{position:absolute;right:0;top:-18px;font:700 14px var(--disp);color:var(--ink)}
 .axis .refkey{color:var(--mute)}
 .axis{display:flex;justify-content:space-between;font-size:11px;color:var(--mute);margin-top:4px}
@@ -150,6 +158,46 @@ label.f{display:block;margin:12px 0 4px;font-size:13px;color:var(--ink2)}
 .entry .when{font-size:12px;color:var(--mute)}
 .entry .chev{margin-right:4px}
 .entry.static{display:flex;gap:12px;align-items:center;padding:10px 0}
+.card.hero{border-color:rgba(224,166,44,.42);background:linear-gradient(180deg,rgba(224,166,44,.11),var(--panel) 55%)}
+.ext{display:grid;grid-template-columns:1fr;gap:4px 18px;margin-top:6px}
+.xl h3{margin-bottom:8px}
+.xr{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-top:1px solid var(--line)}
+.xr .xv{flex:none;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font:800 18px/1 var(--disp)}
+.xl.hi .xv{background:var(--gold);color:#1a1200}
+.xl.lo .xv{background:transparent;color:var(--ink);border:2px solid var(--mark2)}
+.xr .xn{font-size:14px;line-height:1.3}
+.xr .xs{font-size:12px;color:var(--mute);margin-top:2px}
+.keyrow{background:var(--panel2);border-radius:10px;padding:8px 12px;margin:10px 0 4px}
+.keyrow .scale-key{margin-bottom:2px}
+.keyrow .mute{font-size:12px}
+.entry.k-practice .sc{box-shadow:inset 0 -3px 0 var(--mark)}
+.entry.k-game .sc{box-shadow:inset 0 -3px 0 var(--mark3)}
+.nudge{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(224,123,57,.12);border:1px solid var(--warn);border-radius:12px;padding:8px 12px;margin:12px 0;font-size:14px}
+.nudge button{flex:none;min-height:36px;padding:6px 12px}
+button.link.flag{display:block;text-align:left;color:var(--warn)}
+.pri-line{padding:8px 0;border-top:1px solid var(--line)}
+.pri-line.main div:not(.sub){font-weight:600}
+.ptype{display:block;font:700 12px/1.2 var(--disp);letter-spacing:.8px;text-transform:uppercase;color:var(--mute);margin-bottom:2px}
+.pri-line.main .ptype{color:var(--gold2)}
+.cue{padding:8px 0;border-top:1px solid var(--line)}
+.cue-t{font:700 22px/1.15 var(--disp);letter-spacing:.3px}
+.pri{border-top:1px solid var(--line);padding:4px 0}
+.pri .hd{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;background:none;border:0;padding:6px 0;text-align:left;color:inherit}
+.pri .hd .nm{flex:1}
+.pri.main .ptype{color:var(--gold2)}
+.pri .hint{font-size:12px;margin-bottom:4px}
+.pri .ghost{margin:10px 0 6px}
+.seg.wrap{flex-wrap:wrap}
+.tl{position:relative;height:58px;margin:8px 14px 4px}
+.tl-track,.tl-fill{position:absolute;left:0;top:14px;height:4px;border-radius:2px;background:var(--panel2);width:100%}
+.tl-fill{background:var(--mark)}
+.tl-node{position:absolute;top:2px;width:28px;height:28px;margin-left:-14px;border-radius:50%;padding:0;min-height:0;background:var(--panel);border:2px solid var(--mark2);color:#04200f;font-size:14px;font-weight:800}
+.tl-node.due{border-color:var(--warn);background:rgba(224,123,57,.25)}
+.tl-node.done{background:var(--good);border-color:var(--good)}
+.tl-lb{position:absolute;top:36px;transform:translateX(-50%);font:700 12px var(--disp);color:var(--mute)}
+.tl-now{position:absolute;top:6px;width:2px;height:20px;margin-left:-1px;background:var(--ink)}
+.tl-today{position:absolute;top:-16px;transform:translateX(-50%);font:700 11px var(--disp);color:var(--ink);white-space:nowrap}
+.tl{margin-top:24px}
 .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;background:var(--panel2);color:var(--ink2);margin-right:6px}
 .tag.g{background:rgba(243,198,91,.16);color:var(--gold2)}
 .empty{color:var(--mute);padding:14px 0;text-align:center;font-size:14px}
@@ -159,11 +207,24 @@ label.f{display:block;margin:12px 0 4px;font-size:13px;color:var(--ink2)}
 .sec .hd{display:flex;align-items:center;gap:10px;cursor:pointer;min-height:44px;background:none;border:0;padding:0;width:100%;text-align:left;color:inherit}
 .sec .hd .nm{flex:1;font-size:15px}
 .sec .hd .n{font-size:12px;color:var(--mute)}
+.sec .hd .n.thin{color:var(--warn)}
+.sec .hd .pct.thin{color:var(--mute);opacity:.75}
 .sec .body{padding-top:6px}
 .chev{width:9px;height:9px;border-right:2px solid var(--mute);border-bottom:2px solid var(--mute);transform:rotate(-45deg);transition:transform .15s;flex:0 0 auto}
 .sec.open .chev{transform:rotate(45deg)}
 .sq{display:grid;grid-template-columns:1fr;gap:6px}
 .seg.yn{margin:2px 0 0}
+.row.gstats{flex-wrap:nowrap;gap:8px}
+.row.gstats>div{flex:1 1 0;min-width:0}
+.row.gstats input{padding:10px 8px}
+.steps{display:flex;gap:6px;margin:12px 0 6px}
+.steps .step{flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 4px;font-size:13px;font-weight:600;color:var(--ink2);text-align:center;border-radius:12px;line-height:1.15}
+.steps .step .n{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--mute);font:700 14px/1 var(--disp)}
+.steps .step.cur{border-color:var(--gold);color:var(--ink)}
+.steps .step.cur .n{border-color:var(--gold);color:var(--gold2)}
+.steps .step.done .n{background:var(--good);border-color:var(--good);color:#04200f}
+.inset{border-top:1px solid var(--line);margin-top:10px;padding-top:12px}
+.inset h2{display:none}
 .seg.yn button{flex:1 1 0}
 .seg.yn button[aria-pressed="true"][data-v="2"]{background:var(--good);border-color:var(--good);color:#04200f}
 .seg.yn button[aria-pressed="true"][data-v="1"]{background:var(--gold);border-color:var(--gold);color:#1a1200}
@@ -174,9 +235,19 @@ label.f{display:block;margin:12px 0 4px;font-size:13px;color:var(--ink2)}
 /* habits */
 .habit{display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--line)}
 .habit:first-child{border-top:0}
-.habit button.tick{width:44px;height:44px;border-radius:50%;padding:0;font-size:20px;flex:0 0 auto}
+.habit button.tick{width:44px;height:44px;border-radius:50%;padding:0;font-size:20px;flex:0 0 auto;border:2px solid var(--mark2)}
 .habit button.tick[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:#04200f}
 .habit .nm{flex:1}
+.gt{border-top:1px solid var(--line);padding:10px 0 4px}
+.gt:first-of-type{border-top:0}
+.gcount{font-size:12px;color:var(--mute)}
+.gcount.ok{color:var(--good)}
+.gcount.over{color:var(--warn)}
+.hwk{display:flex;align-items:center;gap:8px;margin-top:4px}
+.hweek{display:flex;gap:3px}
+.hweek i{width:12px;height:6px;border-radius:3px;background:var(--panel2);border:1px solid var(--line)}
+.hweek i.on{background:var(--good);border-color:var(--good)}
+.hwk .mute{font-size:12px}
 .meter{height:12px;background:var(--panel2);border-radius:6px;overflow:hidden;margin:8px 0}
 .meter i{display:block;height:100%;background:var(--mark)}
 /* standard card */
@@ -192,6 +263,9 @@ label.f{display:block;margin:12px 0 4px;font-size:13px;color:var(--ink2)}
 .chgrid .no{font:800 34px/1 var(--disp);color:var(--gold)}
 .chgrid .ti{font-weight:600;line-height:1.25}
 .chgrid small{display:block;color:var(--mute);font-size:12px;margin-top:3px}
+.chgrid .wr{display:flex;align-items:center;gap:8px;margin-top:8px;font:700 14px/1 var(--disp);letter-spacing:.4px;text-transform:uppercase;color:var(--ink)}
+.chgrid .wr.full{color:var(--gold2)}
+.chgrid .wr .dots i{width:14px;height:6px}
 .chgrid .st{font-size:12px;color:var(--good)}
 .prose{max-width:66ch}
 .prose .kick{font:700 14px var(--disp);letter-spacing:2px;text-transform:uppercase;color:var(--gold)}
@@ -211,6 +285,7 @@ nav.tabs button[aria-current="page"]{color:var(--gold2);font-weight:700}
 section[data-tab]{display:none}
 section[data-tab].on{display:block}
 .cols{display:block}
+@media (min-width:560px){ .ext{grid-template-columns:1fr 1fr} }
 @media (min-width:960px){
   main{max-width:1080px;padding:0 28px}
   .cols{display:grid;grid-template-columns:1.1fr 1fr;gap:18px;align-items:start}
@@ -244,7 +319,7 @@ section[data-tab].on{display:block}
   </section>
   <section data-tab="log" id="tab-log"><h1>Log</h1><p class="sub">Practices and games. Rate what happened, not what you hoped.</p><div id="logSlot"></div></section>
   <section data-tab="ratings" id="tab-ratings"><h1>Ratings</h1><p class="sub">Chapter Six, 1 to 5. Rate what appears consistently, not your best day.</p><div id="ratingsSlot"></div></section>
-  <section data-tab="goals" id="tab-goals"><h1>Goals</h1><p class="sub">Season purpose, five habits, and the 90-day block.</p><div id="goalsSlot" class="narrow"></div></section>
+  <section data-tab="goals" id="tab-goals"><h1>Goals</h1><p class="sub">Season purpose, five habits, and the 90-day plan.</p><div id="goalsSlot" class="narrow"></div></section>
   <section data-tab="read" id="tab-read"><div id="readSlot"></div></section>
 </main>
 <nav class="tabs" id="tabbar"></nav>
@@ -267,6 +342,17 @@ const READY_FIELDS = [
 const GAME_FIELDS = [["ready","Ready at the start"],["shifts","Shift-to-shift consistency"],["decisions","Decisions under pressure"],["mistakes","Response after mistakes"],["role","Role execution"],["late","Late in the game"]];
 const PRACTICE_FIELDS = [["effort","Effort"],["execution","Execution and detail"],["correction","Response to correction"]];
 const BLOCK_DAYS = 90;
+/* Chapter Nine: no more than five primary areas, one of each kind; one is the primary */
+const PRI_TYPES = [["skill","Hockey skill"],["tactical","Tactical / decisions"],["physical","Physical"],["recovery","Recovery / lifestyle"],["team","Personal / team"]];
+const PRI_FIELDS = [["what","The priority","Game language: the skill, the situation, the pressure."],["base","Where it is now","What happens now, how often, where it breaks down."],["better","What improvement looks like","The behaviour you want to produce, not just the problem gone."],["action","The work","What, how often, when, with whom."],["measure","How progress is measured",""]];
+/* "One or two practice cues … game cues: one preparation cue, one tactical cue, and one response cue." */
+/* Chapter Seven: the six types of season goals and the manual's suggested structure ("one primary role or outcome goal,
+   two or three major performance goals, three development priorities, three to five habit goals, one team goal, and one personal or academic goal") */
+const GOAL_TYPES = [["outcome","Outcome",1,1,"e.g. Earn a regular lineup position"],["performance","Performance",2,3,"e.g. Reduce avoidable turnovers"],["development","Development",3,3,"e.g. First-step acceleration"],["habit","Habit",3,5,""],["team","Team",1,1,"e.g. Bench energy after a bad shift"],["personal","Personal / academic",1,1,"e.g. Keep my grades up on the road"]];
+const CUE_FIELDS = [["practice","Practice cue"],["prep","Game · preparation"],["tactical","Game · tactical"],["response","Game · response"]];
+const CP_DAYS = [14, 30, 45, 60, 75, 90];
+const CP_Q = [["done","Is the work being completed?"],["quality","Is the quality good enough?"],["relevant","Is the priority still the right one?"],["workload","Is the workload right?"],["visible","Is progress visible?"],["adjust","Does the plan need support or a change?"]];
+const DECISIONS = ["Continue","Maintain","Replace","Pause","Get evaluated"];
 /* the chapter prompts that become answer fields, placed right after the heading that asks for them.
    Their answers come back on Today. The self-check fails if a heading here stops existing. */
 const FIELDS = {
@@ -283,13 +369,28 @@ const STANDARD_Q = (() => {
   return b ? b.p.map(p => p.match(/^(\w+):\s*(.+?\?)\s*☐/)).filter(Boolean).map(m => ({k: m[1].toLowerCase(), nm: m[1], q: m[2]})) : [];
 })();
 const STANDARD_A = [[2,"Yes"],[1,"Partially"],[0,"No"]];
+/* Chapter Five: the development team, in the chapter's own order of roles */
+const TEAM_ROLES = ["Head coach","Assistant / positional coach","Strength and conditioning","Athletic trainer / medical","Nutrition","Skills coach","Teammate","Family","Billet family","Teacher / academic","Agent / advisor","Mentor","Mental performance / health"];
+/* the questions a heading in the manual asks, read from the chapter itself (the self-check fails if a heading moves) */
+function chapterQs(n, h){ const ch = CHAPTERS.find(c => c.n === n), b = ch && ch.blocks.find(x => x.h === h); return b ? b.p.map(p => p.trim()).filter(p => /\?$/.test(p)) : []; }
+const COACH_Q = chapterQs("TWO", "Coach Feedback Conversation");
+const TEAM_REVIEW_Q = chapterQs("FIVE", "Quarter-Season Development Team Review");
+/* ponytail: "quarter season" = every 45 days (a WHL regular season is ~6 months); upgrade = season start/end dates */
+const REVIEW_EVERY = 45;
 /* season stats from the game log; a game with no numbers entered is a gap, never a zero */
 function gameNum(v){ return v === "" || v == null || isNaN(+v) ? null : +v; }
+/* time on ice: "14:30" or "14.5" → minutes; anything else is not a number, never a zero */
+function toiMin(v){ const s = String(v == null ? "" : v).trim(), m = s.match(/^(\d{1,2}):([0-5]\d)$/); return m ? +m[1] + (+m[2]) / 60 : /^\d+(\.\d+)?$/.test(s) ? +s : null; }
+function toiText(m){ const t = Math.round(m * 60); return Math.floor(t / 60) + ":" + pad(t % 60); }
+/* a scratch (didn't dress) is not a game played: it counts on its own line, never as a zero */
 function seasonStats(games){
-  const withStats = games.filter(g => gameNum(g.g) != null || gameNum(g.a) != null || gameNum(g.shots) != null);
+  const played = games.filter(g => !g.scratched);
+  const withStats = played.filter(g => gameNum(g.g) != null || gameNum(g.a) != null || gameNum(g.shots) != null);
   const sum = k => withStats.reduce((a, g) => a + (gameNum(g[k]) || 0), 0);
   const G = sum("g"), A = sum("a"), S = sum("shots");
-  return {gp: games.length, counted: withStats.length, g: G, a: A, p: G + A, shots: S, shPct: S ? Math.round(G / S * 1000) / 10 : null};
+  const toi = played.map(g => toiMin(g.toi)).filter(v => v != null);
+  return {gp: played.length, scratched: games.length - played.length, counted: withStats.length, g: G, a: A, p: G + A, shots: S, shPct: S ? Math.round(G / S * 1000) / 10 : null,
+    toiN: toi.length, toiAvg: toi.length ? toi.reduce((a, b) => a + b, 0) / toi.length : null};
 }
 const NUM = {ONE:1,TWO:2,THREE:3,FOUR:4,FIVE:5,SIX:6,SEVEN:7,EIGHT:8,NINE:9};
 
@@ -340,16 +441,27 @@ function words(ch){ return ch.blocks.reduce((a,b) => a + b.p.join(" ").split(/\s
 const Store = {
   KEY: "pdm.v1",
   data: null,
-  blank(){ return {readiness:{}, practices:{}, games:{}, assessments:[], goals:{purpose:"", habits:["","","","",""], primary:"", measure:"", supporting:["","","",""], blockStart:"", checkpoints:{}}, habitsDone:{}, notes:{}, answers:{}, read:{}, drafts:{}, meta:{}, standardCheck:{}}; },
+  blank(){ return {readiness:{}, practices:{}, games:{}, assessments:[], goals:{purpose:"", habits:["","","","",""], blockStart:"", primaryType:"skill", priorities:{}, cues:{}, checkpoints:{}, cpq:{}, decisions:{}, season:{}}, habitsDone:{}, notes:{}, answers:{}, read:{}, drafts:{}, meta:{}, standardCheck:{}, weekly:{}, team:{}, talks:{}, teamReviews:{}, prioritize:{}}; },
   /* every section gets its blank shape back if it is missing, null or the wrong type (typeof null is "object") */
   normalize(d){
     const obj = v => !!v && typeof v === "object" && !Array.isArray(v);
     const out = Object.assign(this.blank(), obj(d) ? d : {});
     out.goals = Object.assign(this.blank().goals, obj(out.goals) ? out.goals : {});
     if(!Array.isArray(out.goals.habits)) out.goals.habits = ["","","","",""];
-    if(!Array.isArray(out.goals.supporting)) out.goals.supporting = ["","","",""];
-    if(!obj(out.goals.checkpoints)) out.goals.checkpoints = {};
-    ["readiness","practices","games","answers","read","drafts","meta","notes","habitsDone","standardCheck"].forEach(k => { if(!obj(out[k])) out[k] = {}; });
+    const g = out.goals;
+    ["priorities","cues","checkpoints","cpq","decisions","season"].forEach(k => { if(!obj(g[k])) g[k] = {}; });
+    Object.keys(g.season).forEach(id => { const x = g.season[id]; if(!obj(x) || !GOAL_TYPES.some(t => t[0] === x.type && t[0] !== "habit") || typeof x.what !== "string") delete g.season[id]; });
+    /* the first build kept one primary + measure + four supporting lines: they become the five typed priorities */
+    if("primary" in g || "measure" in g || "supporting" in g){
+      const put = (t, k, v) => { if(typeof v === "string" && v.trim()){ const q = g.priorities[t] = obj(g.priorities[t]) ? g.priorities[t] : {}; if(!q[k]) q[k] = v; } };
+      put("skill", "what", g.primary); put("skill", "measure", g.measure);
+      (Array.isArray(g.supporting) ? g.supporting : []).forEach((v, i) => { if(PRI_TYPES[i+1]) put(PRI_TYPES[i+1][0], "what", v); });
+      delete g.primary; delete g.measure; delete g.supporting;
+    }
+    Object.keys(g.priorities).forEach(t => { if(!obj(g.priorities[t])) delete g.priorities[t]; });
+    Object.keys(g.cpq).forEach(c => { if(!obj(g.cpq[c])) delete g.cpq[c]; });
+    if(!PRI_TYPES.some(t => t[0] === g.primaryType)) g.primaryType = "skill";
+    ["readiness","practices","games","answers","read","drafts","meta","notes","habitsDone","standardCheck","weekly","team","talks","teamReviews","prioritize"].forEach(k => { if(!obj(out[k])) out[k] = {}; });
     if(!Array.isArray(out.assessments)) out.assessments = [];
     out.assessments = out.assessments.filter(a => obj(a) && obj(a.r) && typeof a.day === "string");
     return out;
@@ -368,17 +480,37 @@ const Store = {
   readinessPct(day){ const r = this.data.readiness[day]; return r ? pct(READY_FIELDS.map(f => r[f[0]])) : null; },
   putPractice(e){ this.data.practices[e.id] = e; this.save(); },
   putGame(e){ this.data.games[e.id] = e; this.save(); },
+  setPrioritize(k, v){ if((v||"").trim()) this.data.prioritize[k] = v; else delete this.data.prioritize[k]; this.save(); },
+  putTalk(e){ this.data.talks[e.id] = e; this.save(); },
+  teamList(){ return Object.values(this.data.team).sort((a,b) => TEAM_ROLES.indexOf(a.role) - TEAM_ROLES.indexOf(b.role) || (a.at||0) - (b.at||0)); },
+  addSeasonGoal(rec){ const id = uid(); this.data.goals.season[id] = Object.assign({}, rec, {what: rec.what.trim(), at: Date.now(), day: dayOf(Date.now())}); this.save(); return id; },
+  seasonGoals(t){ return Object.keys(this.data.goals.season).map(id => Object.assign({id}, this.data.goals.season[id])).filter(x => x.type === t).sort((a,b) => a.at - b.at); },
+  goalCount(t){ return t === "habit" ? this.habitSlots().length : this.seasonGoals(t).length; },
+  addMember(name, role){ const id = uid(); this.data.team[id] = {id, name: name.trim(), role, at: Date.now(), day: dayOf(Date.now())}; this.save(); return id; },
+  /* one review per quarter: answers written within 14 days of each other belong to the same review */
+  reviewKey(today){ const ks = Object.keys(this.data.teamReviews).sort(), last = ks[ks.length-1]; return last && daysBetween(last, today) < 14 ? last : today; },
+  setReview(today, i, v){ const k = this.reviewKey(today), r = this.data.teamReviews[k] || (this.data.teamReviews[k] = {}); if((v||"").trim()) r[i] = v; else delete r[i]; if(!Object.keys(r).length) delete this.data.teamReviews[k]; this.save(); },
+  reviewDue(today){ const m = this.teamList(); if(!m.length) return false; const ks = Object.keys(this.data.teamReviews).sort(); return daysBetween(ks.length ? ks[ks.length-1] : m.map(x => x.day).sort()[0], today) >= REVIEW_EVERY; },
   drop(kind, id){ delete this.data[kind][id]; this.save(); },
   list(kind){ return Object.values(this.data[kind]).sort((a,b)=> a.date < b.date ? 1 : a.date > b.date ? -1 : (b.at||0)-(a.at||0)); },
   lastAssessment(){ const a = this.data.assessments; return a.length ? a[a.length-1] : null; },
   baseline(){ return this.data.assessments[0] || null; },
   saveAssessment(r){ this.data.assessments.push({at: Date.now(), day: dayOf(Date.now()), r: Object.assign({}, r)}); delete this.data.drafts.ratings; this.save(); },
   setGoals(patch){ Object.assign(this.data.goals, patch); this.save(); },
+  setPriority(t, k, v){ const P = this.data.goals.priorities, q = P[t] || (P[t] = {}); q[k] = v; this.save(); },
+  setCue(k, v){ this.data.goals.cues[k] = v; this.save(); },
+  putCheckpoint(c, k, v){ const Q = this.data.goals.cpq, d = Q[c] || (Q[c] = {}); if(d[k] === v) delete d[k]; else d[k] = v; this.save(); },
+  /* the written priorities, primary first, in Chapter Nine's order */
+  priorities(){ const g = this.data.goals; return PRI_TYPES.map(([t, nm]) => ({t, nm, p: g.priorities[t] || {}, primary: g.primaryType === t})).filter(x => (x.p.what||"").trim()).sort((a,b) => b.primary - a.primary); },
+  /* a checkpoint counts as done once any question is answered or anything is written */
+  checkpointDone(c){ const g = this.data.goals; return !!(g.checkpoints[c]||"").trim() || Object.keys(g.cpq[c] || {}).length > 0; },
   habitNames(){ return this.habitSlots().map(h => h.nm); },
   /* ticks are keyed by the habit's SLOT (0..4), so filling or clearing another slot never moves them */
   habitSlots(){ return this.data.goals.habits.map((h, i) => ({i, nm: (h||"").trim()})).filter(h => h.nm); },
   toggleHabit(day, slot){ const d = this.data.habitsDone[day] || (this.data.habitsDone[day] = {}); d[slot] = !d[slot]; this.save(); },
   habitPct(day){ const s = this.habitSlots(); if(!s.length) return null; const d = this.data.habitsDone[day] || {}; return Math.round(s.filter(h => d[h.i]).length / s.length * 100); },
+  /* one habit's last seven days, oldest first, so today sits on the right */
+  habitDays(i, endDay){ const out = []; for(let j=6;j>=0;j--) out.push(!!(this.data.habitsDone[addDays(endDay, -j)] || {})[i]); return out; },
   habitWeekPct(endDay){
     const s = this.habitSlots(); if(!s.length) return null;
     let k = 0;
@@ -392,6 +524,9 @@ const Store = {
     days.forEach(day => { const d = this.data.standardCheck[day] || {}; STANDARD_Q.forEach(q => { if(d[q.k] === 0 || d[q.k] === 1 || d[q.k] === 2){ got += d[q.k]; n++; } }); });
     return n ? Math.round(got / (2*n) * 100) : null;
   },
+  /* the week, keyed by its Sunday: win = the one behaviour chosen for it; hit / transfer / adjust close it */
+  setWeek(end, k, v){ const w = this.data.weekly[end] || (this.data.weekly[end] = {}); if(v === "" || v == null || (k !== "win" && k !== "adjust" && w[k] === v)) delete w[k]; else w[k] = v; if(!Object.keys(w).length) delete this.data.weekly[end]; this.save(); },
+  weekClosed(end){ const w = this.data.weekly[end] || {}; return w.hit != null || w.transfer != null || !!(w.adjust||"").trim() || !!((this.data.weekly[addDays(end, 7)] || {}).win||"").trim(); },
   setNote(ch, text){ this.data.notes[ch] = text; this.save(); },
   setAnswer(k, text){ this.data.answers[k] = text; this.save(); },
   /* drafts: a half-finished assessment or log entry survives a reload */
@@ -402,12 +537,12 @@ const Store = {
     let o = null;
     try{ o = JSON.parse(text); }catch(e){ return {err:"That file could not be read as a backup."}; }
     const obj = v => !!v && typeof v === "object" && !Array.isArray(v);
-    if(!o || o.app !== "pdm" || !obj(o.data) || !Array.isArray(o.data.assessments) || ["readiness","practices","games"].some(k => !obj(o.data[k])) || ["habitsDone","answers","notes","standardCheck","goals"].some(k => k in o.data && !obj(o.data[k]))) return {err:"That file is not a Player Development Manual backup, or it is damaged. Nothing was changed."};
+    if(!o || o.app !== "pdm" || !obj(o.data) || !Array.isArray(o.data.assessments) || ["readiness","practices","games"].some(k => !obj(o.data[k])) || ["habitsDone","answers","notes","standardCheck","goals","weekly","team","talks","teamReviews","prioritize"].some(k => k in o.data && !obj(o.data[k]))) return {err:"That file is not a Player Development Manual backup, or it is damaged. Nothing was changed."};
     return {data:o.data, at:o.at};
   },
   restore(d){ this.data = this.normalize(JSON.parse(JSON.stringify(d))); this.save(); }
 };
-const State = { tab:"today", draft:null, ratingsDraft:null, openSec:{}, flash:"", readChapter:null, checkStep:null, logFilter:"all", pendingImport:null, confirmDiscard:false };
+const State = { openPri:{}, cpOpen:null, tab:"today", draft:null, ratingsDraft:null, openSec:{}, flash:"", readChapter:null, checkStep:null, logFilter:"all", pendingImport:null, confirmDiscard:false, editWin:false, teamNew:{name:"", role:""}, teamDel:null, toPlan:null, setupStep:null, inSetup:false, goalNew:{type:"", what:"", min:"", target:"", stretch:"", measure:""}, goalDel:null };
 /* score of one entry, from its 1..5 fields */
 function practiceScore(e){ return pct(PRACTICE_FIELDS.map(f => e[f[0]])); }
 function gameScore(e){ return pct(GAME_FIELDS.map(f => e[f[0]])); }
@@ -419,6 +554,18 @@ function blockProgress(start, now){
   if(!start) return null;
   const days = daysBetween(start, dayOf(now));
   return {days: days, pct: Math.max(0, Math.min(100, Math.round(days / BLOCK_DAYS * 100))), left: Math.max(0, BLOCK_DAYS - days)};
+}
+/* a hockey week ends on Sunday: the review closes it, the win is chosen for the next */
+function weekEnd(day){ return addDays(day, (7 - new Date(tsOfDay(day)).getDay()) % 7); }
+/* the manual's "close the loop": completion, quality, health — from what he logged that week, gaps never zeros */
+function weekSummary(end){
+  const days = []; for(let j=6; j>=0; j--) days.push(addDays(end, -j));
+  const rd = days.map(d => Store.readinessPct(d)).filter(v => v != null);
+  const inWk = e => e.date >= days[0] && e.date <= end;
+  const pr = Store.list("practices").filter(inWk), gmAll = Store.list("games").filter(inWk), gm = gmAll.filter(g => !g.scratched);
+  const avg = a => { const v = a.filter(x => x != null); return v.length ? Math.round(v.reduce((s, x) => s + x, 0) / v.length) : null; };
+  return {days, readyN: rd.length, readyAvg: avg(rd), low: rd.filter(v => v < 50).length, habits: Store.habitWeekPct(end), standard: Store.standardPct(days),
+    pN: pr.length, pAvg: avg(pr.map(practiceScore)), gN: gm.length, gAvg: avg(gm.map(gameScore)), scr: gmAll.length - gm.length};
 }
 /* top / bottom rated items, for Foundation and Watch */
 function extremes(r, k){
@@ -473,9 +620,16 @@ function bars(points, emptyText, opts){
   });
   const yRef = padT + (H - padT) * .5;
   if(!opts.max) svg.appendChild(svgEl("line", {class:"ref", x1:0, x2:W, y1:yRef, y2:yRef, "vector-effect":"non-scaling-stroke"}));
+  /* each column carries its own number (HTML, placed by the same x maths) when they fit: up to 15.
+     ponytail: past 15 columns only the latest value shows; upgrade = label every k-th column. */
+  if(n <= 15){
+    const vals = el("div", {class:"vals", "aria-hidden":"true"});
+    points.forEach((pt, i) => { if(pt.v == null) return; const s = el("span", null, String(pt.v)); s.style.left = (i*(cw+gap)/W*100).toFixed(2) + "%"; s.style.width = (cw/W*100).toFixed(2) + "%"; vals.appendChild(s); });
+    box.appendChild(vals);
+  }
   box.appendChild(svg);
   const lastReal = points.filter(p => p.v != null).pop();
-  box.appendChild(el("div", {class:"lastv"}, lastReal.v + (opts.max ? " " + (opts.unit || "") : "%")));
+  if(n > 15) box.appendChild(el("div", {class:"lastv"}, lastReal.v + (opts.max ? " " + (opts.unit || "") : "%")));
   const ax = el("div", {class:"axis"}, el("span", null, points[0].label), opts.max ? null : el("span", {class:"refkey"}, "┄ 50%"), el("span", null, points[n-1].label));
   const wrap = el("div", null, box, ax);
   return wrap;
@@ -495,6 +649,50 @@ function ring(p){
   w.appendChild(el("div", {class:"v"}, el("b", {id:"kpiReady"}, pctText(p)), el("small", null, p == null ? "not checked" : "readiness")));
   return w;
 }
+/* first run is over once he has done all three steps, skipped it, or has history (a log, an assessment, a second morning) */
+function setupSteps(){
+  const d = Store.data, g = d.goals;
+  return [!!(d.answers.identity||"").trim(),
+    Store.habitSlots().length > 0 && !!g.blockStart && !!((g.priorities[g.primaryType]||{}).what||"").trim(),
+    Object.values(d.readiness).some(r => READY_FIELDS.every(f => r[f[0]] >= 1))];
+}
+function setupActive(){
+  const d = Store.data;
+  if(d.meta.setupSkipped || Object.keys(d.practices).length || Object.keys(d.games).length || Object.keys(d.talks).length || d.assessments.length || Object.keys(d.readiness).length > 1) return false;
+  return setupSteps().indexOf(false) >= 0;
+}
+const SETUP_STEPS = ["Who I am", "Habits + plan", "First check"];
+function setupCard(today){
+  const done = setupSteps(), g = Store.data.goals;
+  const cur = State.setupStep != null ? State.setupStep : Math.max(0, done.indexOf(false));
+  const c = el("div", {class:"card hero", id:"setupCard"}, el("h2", null, "Start here"), el("p", {class:"sub"}, "Three steps, once. Then this page is your day: morning check, habits, the block, your standard."));
+  const nav = el("div", {class:"steps"});
+  SETUP_STEPS.forEach((nm, i) => nav.appendChild(el("button", {type:"button", class:"step" + (done[i] ? " done" : "") + (i === cur ? " cur" : ""), "aria-current": i === cur ? "step" : null, "data-step": i, onclick: () => { State.setupStep = i; renderToday(); }}, el("span", {class:"n"}, done[i] ? "✓" : String(i + 1)), el("span", null, nm))));
+  c.appendChild(nav);
+  const next = el("button", {type:"button", class:"primary right", id:"suNext", onclick: () => { State.setupStep = cur + 1; renderToday(); }}, "Next");
+  if(cur === 0){
+    c.appendChild(el("label", {class:"f", for:"suIdentity"}, "My identity statement"));
+    c.appendChild(el("div", {class:"mute hint"}, "Chapter Two: a short description of the player you are committed to becoming. Not a slogan — something useful in preparation, training, competition and review."));
+    c.appendChild(el("textarea", {id:"suIdentity", rows:3, value: Store.data.answers.identity || "", placeholder:"I am developing into a player who…", oninput: ev => Store.setAnswer("identity", ev.target.value)}));
+    c.appendChild(el("div", {class:"row"}, el("span", {class:"mute"}, "It shows on Today every day. Change it in Read."), next));
+  } else if(cur === 1){
+    const hi = Math.max(0, g.habits.findIndex(h => (h||"").trim())), pt = g.primaryType, ptn = (PRI_TYPES.find(p => p[0] === pt) || PRI_TYPES[0])[1];
+    c.appendChild(el("label", {class:"f", for:"suHabit"}, "One daily habit"));
+    c.appendChild(el("div", {class:"mute hint"}, "The behaviour, not the wish. It becomes a tick on Today. Add up to four more on Goals."));
+    c.appendChild(el("input", {type:"text", id:"suHabit", value: g.habits[hi] || "", placeholder:"e.g. Bed by 10:30 on school nights", oninput: ev => { const h = g.habits.slice(); h[hi] = ev.target.value; Store.setGoals({habits: h}); }}));
+    c.appendChild(el("label", {class:"f", for:"suBlock"}, "90-day block starts"));
+    c.appendChild(el("div", {class:"row"}, el("input", {type:"date", id:"suBlock", class:"grow", style:"width:auto", value: g.blockStart, oninput: ev => Store.setGoals({blockStart: ev.target.value})}),
+      el("button", {type:"button", class:"ghost", id:"suToday", onclick: () => { Store.setGoals({blockStart: today}); renderToday(); }}, "Today")));
+    c.appendChild(el("label", {class:"f", for:"suPrimary"}, "Primary priority · " + ptn));
+    c.appendChild(el("div", {class:"mute hint"}, "Chapter Nine: the most important development need in this block. The other four kinds can wait for Goals."));
+    c.appendChild(el("textarea", {id:"suPrimary", rows:2, value: (g.priorities[pt]||{}).what || "", placeholder:"e.g. Puck protection on the wall under pressure", oninput: ev => Store.setPriority(pt, "what", ev.target.value)}));
+    c.appendChild(el("div", {class:"row"}, el("span", {class:"mute"}, "Everything here lives on Goals too."), next));
+  } else {
+    const ck = checkCard(today); ck.className = "inset"; c.appendChild(ck);
+  }
+  c.appendChild(el("button", {type:"button", class:"link", id:"suSkip", onclick: () => { Store.data.meta.setupSkipped = true; Store.save(); State.setupStep = null; State.inSetup = false; renderToday(); }}, "Skip — show the full page"));
+  return c;
+}
 function renderToday(){
   const slot = $("todaySlot"); clear(slot);
   const today = dayOf(Date.now());
@@ -506,6 +704,22 @@ function renderToday(){
   ht.appendChild(el("div", {class:"t3", id:"heroDate"}, niceDay(today) + (bp && bp.days >= 0 && bp.left ? " · Day " + (bp.days + 1) + " of " + BLOCK_DAYS : "")));
   const f = flashBox(); if(f) slot.appendChild(f);
   if(Store.saveFailed) slot.appendChild(el("div", {class:"unsaved", id:"saveFail", role:"alert"}, "This phone refused to save (storage full or private browsing). Your last changes are NOT kept — tap Save backup file below now."));
+  const lastB = Store.data.meta.lastBackup, fd = firstDay();
+  const bAge = lastB ? daysBetween(dayOf(lastB), today) : (fd ? daysBetween(fd, today) : 0);
+  if(fd && bAge >= (lastB ? 14 : 3)) slot.appendChild(el("div", {class:"nudge", id:"backupNudge"}, el("span", null, lastB ? "Last backup " + bAge + " days ago." : bAge + " days of work and no backup yet."), el("button", {type:"button", class:"ghost", onclick: () => { downloadBackup(); renderToday(); }}, "Save backup file")));
+  /* first run: three steps in place of five empty cards; the day's end check and backup stay */
+  const su = setupActive();
+  if(State.inSetup && !su && !Store.data.meta.setupSkipped){ State.inSetup = false; flash("Set up. From here this page is your day."); renderToday(); return; }
+  State.inSetup = su;
+  if(su){
+    slot.appendChild(setupCard(today));
+    slot.appendChild(el("div", {class:"cols"}, el("div", null, eveningCard(today)), el("div", null, backupCard())));
+    return;
+  }
+  /* Sunday closes the week; on Monday an unclosed week is still offered, then it lets go */
+  const wkEnd = weekEnd(today), lastEnd = addDays(wkEnd, -7);
+  const loopEnd = !hasData() ? null : wkEnd === today ? today : daysBetween(lastEnd, today) === 1 && !Store.weekClosed(lastEnd) ? lastEnd : null;
+  if(loopEnd) slot.appendChild(loopCard(loopEnd));
   const colA = el("div"), colB = el("div");
   slot.appendChild(el("div", {class:"cols"}, colA, colB));
   /* state: ring + last 7 days */
@@ -518,7 +732,10 @@ function renderToday(){
       el("div", null, el("div", {class:"lbl"}, "Last 7 days" + (avg == null ? "" : " · average " + avg + "%")), bars(pts, "No checks yet this week. The chart starts with today's.", {small:true}))),
     el("div", {class:"minis"},
       el("div", {class:"mini"}, el("div", {class:"lbl"}, "Habits today"), el("div", {class:"val", id:"kpiHabits"}, pctText(hp))),
-      el("div", {class:"mini"}, el("div", {class:"lbl"}, "90-day block"), el("div", {class:"val", id:"kpiBlock"}, bp ? bp.pct + "%" : "—"))));
+      el("div", {class:"mini"}, el("div", {class:"lbl"}, "90-day block"), el("div", {class:"val", id:"kpiBlock"}, bp ? bp.pct + "%" : "—")),
+      ratingsMini()));
+  const streak = checkStreak(today), in7 = pts.filter(p => p.v != null).length;
+  if(in7) st.appendChild(el("p", {class:"sub", id:"checkStreak"}, "Morning check: " + in7 + " of the last 7 days" + (streak > 1 ? " · " + streak + " in a row" : "")));
   const eveDone = STANDARD_Q.filter(q => (Store.data.standardCheck[today] || {})[q.k] != null).length;
   st.appendChild(el("button", {type:"button", class:"link", id:"jumpEvening", onclick: () => { const e = $("eveningCard"); if(e && e.scrollIntoView) e.scrollIntoView({behavior:"smooth", block:"start"}); }}, "End-of-day check · " + eveDone + " of " + STANDARD_Q.length + " ↓"));
   colA.appendChild(st);
@@ -526,29 +743,90 @@ function renderToday(){
   /* habits */
   const slots = Store.habitSlots();
   const hc = el("div", {class:"card", id:"habitCard"}, el("h2", null, "Today's habits"));
-  if(!slots.length) hc.appendChild(el("div", {class:"empty"}, "No habit goals yet. Write up to five on the Goals tab and they appear here every day."));
+  if(!slots.length){ hc.appendChild(el("div", {class:"empty"}, "No habit goals yet. Write up to five and they appear here every day.")); hc.appendChild(el("button", {type:"button", class:"link", id:"goHabits", onclick: () => goTo("goals", "habit0")}, "Write my habits →")); }
   else {
     const doneMap = Store.data.habitsDone[today] || {};
-    slots.forEach(h => hc.appendChild(el("div", {class:"habit"}, el("button", {type:"button", class:"tick", "aria-pressed": String(!!doneMap[h.i]), "aria-label": (doneMap[h.i] ? "done: " : "not yet: ") + h.nm, onclick: () => { Store.toggleHabit(today, h.i); renderToday(); }}, doneMap[h.i] ? "✓" : ""), el("div", {class:"nm"}, h.nm))));
-    hc.appendChild(el("p", {class:"sub", id:"habitWeek"}, "This week: " + pctText(Store.habitWeekPct(today)) + " of habits kept"));
+    slots.forEach(h => {
+      const wk = Store.habitDays(h.i, today), n = wk.filter(Boolean).length, strip = el("div", {class:"hweek", "aria-hidden":"true"});
+      wk.forEach(on => strip.appendChild(el("i", {class: on ? "on" : null})));
+      hc.appendChild(el("div", {class:"habit"}, el("button", {type:"button", class:"tick", "aria-pressed": String(!!doneMap[h.i]), "aria-label": (doneMap[h.i] ? "done: " : "not yet: ") + h.nm, onclick: () => { Store.toggleHabit(today, h.i); renderToday(); }}, doneMap[h.i] ? "✓" : ""),
+        el("div", {class:"nm"}, h.nm, el("div", {class:"hwk"}, strip, el("span", {class:"mute", "aria-label": "kept " + n + " of the last 7 days"}, n + "/7")))));
+    });
+    hc.appendChild(el("p", {class:"sub", id:"habitWeek"}, "Last 7 days: " + pctText(Store.habitWeekPct(today)) + " of habits kept"));
   }
   colA.appendChild(hc);
   /* block */
   const bc = el("div", {class:"card", id:"blockCard"}, el("h2", null, "90-day block"));
-  if(!bp) bc.appendChild(el("div", {class:"empty"}, "No block started. Set a start date and a primary priority on the Goals tab."));
+  if(!bp){ bc.appendChild(el("div", {class:"empty"}, "No block started. Set a start date and a primary priority.")); bc.appendChild(el("button", {type:"button", class:"link", id:"goBlock", onclick: () => goTo("goals", "blockStart")}, "Start my 90-day block →")); }
   else {
     const m = el("div", {class:"meter"}); const mi = el("i"); mi.style.width = bp.pct + "%"; m.appendChild(mi); bc.appendChild(m);
     bc.appendChild(el("p", {class:"sub"}, bp.days < 0 ? "Starts in " + (-bp.days) + " days" : bp.left ? "Day " + Math.min(bp.days+1, BLOCK_DAYS) + " of " + BLOCK_DAYS + " · " + bp.left + " days left" : "Block complete · write the 90-day review on the Goals tab"));
-    if(g.primary) bc.appendChild(el("p", null, el("b", null, "Primary priority: "), g.primary));
-    if(g.measure) bc.appendChild(el("p", {class:"sub"}, "Measured by: " + g.measure));
-    [30,60,90].forEach(c => { if(bp.days >= c && !(g.checkpoints[c]||"").trim()) bc.appendChild(el("p", {class:"sub"}, "⚑ The " + c + "-day checkpoint is due. Write it on the Goals tab.")); });
+    const pr = Store.priorities();
+    if(!pr.length) bc.appendChild(el("button", {type:"button", class:"link", id:"goPlan", onclick: () => goTo("goals", "pri-skill-what")}, "Write the block's priorities →"));
+    pr.forEach(x => bc.appendChild(el("div", {class:"pri-line" + (x.primary ? " main" : "")}, el("span", {class:"ptype"}, x.primary ? "Primary · " + x.nm : x.nm), el("div", null, x.p.what), x.primary && (x.p.measure||"").trim() ? el("div", {class:"sub"}, "Measured by: " + x.p.measure) : null)));
+    /* only the checkpoint whose window he is in: an earlier one he skipped does not nag */
+    const cur = CP_DAYS.filter(c => bp.days >= c).pop();
+    if(cur && !Store.checkpointDone(cur)) bc.appendChild(el("button", {type:"button", class:"link flag", "data-cp": cur, onclick: () => { State.cpOpen = cur; goTo("goals", "cp" + cur); }}, "⚑ The " + cur + "-day checkpoint is due · answer it →"));
   }
+  if(Store.reviewDue(today)) bc.appendChild(el("button", {type:"button", class:"link flag", id:"reviewFlag", onclick: () => goTo("goals", "rv0")}, "⚑ Quarter-season team review is due →"));
   /* column A = the morning (state, check, habits, block, standard); column B = end of day + backup.
      On a phone the two stack in that order, so the evening check reads last. */
   colA.appendChild(bc);
+  if(!loopEnd) colA.appendChild(winCard(wkEnd));
+  const cues = CUE_FIELDS.filter(([k]) => (g.cues[k]||"").trim());
+  if(cues.length) colA.appendChild(el("div", {class:"card", id:"cueCard"}, el("h2", null, "My cues"), ...cues.map(([k, nm]) => el("div", {class:"cue"}, el("span", {class:"ptype"}, nm), el("div", {class:"cue-t"}, g.cues[k])))));
   colA.appendChild(standardCard());
   colB.appendChild(eveningCard(today));
   colB.appendChild(backupCard());
+}
+/* the manual's weekly template: "Choose one development behavior that would make the week productive even if statistics fluctuate" */
+const WIN_HINT = "One behaviour that makes the week productive even if the stats don't go your way.";
+function winCard(end){
+  const w = Store.data.weekly[end] || {}, c = el("div", {class:"card", id:"winCard"}, el("h2", null, "This week's win"));
+  if((w.win||"").trim() && !State.editWin){
+    c.appendChild(el("div", {class:"cue-t", id:"winText"}, w.win));
+    c.appendChild(el("div", {class:"row"}, el("span", {class:"mute"}, "Sunday: close the loop on it."), el("button", {type:"button", class:"link right", onclick: () => { State.editWin = true; renderToday(); }}, "Change")));
+  } else {
+    c.appendChild(el("p", {class:"mute"}, WIN_HINT));
+    c.appendChild(el("input", {type:"text", id:"winInput", value: w.win || "", placeholder:"e.g. first three strides hard on every puck race", "aria-label":"This week's win", oninput: ev => Store.setWeek(end, "win", ev.target.value)}));
+    c.appendChild(el("button", {type:"button", class:"ghost", id:"winDone", onclick: () => { State.editWin = false; renderToday(); }}, "Done"));
+  }
+  return c;
+}
+/* Sunday: review completion, quality, health, transfer, and the next adjustment; choose next week's win; back up */
+function loopCard(end){
+  const w = Store.data.weekly[end] || {}, s = weekSummary(end), prev = weekSummary(addDays(end, -7)), next = addDays(end, 7), nw = Store.data.weekly[next] || {};
+  const c = el("div", {class:"card hero", id:"loopCard"}, el("h2", null, "Close the loop"),
+    el("p", {class:"sub"}, (end === dayOf(Date.now()) ? "This week" : "Last week") + ", " + shortDay(s.days[0]) + " – " + shortDay(end) + ". Completion, quality, health, transfer, and the next adjustment."));
+  const dl = (a, b) => a != null && b != null && a !== b ? el("small", {class:"dl" + (a < b ? " neg" : "")}, " " + signed(a - b)) : null;
+  /* the tiles answer the manual's first three: completion, quality, health (transfer and the adjustment are asked below) */
+  const tile = (id, dim, lbl, val, d, note) => el("div", {class:"mini", id}, el("span", {class:"ptype"}, dim), el("div", {class:"lbl"}, lbl), el("div", {class:"val"}, val, d), note ? el("div", {class:"lbl"}, note) : null);
+  c.appendChild(el("div", {class:"minis"},
+    tile("wkChecks", "Completion", "Morning checks", s.readyN + "/7", dl(s.readyN, prev.readyN)),
+    tile("wkHabits", "Completion", "Habits kept", pctText(s.habits), dl(s.habits, prev.habits)),
+    tile("wkStandard", "Completion", "Standard", pctText(s.standard), dl(s.standard, prev.standard)),
+    tile("wkPractice", "Quality", "Practices", s.pAvg == null ? String(s.pN) : s.pAvg + "%", null, s.pN + (s.pN === 1 ? " practice" : " practices") + (s.pN && s.pAvg == null ? ", none rated" : s.pN ? " · avg" : "")),
+    tile("wkGames", "Quality", "Games", s.gAvg == null ? String(s.gN) : s.gAvg + "%", null, [s.gN + (s.gN === 1 ? " game" : " games") + (s.gN && s.gAvg == null ? ", none rated" : s.gN ? " · avg" : ""), s.scr ? s.scr + " scratched" : null].filter(Boolean).join(" · ")),
+    tile("wkReady", "Health", "Readiness", pctText(s.readyAvg), dl(s.readyAvg, prev.readyAvg), s.low ? s.low + (s.low === 1 ? " day" : " days") + " under 50%" : s.readyN ? "no low days" : null)));
+  const yn = (k, q, rec, setK) => { const seg = el("div", {class:"seg yn"}); STANDARD_A.forEach(([v, nm]) => seg.appendChild(el("button", {type:"button", "aria-pressed": String(rec[k] === v), "data-v": v, onclick: () => { Store.setWeek(end, k, v); renderToday(); }}, nm))); return el("div", {class:"item sq", id: setK}, el("div", {class:"nm"}, q), seg); };
+  if((w.win||"").trim()) c.appendChild(yn("hit", el("span", null, el("span", {class:"mute"}, "The week's win: "), el("b", null, w.win), " — did it happen?"), w, "wkHit"));
+  if(s.gN) c.appendChild(yn("transfer", el("b", null, "Transfer: did the week's work show up in games?"), w, "wkTransfer"));
+  c.appendChild(el("label", {class:"f", for:"wkAdjust"}, "The next adjustment"));
+  c.appendChild(el("textarea", {id:"wkAdjust", rows:2, value: w.adjust || "", placeholder:"One change for next week, and why.", oninput: ev => Store.setWeek(end, "adjust", ev.target.value)}));
+  c.appendChild(el("label", {class:"f", for:"wkNextWin"}, "Next week's win"));
+  c.appendChild(el("div", {class:"mute hint"}, WIN_HINT));
+  c.appendChild(el("input", {type:"text", id:"wkNextWin", value: nw.win || "", oninput: ev => Store.setWeek(next, "win", ev.target.value)}));
+  const lb = Store.data.meta.lastBackup;
+  c.appendChild(el("div", {class:"row", style:"margin-top:12px"}, el("button", {type:"button", class:"primary", id:"wkBackup", onclick: downloadBackup}, "Save backup file"), el("span", {class:"mute"}, "Last backup: " + (lb ? agoText(lb) : "never"))));
+  return c;
+}
+/* Chapter Six progress on Today: latest saved overall, and the change since the baseline */
+function ratingsMini(){
+  const last = Store.lastAssessment(), base = Store.baseline();
+  const ov = last ? overallPct(last.r) : null, d = last && base && last !== base && ov != null ? ov - overallPct(base.r) : null;
+  return el("button", {type:"button", class:"mini tap", id:"kpiRatings", onclick: () => setTab("ratings")}, el("div", {class:"lbl"}, "Ratings"),
+    el("div", {class:"val"}, pctText(ov), d != null ? el("small", {class:"dl" + (d < 0 ? " neg" : "")}, " " + signed(d)) : null),
+    el("div", {class:"lbl"}, d != null ? "since baseline" : last ? "baseline saved" : "not rated yet"));
 }
 /* the morning check: one question per screen, tapping an answer moves on */
 function checkCard(today){
@@ -569,7 +847,7 @@ function checkCard(today){
     card.appendChild(wrap);
   } else if(done === 7){
     const chips = el("div", {class:"chips"});
-    READY_FIELDS.forEach(f => chips.appendChild(el("span", {class:"chip"}, f[1], el("b", null, rec[f[0]]))));
+    READY_FIELDS.forEach(f => chips.appendChild(el("span", {class:"chip" + (rec[f[0]] <= 2 ? " low" : "")}, f[1], el("b", null, rec[f[0]]))));
     card.appendChild(chips);
     card.appendChild(el("button", {type:"button", class:"link", onclick: () => { State.checkStep = 0; renderToday(); }}, "Change answers"));
   } else {
@@ -610,6 +888,19 @@ function standardCard(){
     c.appendChild(el("button", {type:"button", class:"link", onclick: () => { State.readChapter = CHAPTERS.findIndex(ch => ch.n === "TWO"); setTab("read"); }}, "Open Chapter Two →"));
   }
   return c;
+}
+/* jump to a tab and bring one field into view (focus it when it takes text) */
+function goTo(tab, id){ setTab(tab); const e = $(id); if(e){ if(e.scrollIntoView) e.scrollIntoView({block:"center"}); if(e.focus) e.focus(); } }
+/* morning checks in a row, ending today — or yesterday while today's is still open, so the run is not "broken" at 7am */
+function checkStreak(today){
+  let d = Store.readinessPct(today) == null ? addDays(today, -1) : today, n = 0;
+  while(Store.readinessPct(d) != null && n < 3660){ n++; d = addDays(d, -1); }
+  return n;
+}
+/* the first day anything was logged, for the backup nudge */
+function firstDay(){
+  const D = Store.data, days = Object.keys(D.readiness).concat(Object.values(D.practices).map(e => e.date), Object.values(D.games).map(e => e.date), D.assessments.map(a => a.day)).filter(Boolean).sort();
+  return days[0] || null;
 }
 function agoText(ts){ const d = daysBetween(dayOf(ts), dayOf(Date.now())); return d <= 0 ? "today" : d === 1 ? "yesterday" : d + " days ago"; }
 function hasData(){ const d = Store.data; return Object.keys(d.readiness).length || Object.keys(d.practices).length || Object.keys(d.games).length || d.assessments.length || Object.keys(d.answers).some(k => d.answers[k]); }
@@ -655,24 +946,26 @@ function renderLog(){
   const f = flashBox(); if(f) slot.appendChild(f);
   slot.appendChild(el("div", {class:"row"},
     el("button", {type:"button", class:"primary", id:"btnPractice", onclick: () => openDraft({kind:"practice", id:uid(), date: dayOf(Date.now()), focus:"", learned:"", cue:""})}, "+ Practice"),
-    el("button", {type:"button", class:"primary", id:"btnGame", onclick: () => openDraft({kind:"game", id:uid(), date: dayOf(Date.now()), opp:"", note:"", g:"", a:"", shots:""})}, "+ Game")));
+    el("button", {type:"button", class:"primary", id:"btnGame", onclick: () => openDraft({kind:"game", id:uid(), date: dayOf(Date.now()), opp:"", note:"", g:"", a:"", shots:""})}, "+ Game"),
+    el("button", {type:"button", class:"ghost", id:"btnTalk", onclick: () => openDraft({kind:"talk", id:uid(), date: dayOf(Date.now()), who:""})}, "+ Conversation")));
   if(State.draft) slot.appendChild(draftForm());
-  const pr = Store.list("practices"), gm = Store.list("games");
+  const pr = Store.list("practices"), gm = Store.list("games"), tk = Store.list("talks");
   const cols = el("div", {class:"cols"}); slot.appendChild(cols);
   const tc = el("div", {class:"card"}, el("h2", null, "Last ten"));
   const p10 = pr.slice(0,10).reverse().map(e => ({v: practiceScore(e), label: shortDay(e.date)}));
-  const g10 = gm.slice(0,10).reverse().map(e => ({v: gameScore(e), label: shortDay(e.date), alt:true}));
+  const g10 = gm.filter(e => !e.scratched).slice(0,10).reverse().map(e => ({v: gameScore(e), label: shortDay(e.date), alt:true}));
   tc.appendChild(el("h3", null, "Practices")); tc.appendChild(bars(p10, "No practices logged yet."));
   tc.appendChild(el("h3", null, "Games")); tc.appendChild(bars(g10, "No games logged yet."));
   const ss = seasonStats(gm);
   const sc = el("div", {class:"card", id:"seasonStats"}, el("h2", null, "Season stats"));
-  if(!ss.counted) sc.appendChild(el("div", {class:"empty"}, gm.length ? "No goals, assists or shots entered yet. Add them when you log a game." : "No games logged yet."));
+  if(!ss.counted) sc.appendChild(el("div", {class:"empty"}, gm.length ? (ss.gp ? "No goals, assists or shots entered yet. Add them when you log a game." : "No games played yet") + (ss.scratched ? " · " + ss.scratched + " scratched" : "") + "." : "No games logged yet."));
   else {
     const st = el("div", {class:"stats"});
-    [["Games", ss.gp + (ss.counted < ss.gp ? " (" + ss.counted + " with stats)" : "")], ["Goals", ss.g], ["Assists", ss.a], ["Points", ss.p], ["Shots", ss.shots], ["Shooting", ss.shPct == null ? "—" : ss.shPct + "%"]]
-      .forEach(([k, v]) => st.appendChild(el("div", {class:"mini"}, el("div", {class:"lbl"}, k), el("div", {class:"val num"}, v))));
+    [["Games", ss.gp, [ss.counted < ss.gp ? ss.counted + " with stats" : null, ss.scratched ? ss.scratched + " scratched" : null].filter(Boolean).join(" · ") || null], ["Goals", ss.g], ["Assists", ss.a], ["Points", ss.p], ["Shots", ss.shots], ["Shooting", ss.shPct == null ? "—" : ss.shPct + "%"]]
+      .forEach(([k, v, note]) => st.appendChild(el("div", {class:"mini", id: k === "Games" ? "statGames" : null}, el("div", {class:"lbl"}, k), el("div", {class:"val num"}, String(v)), note ? el("div", {class:"lbl"}, note) : null)));
     sc.appendChild(st);
-    const last = gm.slice(0, 15).reverse();
+    if(ss.toiAvg != null) sc.appendChild(el("p", {class:"sub", id:"toiLine"}, "Average ice time " + toiText(ss.toiAvg) + " over " + ss.toiN + (ss.toiN === 1 ? " game" : " games") + " with TOI"));
+    const last = gm.filter(g => !g.scratched).slice(0, 15).reverse();
     const pp = last.map(g => { const G = gameNum(g.g), A = gameNum(g.a); return {v: G == null && A == null ? null : (G||0) + (A||0), label: shortDay(g.date), alt:true}; });
     const sh = last.map(g => ({v: gameNum(g.shots), label: shortDay(g.date)}));
     sc.appendChild(el("h3", null, "Points per game"));
@@ -683,48 +976,87 @@ function renderLog(){
   cols.appendChild(el("div", null, tc, sc));
   const lc = el("div", {class:"card", id:"entries"}, el("h2", null, "Entries"));
   const seg = el("div", {class:"seg", role:"group", "aria-label":"Show"});
-  [["all","All"],["practice","Practices"],["game","Games"]].forEach(([k, nm]) => seg.appendChild(el("button", {type:"button", "aria-pressed": String(State.logFilter === k), onclick: () => { State.logFilter = k; renderLog(); }}, nm)));
+  [["all","All"],["practice","Practices"],["game","Games"],["talk","Talks"]].forEach(([k, nm]) => seg.appendChild(el("button", {type:"button", "aria-pressed": String(State.logFilter === k), onclick: () => { State.logFilter = k; renderLog(); }}, nm)));
   lc.appendChild(seg);
-  const all = pr.map(e => Object.assign({kind:"practice"}, e)).concat(gm.map(e => Object.assign({kind:"game"}, e)))
+  const all = pr.map(e => Object.assign({kind:"practice"}, e)).concat(gm.map(e => Object.assign({kind:"game"}, e)), tk.map(e => Object.assign({kind:"talk"}, e)))
     .filter(e => State.logFilter === "all" || e.kind === State.logFilter)
     .sort((a,b)=> a.date < b.date ? 1 : a.date > b.date ? -1 : (b.at||0)-(a.at||0));
   const list = el("div", {id:"entryList"}); lc.appendChild(list);
-  if(!all.length) list.appendChild(el("div", {class:"empty"}, pr.length + gm.length ? "None of this kind yet." : "Nothing logged yet. Tap + Practice or + Game after the next one."));
+  if(!all.length) list.appendChild(el("div", {class:"empty"}, pr.length + gm.length + tk.length ? "None of this kind yet." : "Nothing logged yet. Tap + Practice or + Game after the next one."));
   all.forEach(e => {
-    const sc = e.kind === "practice" ? practiceScore(e) : gameScore(e);
-    const what = el("div", {class:"what"}, el("div", {class:"when"}, niceDay(e.date)), el("div", null, el("span", {class:"tag" + (e.kind === "game" ? " g" : "")}, e.kind === "practice" ? "Practice" : "Game"), e.kind === "practice" ? (e.focus || "") : ("vs " + (e.opp || "?") + (e.g !== "" && e.g != null ? " · " + e.g + "G " + (e.a||0) + "A" : ""))));
-    if(e.kind === "practice" && e.cue) what.appendChild(el("div", {class:"mute"}, "Next cue: " + e.cue));
+    if(e.kind === "talk"){
+      const w = el("div", {class:"what"}, el("div", {class:"when"}, niceDay(e.date)), el("div", null, el("span", {class:"tag"}, "Talk"), "with " + (e.who || "?") + ((e.purpose||"").trim() ? " · " + e.purpose : "")));
+      if((e.todo||"").trim()) w.appendChild(el("div", {class:"mute"}, "I'll do: " + e.todo));
+      list.appendChild(el("div", {class:"entry k-talk"}, el("button", {type:"button", class:"rowbtn", "aria-label":"Edit conversation from " + niceDay(e.date), onclick: () => { openDraft(Object.assign({}, e)); window.scrollTo(0,0); }}, el("div", {class:"sc"}, "Talk", el("small", null, "notes")), w, el("i", {class:"chev"}))));
+      return;
+    }
+    const scr = e.kind === "game" && e.scratched, sc = e.kind === "practice" ? practiceScore(e) : scr ? null : gameScore(e);
+    const what = el("div", {class:"what"}, el("div", {class:"when"}, niceDay(e.date)), el("div", null, el("span", {class:"tag" + (e.kind === "game" ? " g" : "")}, e.kind === "practice" ? "Practice" : scr ? "Scratched" : "Game"), e.kind === "practice" ? (e.focus || "") : ("vs " + (e.opp || "?") + (scr ? " · didn't dress" : e.g !== "" && e.g != null ? " · " + e.g + "G " + (e.a||0) + "A" : ""))));
     if(e.kind === "game" && e.note) what.appendChild(el("div", {class:"mute"}, e.note));
-    list.appendChild(el("div", {class:"entry"}, el("button", {type:"button", class:"rowbtn", "aria-label":"Edit " + e.kind + " from " + niceDay(e.date), onclick: () => { const d = Object.assign({}, e); openDraft(d); window.scrollTo(0,0); }}, el("div", {class:"sc"}, pctText(sc), el("small", null, "score")), what, el("i", {class:"chev"}))));
+    if(e.cue) what.appendChild(el("div", {class:"mute"}, "Next cue: " + e.cue));
+    list.appendChild(el("div", {class:"entry k-" + e.kind}, el("button", {type:"button", class:"rowbtn", "aria-label":"Edit " + e.kind + " from " + niceDay(e.date), onclick: () => { const d = Object.assign({}, e); openDraft(d); window.scrollTo(0,0); }}, el("div", {class:"sc"}, scr ? "—" : pctText(sc), el("small", null, scr ? "scratch" : "score")), what, el("i", {class:"chev"}))));
   });
   cols.appendChild(lc);
 }
+/* the manual's dated entry (Ch 10–55): what I intended · what actually happened · what I learned · the next cue.
+   A scratch is logged as a game he did not dress for: no ratings, no stats, its own reflection. */
 function draftForm(){
-  const d = State.draft, isP = d.kind === "practice";
+  const d = State.draft, isT = d.kind === "talk", isP = d.kind === "practice", scr = d.kind === "game" && !!d.scratched;
   const keep = () => Store.keepDraft("log", d);
-  const c = el("div", {class:"card", id:"draft"}, el("h2", null, isP ? "Practice" : "Game"));
+  const kind = isT ? "talks" : isP ? "practices" : "games", exists = !!Store.data[kind][d.id];
+  const sc = isT ? null : isP ? practiceScore(d) : scr ? null : gameScore(d);
+  const save = () => { d.at = Date.now(); const e = Object.assign({}, d); delete e.kind; delete e.confirmDelete; if(scr) GAME_FIELDS.map(f => f[0]).concat(["g","a","shots","toi"]).forEach(k => delete e[k]); if(isT) Store.putTalk(e); else if(isP) Store.putPractice(e); else Store.putGame(e); State.draft = null; Store.keepDraft("log", null); flash(isT ? "Conversation saved" : (isP ? "Practice" : "Game") + " saved" + (scr ? " · scratch noted" : " · " + pctText(sc))); renderLog(); };
+  /* the 2-minute locker room: Save sits right under the ratings (and a game's numbers); the manual's lines follow and can wait */
+  const quick = () => { c.appendChild(el("p", {class:"sub", id:"draftScore"}, "Score: " + pctText(sc))); c.appendChild(el("div", {class:"row", id:"quickSave"}, el("button", {type:"button", class:"primary", id:"saveDraft", onclick: save}, exists ? "Save changes" : "Save"), el("span", {class:"mute", style:"flex:1 1 150px"}, "Short on time? Save now. The lines below can wait — tap the entry to add them later."))); };
+  const txt = (k, label, ph, rows) => { c.appendChild(el("label", {class:"f", for:"d-" + k}, label)); c.appendChild(el("textarea", {id:"d-" + k, rows: rows || 2, value: d[k] || "", placeholder: ph || "", oninput: ev => { d[k] = ev.target.value; keep(); }})); };
+  const c = el("div", {class:"card", id:"draft"}, el("h2", null, isT ? "Conversation" : isP ? "Practice" : scr ? "Game · didn't dress" : "Game"));
+  if(isT) talkFields(c, d, keep, txt); else {
+  if(!isP){
+    const gc = Store.data.goals.cues, cues = CUE_FIELDS.slice(1).filter(([k]) => (gc[k]||"").trim());
+    if(cues.length && !scr) c.appendChild(el("div", {class:"says", id:"draftCues"}, el("div", {class:"k"}, "My game cues"), ...cues.map(([k, nm]) => el("p", null, el("span", {class:"mute"}, nm.replace("Game · ", "") + ": "), gc[k]))));
+  }
   c.appendChild(el("label", {class:"f"}, "Date")); c.appendChild(el("input", {type:"date", value:d.date, oninput: ev => { d.date = ev.target.value || d.date; keep(); }}));
   if(isP){
-    c.appendChild(el("label", {class:"f"}, "Focus of the session")); c.appendChild(el("input", {type:"text", value:d.focus, placeholder:"e.g. wall play under pressure", oninput: ev => { d.focus = ev.target.value; keep(); }}));
+    const lastP = Store.list("practices").find(e => e.id !== d.id && (e.focus||"").trim());
+    c.appendChild(el("label", {class:"f", for:"d-focus"}, "What I intended to work on"));
+    c.appendChild(el("input", {type:"text", id:"d-focus", value:d.focus, placeholder:"e.g. wall play under pressure", oninput: ev => { d.focus = ev.target.value; keep(); }}));
+    if(lastP && !(d.focus||"").trim()) c.appendChild(el("button", {type:"button", class:"link", id:"sameFocus", onclick: () => { d.focus = lastP.focus; keep(); renderLog(); }}, "↺ Same as last time: " + lastP.focus));
   } else {
     c.appendChild(el("label", {class:"f"}, "Opponent")); c.appendChild(el("input", {type:"text", value:d.opp, oninput: ev => { d.opp = ev.target.value; keep(); }}));
+    c.appendChild(el("div", {class:"seg", role:"group", "aria-label":"Did you dress?"},
+      el("button", {type:"button", id:"dressed", "aria-pressed": String(!scr), onclick: () => { delete d.scratched; keep(); renderLog(); }}, "Played"),
+      el("button", {type:"button", id:"scratchToggle", "aria-pressed": String(scr), onclick: () => { d.scratched = true; keep(); renderLog(); }}, "Didn't dress (scratched)")));
   }
-  (isP ? PRACTICE_FIELDS : GAME_FIELDS).forEach(([k, nm]) => c.appendChild(el("div", {class:"item"}, el("div", {class:"nm"}, nm), scale(d[k], v => { d[k] = v; keep(); renderLog(); }, "", ""))));
-  if(isP){
-    c.appendChild(el("label", {class:"f"}, "What I learned")); c.appendChild(el("textarea", {value:d.learned, oninput: ev => { d.learned = ev.target.value; keep(); }}));
-    c.appendChild(el("label", {class:"f"}, "Next cue")); c.appendChild(el("input", {type:"text", value:d.cue, oninput: ev => { d.cue = ev.target.value; keep(); }}));
+  if(scr){
+    c.appendChild(el("p", {class:"mute"}, "A scratch is not a zero. It counts on its own line in your season stats. Two minutes on it now makes the next game you dress count more."));
+    txt("intended", "What I did to stay ready", "Skate, workout, video, how I carried myself…");
+    txt("note", "What I noticed from the stands", "My position, my role, the player in my spot…", 3);
+    txt("learned", "What I learned");
+    txt("cue", "What I'll show at the next practice");
   } else {
-    const st = el("div", {class:"row"});
-    [["g","Goals"],["a","Assists"],["shots","Shots"]].forEach(([k,nm]) => st.appendChild(el("div", {class:"grow"}, el("label", {class:"f"}, nm), el("input", {type:"number", inputmode:"numeric", min:"0", value:d[k], oninput: ev => { d[k] = ev.target.value; keep(); }}))));
-    c.appendChild(st);
-    c.appendChild(el("label", {class:"f"}, "One line on the game")); c.appendChild(el("textarea", {value:d.note, oninput: ev => { d.note = ev.target.value; keep(); }}));
+    if(!isP) txt("intended", "What I intended to do", Store.data.goals.cues.tactical ? "e.g. " + Store.data.goals.cues.tactical : "");
+    c.appendChild(el("p", {class:"mute", id:"blankOk"}, "Rate what you can — blank is fine. Only what you rate counts."));
+    (isP ? PRACTICE_FIELDS : GAME_FIELDS).forEach(([k, nm]) => c.appendChild(el("div", {class:"item"}, el("div", {class:"nm"}, nm), scale(d[k], v => { d[k] = v; keep(); renderLog(); }, "", ""))));
+    if(isP){
+      quick();
+      txt("happened", "What actually happened");
+      txt("learned", "What I learned");
+      c.appendChild(el("label", {class:"f"}, "The next cue or action")); c.appendChild(el("input", {type:"text", value:d.cue, oninput: ev => { d.cue = ev.target.value; keep(); }}));
+    } else {
+      const st = el("div", {class:"row gstats", id:"gameStats"});
+      [["g","Goals"],["a","Assists"],["shots","Shots"]].forEach(([k,nm]) => st.appendChild(el("div", {class:"grow"}, el("label", {class:"f"}, nm), el("input", {type:"number", inputmode:"numeric", min:"0", value:d[k], oninput: ev => { d[k] = ev.target.value; keep(); }}))));
+      st.appendChild(el("div", {class:"grow"}, el("label", {class:"f"}, "TOI"), el("input", {type:"text", inputmode:"decimal", id:"d-toi", placeholder:"14:30", value:d.toi || "", oninput: ev => { d.toi = ev.target.value; keep(); }})));
+      c.appendChild(st);
+      quick();
+      txt("note", "What actually happened", "The moment that mattered — good or bad.", 3);
+      txt("learned", "What I learned");
+      txt("cue", "The next cue or action");
+    }
   }
-  const sc = isP ? practiceScore(d) : gameScore(d);
-  c.appendChild(el("p", {class:"sub", id:"draftScore"}, "Score: " + pctText(sc)));
-  const kind = isP ? "practices" : "games";
-  const exists = !!Store.data[kind][d.id];
+  }
+  if(scr) c.appendChild(el("p", {class:"sub", id:"draftScore"}, "Not rated: you didn't dress."));
   const btns = el("div", {class:"row"},
-    el("button", {type:"button", class:"primary", id:"saveDraft", onclick: () => { d.at = Date.now(); const e = Object.assign({}, d); delete e.kind; delete e.confirmDelete; if(isP) Store.putPractice(e); else Store.putGame(e); State.draft = null; Store.keepDraft("log", null); flash((isP ? "Practice" : "Game") + " saved · " + pctText(sc)); renderLog(); }}, exists ? "Save changes" : "Save"),
+    el("button", {type:"button", class:"primary", id: isT || scr ? "saveDraft" : "saveDraft2", onclick: save}, exists ? "Save changes" : "Save"),
     el("button", {type:"button", class:"ghost", onclick: () => { State.draft = null; Store.keepDraft("log", null); renderLog(); }}, "Cancel"));
   if(exists){
     if(d.confirmDelete) btns.appendChild(el("button", {type:"button", onclick: () => { Store.drop(kind, d.id); State.draft = null; Store.keepDraft("log", null); flash("Removed"); renderLog(); }}, "Yes, remove it"));
@@ -734,6 +1066,30 @@ function draftForm(){
   return c;
 }
 
+/* Chapter Five: "before meeting … write down the purpose of the conversation, the most important question …";
+   after it, what was heard and what will be done. Chapter Two's four coach questions are one tap away. */
+function talkFields(c, d, keep, txt){
+  const team = Store.teamList();
+  c.appendChild(el("label", {class:"f", for:"d-who"}, "With"));
+  if(team.length){
+    const seg = el("div", {class:"seg wrap", id:"talkWho"});
+    team.forEach(m => seg.appendChild(el("button", {type:"button", "aria-pressed": String(d.who === m.name), onclick: () => { d.who = d.who === m.name ? "" : m.name; keep(); renderLog(); }}, m.name)));
+    c.appendChild(seg);
+  }
+  c.appendChild(el("input", {type:"text", id:"d-who", value: d.who || "", placeholder: team.length ? "or someone else" : "Name — add your team on Goals", oninput: ev => { d.who = ev.target.value; keep(); }}));
+  c.appendChild(el("h3", null, "Before"));
+  txt("purpose", "The purpose of the conversation", "What I want to understand or decide.");
+  txt("questions", "My questions", "The most important one first.", 4);
+  const left = COACH_Q.filter(q => (d.questions || "").indexOf(q) < 0);
+  if(left.length){
+    const ch = el("div", {class:"chips", id:"coachQs"}, el("span", {class:"mute"}, "From Chapter Two — tap to add:"));
+    left.forEach(q => ch.appendChild(el("button", {type:"button", class:"chip", onclick: () => { d.questions = ((d.questions || "").trim() ? d.questions.replace(/\s+$/, "") + "\n" : "") + q; keep(); renderLog(); }}, q)));
+    c.appendChild(ch);
+  }
+  c.appendChild(el("h3", null, "After"));
+  txt("heard", "What I heard", "Their words, as close as you can.", 3);
+  txt("todo", "What I'll do, and by when");
+}
 /* ================= Ratings ================= */
 function ratingsDraft(){
   if(!State.ratingsDraft){ const kept = Store.data.drafts.ratings, last = Store.lastAssessment(); State.ratingsDraft = Object.assign({}, kept || (last ? last.r : {})); }
@@ -747,7 +1103,7 @@ function renderRatings(){
   const unsaved = !!Store.data.drafts.ratings && !sameRatings(r, last ? last.r : {});
   const cols = el("div", {class:"cols"}); slot.appendChild(cols);
   const colA = el("div"), colB = el("div"); cols.appendChild(colA); cols.appendChild(colB);
-  const top = el("div", {class:"card"}, el("div", {class:"row"}, el("div", null, el("div", {class:"mute"}, "Overall"), el("div", {class:"big", id:"overall"}, pctText(ov))),
+  const top = el("div", {class:"card hero"}, el("div", {class:"row"}, el("div", null, el("div", {class:"mute"}, "Overall"), el("div", {class:"big", id:"overall"}, pctText(ov))),
     el("div", {class:"right sub", style:"text-align:right"}, last ? "Last saved " + niceDay(last.day) : "Not saved yet", base ? el("div", {class:"mute"}, "Baseline " + shortDay(base.day) + ": " + pctText(ovBase) + (ov != null && ovBase != null ? " (" + signed(ov - ovBase) + ")" : "")) : null)));
   top.appendChild(bar(ov, ovBase));
   const ex = extremes(r, 3);
@@ -758,9 +1114,12 @@ function renderRatings(){
     top.appendChild(u);
   }
   top.appendChild(el("div", {class:"row"}, el("button", {type:"button", class:"primary", id:"saveAssess", disabled: ex.rated ? null : "disabled", onclick: () => { Store.saveAssessment(r); State.confirmDiscard = false; flash("Assessment saved · " + pctText(ov)); renderRatings(); }}, "Save assessment"), el("span", {class:"mute"}, ex.rated + " of 175 rated")));
+  const gapSec = SECTIONS.find(sec => sec.items.some((_, i) => !(r[sec.key + i] >= 1)));
+  if(ex.rated && gapSec) top.appendChild(el("button", {type:"button", class:"link", id:"rateNext", onclick: () => { State.openSec[gapSec.key] = true; renderRatings(); const b = $("sec-" + gapSec.key); if(b && b.scrollIntoView) b.scrollIntoView({block:"start"}); }}, (175 - ex.rated) + " not rated yet · rate " + gapSec.name + " next →"));
   if(ex.rated){
-    top.appendChild(el("h3", null, "Foundation")); ex.hi.forEach(x => top.appendChild(el("div", {class:"sub"}, x.v + " · " + x.nm + " (" + x.sec + ")")));
-    top.appendChild(el("h3", null, "Watch")); ex.lo.forEach(x => top.appendChild(el("div", {class:"sub"}, x.v + " · " + x.nm + " (" + x.sec + ")")));
+    const xl = (id, title, rows, kind) => { const b = el("div", {id:id, class:"xl " + kind}, el("h3", null, title)); rows.forEach(x => b.appendChild(el("div", {class:"xr"}, el("b", {class:"xv"}, String(x.v)), el("div", null, el("div", {class:"xn"}, x.nm), el("div", {class:"xs"}, x.sec))))); return b; };
+    top.appendChild(el("div", {class:"ext"}, xl("extHi", "Foundational strengths", ex.hi, "hi"), xl("extLo", "Current limitations", ex.lo, "lo")));
+    top.appendChild(el("p", {class:"mute", id:"extNote"}, "Your highest and lowest ratings, as a starting point. \u201cThe lowest numerical rating is not always the most important priority.\u201d — Chapter Six"));
   }
   colA.appendChild(top);
   const hist = el("div", {class:"card", id:"history"}, el("h2", null, "Saved assessments"));
@@ -771,16 +1130,19 @@ function renderRatings(){
   }
   Store.data.assessments.slice().reverse().forEach((a, i, arr) => hist.appendChild(el("div", {class:"entry static"}, el("div", {class:"sc"}, pctText(overallPct(a.r)), el("small", null, "overall")), el("div", {class:"what"}, el("div", {class:"when"}, niceDay(a.day) + (i === arr.length - 1 ? " · baseline" : "")), el("div", {class:"sub"}, Object.keys(a.r).length + " items rated")))));
   colB.appendChild(hist);
-  colB.appendChild(el("div", {class:"card"}, el("div", {class:"scale-key"}, el("span", null, "1 major limitation"), el("span", null, "3 functional"), el("span", null, "5 distinguishing")), el("p", {class:"mute"}, "A 3 is functional, not poor. A 5 should be rare.")));
-  const secCard = el("div", {class:"card"}, el("h2", null, "Sections · baseline vs now"));
+  if(last) colB.appendChild(prioritizeCard());
+  const secCard = el("div", {class:"card", id:"secCard"}, el("h2", null, "Sections · baseline vs now"));
   secCard.appendChild(el("div", {class:"legend"}, el("span", null, el("i", {class:"now"}), "now"), base ? el("span", null, el("i", {class:"base"}), "baseline " + shortDay(base.day)) : el("span", null, "no baseline yet — your first save becomes it"), el("span", null, "tick = 50%")));
+  secCard.appendChild(el("div", {class:"keyrow", id:"scaleKey"}, el("div", {class:"scale-key"}, el("span", null, "1 major limitation"), el("span", null, "3 functional"), el("span", null, "5 distinguishing")), el("div", {class:"mute"}, "A 3 is functional, not poor. A 5 should be rare.")));
   const list = el("div", {id:"sections"});
   SECTIONS.forEach(sec => {
     const sp = sectionPct(sec, r), bpS = base ? sectionPct(sec, baseR).p : null;
     const open = !!State.openSec[sec.key];
-    const box = el("div", {class:"sec" + (open ? " open" : ""), "data-sec": sec.key});
-    box.appendChild(el("button", {type:"button", class:"hd", "aria-expanded": String(open), onclick: () => { State.openSec[sec.key] = !open; renderRatings(); }}, el("div", {class:"nm"}, sec.name, el("div", {class:"n"}, sp.n + " of " + sp.of + " rated")), el("div", {class:"delta"}, sp.p != null && bpS != null ? signed(sp.p - bpS) : ""), el("div", {class:"pct"}, pctText(sp.p)), el("div", {class:"chev"})));
-    box.appendChild(dumb(sp.p, bpS));
+    const box = el("div", {class:"sec" + (open ? " open" : ""), "data-sec": sec.key, id:"sec-" + sec.key});
+    /* under half the section rated: the % still shows, dimmed, and says why */
+    const thin = sp.n > 0 && sp.n * 2 < sp.of;
+    box.appendChild(el("button", {type:"button", class:"hd", "aria-expanded": String(open), onclick: () => { State.openSec[sec.key] = !open; renderRatings(); }}, el("div", {class:"nm"}, sec.name, el("div", {class:"n" + (thin ? " thin" : "")}, sp.n + " of " + sp.of + " rated" + (thin ? " · too few to trust yet" : ""))), el("div", {class:"delta"}, sp.p != null && bpS != null ? signed(sp.p - bpS) : ""), el("div", {class:"pct" + (thin ? " thin" : "")}, pctText(sp.p)), el("div", {class:"chev"})));
+    const db = dumb(sp.p, bpS); if(thin) db.classList.add("thin"); box.appendChild(db);
     if(open){
       const body = el("div", {class:"body"});
       sec.items.forEach((nm, i) => body.appendChild(el("div", {class:"item"}, el("div", {class:"nm"}, nm), scale(r[sec.key+i], v => { r[sec.key+i] = v; Store.keepDraft("ratings", r); renderRatings(); }, "", ""))));
@@ -792,6 +1154,28 @@ function renderRatings(){
   slot.appendChild(secCard);
 }
 
+/* Chapter Six, "Prioritize The Baseline": after the assessment, name the limiting factor, the habit, the coach
+   question and the support; each one can be sent where it gets worked on (the plan, a habit, a conversation) */
+const PRIORITIZE = [["limiting","One primary limiting factor","It restricts several other parts of performance."],["habit","One habit requiring immediate attention",""],["coach","One area requiring coach clarification",""],["support","One area requiring professional support","Medical, strength, nutrition, mental performance…"]];
+function prioritizeCard(){
+  const P = Store.data.prioritize, c = el("div", {class:"card", id:"prioritize"}, el("h2", null, "Prioritize the baseline"), el("p", {class:"mute"}, "Chapter Six: \u201cThe baseline should narrow attention.\u201d"));
+  PRIORITIZE.forEach(([k, lab, hint]) => {
+    c.appendChild(el("label", {class:"f", for:"pz-" + k}, lab)); if(hint) c.appendChild(el("div", {class:"mute hint"}, hint));
+    c.appendChild(el("textarea", {id:"pz-" + k, rows:2, value: P[k] || "", oninput: ev => { Store.setPrioritize(k, ev.target.value); const b = $("pzGo-" + k); if(b) b.disabled = !ev.target.value.trim(); }}));
+    const t = (P[k] || "").trim(), dis = t ? null : "disabled";
+    if(k === "limiting"){
+      if(State.toPlan){
+        const seg = el("div", {class:"seg wrap", id:"pzTypes"}, el("span", {class:"mute"}, "Make it the primary 90-day priority, as:"));
+        PRI_TYPES.forEach(([ty, nm]) => { const cur = ((Store.data.goals.priorities[ty] || {}).what || "").trim(), ask = cur && cur !== t && State.toPlan === ty;
+          seg.appendChild(el("button", {type:"button", "data-t": ty, onclick: () => { if(cur && cur !== t && State.toPlan !== ty){ State.toPlan = ty; renderRatings(); return; } Store.setPriority(ty, "what", t); Store.setGoals({primaryType: ty}); State.toPlan = null; flash("Now your primary priority: " + nm); goTo("goals", "priCard"); }}, ask ? "Replace \u201c" + cur + "\u201d?" : nm + (cur && cur !== t ? " (has one)" : ""))); });
+        c.appendChild(seg);
+      } else c.appendChild(el("button", {type:"button", class:"link", id:"pzGo-limiting", disabled: dis, onclick: () => { State.toPlan = true; renderRatings(); }}, "Make it a 90-day priority →"));
+    }
+    if(k === "habit") c.appendChild(el("button", {type:"button", class:"link", id:"pzGo-habit", disabled: dis, onclick: () => { const h = Store.data.goals.habits.slice(), i = h.findIndex(x => !(x||"").trim()); if(i < 0){ flash("All five habit slots are full — change one on Goals"); goTo("goals", "habit0"); return; } h[i] = t; Store.setGoals({habits: h}); flash("Added to today's habits"); goTo("goals", "habit" + i); }}, "Add it to my daily habits →"));
+    if(k === "coach") c.appendChild(el("button", {type:"button", class:"link", id:"pzGo-coach", disabled: dis, onclick: () => { State.logFilter = "all"; openDraft({kind:"talk", id:uid(), date: dayOf(Date.now()), who:"", purpose:"Clarify: " + t}); setTab("log"); }}, "Prepare a conversation about it →"));
+  });
+  return c;
+}
 /* ================= Goals ================= */
 function renderGoals(){
   const slot = $("goalsSlot"); clear(slot);
@@ -800,24 +1184,143 @@ function renderGoals(){
   const c1 = el("div", {class:"card"}, el("h2", null, "Season purpose"), el("p", {class:"mute"}, "At the end of the season, I want to be able to say…"));
   c1.appendChild(el("textarea", {id:"purpose", value:g.purpose, oninput: ev => Store.setGoals({purpose: ev.target.value})}));
   slot.appendChild(c1);
+  slot.appendChild(seasonCard());
   const c2 = el("div", {class:"card", id:"habitGoals"}, el("h2", null, "Habit goals"), el("p", {class:"mute"}, "Up to five. Each one becomes a daily tick on Today. Write the behaviour, not the wish."));
-  for(let i=0;i<5;i++){ c2.appendChild(el("input", {type:"text", value:g.habits[i]||"", placeholder: "Habit " + (i+1), "aria-label": "Habit " + (i+1), oninput: ev => { const h = g.habits.slice(); h[i] = ev.target.value; Store.setGoals({habits:h}); }})); }
+  for(let i=0;i<5;i++){ c2.appendChild(el("input", {type:"text", id:"habit" + i, value:g.habits[i]||"", placeholder: "Habit " + (i+1), "aria-label": "Habit " + (i+1), oninput: ev => { const h = g.habits.slice(); h[i] = ev.target.value; Store.setGoals({habits:h}); }})); }
   slot.appendChild(c2);
-  const c3 = el("div", {class:"card", id:"blockGoals"}, el("h2", null, "90-day block"));
-  c3.appendChild(el("label", {class:"f"}, "Block start date")); c3.appendChild(el("input", {type:"date", id:"blockStart", value:g.blockStart, oninput: ev => { Store.setGoals({blockStart: ev.target.value}); renderGoals(); }}));
-  c3.appendChild(el("label", {class:"f"}, "Primary priority (skill, situation, and what improvement looks like)")); c3.appendChild(el("textarea", {value:g.primary, oninput: ev => Store.setGoals({primary: ev.target.value})}));
-  c3.appendChild(el("label", {class:"f"}, "How progress will be measured")); c3.appendChild(el("input", {type:"text", value:g.measure, oninput: ev => Store.setGoals({measure: ev.target.value})}));
-  c3.appendChild(el("label", {class:"f"}, "Supporting priorities (up to four)"));
-  for(let i=0;i<4;i++) c3.appendChild(el("input", {type:"text", value:g.supporting[i]||"", placeholder:"Supporting " + (i+1), "aria-label":"Supporting priority " + (i+1), oninput: ev => { const s = g.supporting.slice(); s[i] = ev.target.value; Store.setGoals({supporting:s}); }}));
+  /* Chapter Nine: the 90-day development plan */
   const bp = blockProgress(g.blockStart, Date.now());
+  const c3 = el("div", {class:"card", id:"blockGoals"}, el("h2", null, "90-day plan"), el("p", {class:"mute"}, "Assess honestly, choose deliberately, plan specifically, act consistently, review the evidence, and adjust."));
+  c3.appendChild(el("label", {class:"f", for:"blockStart"}, "Block start date")); c3.appendChild(el("input", {type:"date", id:"blockStart", value:g.blockStart, oninput: ev => { Store.setGoals({blockStart: ev.target.value}); renderGoals(); }}));
   if(bp){
-    const m = el("div", {class:"meter"}); const mi = el("i"); mi.style.width = bp.pct + "%"; m.appendChild(mi); c3.appendChild(el("h3", null, "Progress · " + bp.pct + "%")); c3.appendChild(m);
-    [30,60,90].forEach(cp => {
-      c3.appendChild(el("label", {class:"f"}, cp + "-day checkpoint" + (bp.days >= cp ? "" : " (in " + (cp - bp.days) + " days)")));
-      c3.appendChild(el("textarea", {value: g.checkpoints[cp]||"", placeholder: cp === 90 ? "Evidence of improvement, what transferred to games, the next priority" : "What was consistent, what broke down, early evidence, adjustment", oninput: ev => { const ck = Object.assign({}, g.checkpoints); ck[cp] = ev.target.value; Store.setGoals({checkpoints: ck}); }}));
-    });
+    c3.appendChild(el("h3", null, "Progress · " + bp.pct + "%"));
+    c3.appendChild(timeline(bp));
   }
   slot.appendChild(c3);
+  /* five priorities, one of each kind; one is the primary */
+  const pc = el("div", {class:"card", id:"priCard"}, el("h2", null, "Priorities"), el("p", {class:"mute"}, "No more than five: one of each kind. One is the primary — the rest support it."));
+  PRI_TYPES.forEach(([t, nm]) => {
+    const q = g.priorities[t] || {}, open = t in State.openPri ? State.openPri[t] : (!(q.what||"").trim() && t === "skill"), isP = g.primaryType === t;
+    const box = el("div", {class:"pri" + (open ? " open" : "") + (isP ? " main" : ""), "data-pri": t});
+    box.appendChild(el("button", {type:"button", class:"hd", "aria-expanded": String(!!open), onclick: () => { State.openPri[t] = !open; renderGoals(); }},
+      el("div", {class:"nm"}, el("span", {class:"ptype"}, (isP ? "Primary · " : "") + nm), el("div", {class: (q.what||"").trim() ? "" : "mute"}, (q.what||"").trim() || "Not set")), el("div", {class:"chev"})));
+    if(open){
+      PRI_FIELDS.forEach(([k, lab, hint]) => { box.appendChild(el("label", {class:"f", for:"pri-" + t + "-" + k}, lab)); if(hint) box.appendChild(el("div", {class:"mute hint"}, hint)); box.appendChild(el("textarea", {id:"pri-" + t + "-" + k, rows: k === "what" ? 2 : 3, value: q[k] || "", oninput: ev => Store.setPriority(t, k, ev.target.value)})); });
+      if(!isP) box.appendChild(el("button", {type:"button", class:"ghost", onclick: () => { Store.setGoals({primaryType: t}); renderGoals(); }}, "Make this the primary"));
+    }
+    pc.appendChild(box);
+  });
+  slot.appendChild(pc);
+  /* cues */
+  const cc = el("div", {class:"card", id:"cueGoals"}, el("h2", null, "Cues"), el("p", {class:"mute"}, "A cue directs attention to one useful detail — short enough to remember during action. They show on Today."));
+  CUE_FIELDS.forEach(([k, nm]) => { cc.appendChild(el("label", {class:"f", for:"cue-" + k}, nm)); cc.appendChild(el("input", {type:"text", id:"cue-" + k, value: g.cues[k] || "", oninput: ev => Store.setCue(k, ev.target.value)})); });
+  slot.appendChild(cc);
+  /* checkpoints: Day 14, 30, 45, 60, 75, 90 */
+  if(bp) slot.appendChild(checkpointCard(bp));
+  slot.appendChild(teamCard());
+  if(Store.teamList().length) slot.appendChild(reviewCard());
+}
+/* Chapter Five: "You are responsible for the center." Who helps, and what each one is for */
+/* Chapter Seven: season goals by type, counted against the manual's structure; habit goals ARE the daily habits */
+function seasonCard(){
+  const c = el("div", {class:"card", id:"seasonCard"}, el("h2", null, "Season goals"), el("p", {class:"mute"}, "Chapter Seven: goals guide attention — they are not tests of your worth. When every area is a priority, none gets enough."));
+  GOAL_TYPES.forEach(([t, nm, lo, hi]) => {
+    const n = Store.goalCount(t), over = n > hi;
+    const g = el("div", {class:"gt", "data-t": t}, el("div", {class:"row"}, el("span", {class:"ptype"}, nm), el("span", {class:"gcount right" + (over ? " over" : n >= lo ? " ok" : "")}, n + " of " + (lo === hi ? lo : lo + "–" + hi) + (over ? " · more than the manual suggests" : ""))));
+    if(t === "habit"){
+      const hs = Store.habitNames();
+      g.appendChild(el("div", {class:"mute"}, hs.length ? "Your daily habits: " + hs.join(" · ") : "Your daily habits are your habit goals — write them below."));
+    } else Store.seasonGoals(t).forEach(x => {
+      const lv = [["Minimum", x.min], ["Target", x.target], ["Stretch", x.stretch]].filter(v => (v[1]||"").trim());
+      g.appendChild(el("div", {class:"habit member"}, el("div", {class:"nm"}, el("b", null, x.what),
+        lv.length ? el("div", {class:"mute lv"}, lv.map(v => v[0] + ": " + v[1]).join(" · ")) : null,
+        (x.measure||"").trim() ? el("div", {class:"mute"}, "Measured by: " + x.measure) : null),
+        State.goalDel === x.id ? el("button", {type:"button", onclick: () => { delete Store.data.goals.season[x.id]; Store.save(); State.goalDel = null; renderGoals(); }}, "Yes, remove")
+          : el("button", {type:"button", class:"ghost", "aria-label":"Remove " + x.what, onclick: () => { State.goalDel = x.id; renderGoals(); }}, "Remove")));
+    });
+    c.appendChild(g);
+  });
+  /* add one: a kind, the goal, and the manual's minimum / target / stretch "where appropriate" */
+  const nw = State.goalNew, ty = GOAL_TYPES.find(x => x[0] === nw.type), ok = () => !!(nw.type && nw.what.trim());
+  const sync = () => { const b = $("goalAdd"); if(b) b.disabled = !ok(); };
+  c.appendChild(el("h3", null, "Add a season goal"));
+  const seg = el("div", {class:"seg wrap", id:"goalTypes"});
+  GOAL_TYPES.filter(x => x[0] !== "habit").forEach(([t, nm]) => seg.appendChild(el("button", {type:"button", "data-t": t, "aria-pressed": String(nw.type === t), onclick: () => { nw.type = nw.type === t ? "" : t; renderGoals(); }}, nm)));
+  c.appendChild(seg);
+  c.appendChild(el("input", {type:"text", id:"goalWhat", value: nw.what, placeholder: ty ? ty[4] : "Pick a kind, then write the goal", "aria-label":"The goal", oninput: ev => { nw.what = ev.target.value; sync(); }}));
+  const lv = el("div", {class:"row gstats"});
+  [["min","Minimum"],["target","Target"],["stretch","Stretch"]].forEach(([k, lab]) => lv.appendChild(el("div", null, el("label", {class:"f", for:"goal-" + k}, lab), el("input", {type:"text", id:"goal-" + k, value: nw[k], oninput: ev => { nw[k] = ev.target.value; }}))));
+  c.appendChild(lv);
+  c.appendChild(el("div", {class:"mute hint"}, "Minimum = still meaningful progress. Target = what you are actively pursuing. Stretch = possible if things go especially well. All optional."));
+  c.appendChild(el("label", {class:"f", for:"goalMeasure"}, "How I'll measure it"));
+  c.appendChild(el("input", {type:"text", id:"goalMeasure", value: nw.measure, placeholder:"The actions and the result — track both", oninput: ev => { nw.measure = ev.target.value; }}));
+  c.appendChild(el("button", {type:"button", class:"primary", id:"goalAdd", disabled: ok() ? null : "disabled", onclick: () => { if(!ok()) return; Store.addSeasonGoal({type: nw.type, what: nw.what, min: nw.min.trim(), target: nw.target.trim(), stretch: nw.stretch.trim(), measure: nw.measure.trim()}); State.goalNew = {type:"", what:"", min:"", target:"", stretch:"", measure:""}; renderGoals(); }}, "Add goal"));
+  return c;
+}
+function teamCard(){
+  const c = el("div", {class:"card", id:"teamCard"}, el("h2", null, "Development team"), el("p", {class:"mute"}, "Chapter Five: you are responsible for the center. Name who helps, and what each one is for. Log a conversation with any of them from the Log tab."));
+  const team = Store.teamList(), nw = State.teamNew;
+  team.forEach(m => c.appendChild(el("div", {class:"habit member"}, el("div", {class:"nm"}, el("b", null, m.name), el("div", {class:"mute"}, m.role)),
+    State.teamDel === m.id ? el("button", {type:"button", onclick: () => { delete Store.data.team[m.id]; Store.save(); State.teamDel = null; renderGoals(); }}, "Yes, remove")
+      : el("button", {type:"button", class:"ghost", "aria-label":"Remove " + m.name, onclick: () => { State.teamDel = m.id; renderGoals(); }}, "Remove"))));
+  if(!team.length) c.appendChild(el("div", {class:"empty"}, "No one named yet. Start with your head coach."));
+  c.appendChild(el("label", {class:"f", for:"teamName"}, "Add someone"));
+  c.appendChild(el("input", {type:"text", id:"teamName", value: nw.name, placeholder:"Name", oninput: ev => { nw.name = ev.target.value; const b = $("teamAdd"); if(b) b.disabled = !(nw.name.trim() && nw.role); }}));
+  const seg = el("div", {class:"seg wrap", id:"teamRoles"});
+  TEAM_ROLES.forEach(r => seg.appendChild(el("button", {type:"button", "aria-pressed": String(nw.role === r), onclick: () => { nw.role = nw.role === r ? "" : r; renderGoals(); }}, r)));
+  c.appendChild(seg);
+  c.appendChild(el("button", {type:"button", class:"primary", id:"teamAdd", disabled: nw.name.trim() && nw.role ? null : "disabled", onclick: () => { if(!(nw.name.trim() && nw.role)) return; Store.addMember(nw.name, nw.role); State.teamNew = {name:"", role:""}; renderGoals(); }}, "Add to my team"));
+  return c;
+}
+/* Chapter Five's "Quarter-Season Development Team Review", its four questions verbatim */
+function reviewCard(){
+  const today = dayOf(Date.now()), k = Store.reviewKey(today), r = Store.data.teamReviews[k] || {}, due = Store.reviewDue(today);
+  const past = Object.keys(Store.data.teamReviews).sort().filter(x => x !== k);
+  const c = el("div", {class:"card", id:"teamReview"}, el("h2", null, "Quarter-season team review"),
+    el("p", {class:"sub"}, due ? "Due now." : Store.data.teamReviews[k] ? "Written " + niceDay(k) + "." : "Every " + REVIEW_EVERY + " days or so." + (past.length ? " Last one " + niceDay(past[past.length-1]) + "." : "")));
+  TEAM_REVIEW_Q.forEach((q, i) => { c.appendChild(el("label", {class:"f", for:"rv" + i}, q)); c.appendChild(el("textarea", {id:"rv" + i, rows:2, value: r[i] || "", oninput: ev => Store.setReview(today, i, ev.target.value)})); });
+  return c;
+}
+/* the block as an overhead line: six checkpoint nodes, today's position, filled when answered */
+function timeline(bp){
+  const t = el("div", {class:"tl", id:"timeline", role:"img", "aria-label": "Day " + Math.max(0, bp.days) + " of " + BLOCK_DAYS});
+  t.appendChild(el("i", {class:"tl-track"}));
+  const fill = el("i", {class:"tl-fill"}); fill.style.width = bp.pct + "%"; t.appendChild(fill);
+  CP_DAYS.forEach(c => {
+    const done = Store.checkpointDone(c), due = bp.days >= c;
+    const n = el("button", {type:"button", class:"tl-node" + (done ? " done" : due ? " due" : ""), "data-cp": c, "aria-label": "Day " + c + " checkpoint" + (done ? ", answered" : due ? ", due" : ""), onclick: () => { State.cpOpen = c; renderGoals(); const e = $("cpBox"); if(e && e.scrollIntoView) e.scrollIntoView({block:"start"}); }}, done ? "✓" : "");
+    n.style.left = (c / BLOCK_DAYS * 100) + "%";
+    t.appendChild(n);
+    const lb = el("span", {class:"tl-lb"}, String(c)); lb.style.left = (c / BLOCK_DAYS * 100) + "%"; t.appendChild(lb);
+  });
+  if(bp.days >= 0 && bp.left){ const now = el("i", {class:"tl-now"}); now.style.left = (bp.days / BLOCK_DAYS * 100) + "%"; t.appendChild(now);
+    const nl = el("span", {class:"tl-today", id:"tlToday"}, "Day " + (bp.days + 1)); nl.style.left = (bp.days / BLOCK_DAYS * 100) + "%"; t.appendChild(nl); }
+  return t;
+}
+function checkpointCard(bp){
+  const g = Store.data.goals;
+  const due = CP_DAYS.filter(c => bp.days >= c), next = CP_DAYS.find(c => bp.days < c);
+  const c = CP_DAYS.indexOf(State.cpOpen) >= 0 ? State.cpOpen : (due.length ? due[due.length-1] : next);
+  const card = el("div", {class:"card", id:"cpBox"}, el("h2", null, "Day " + c + " checkpoint"));
+  card.appendChild(el("p", {class:"sub"}, bp.days >= c ? (Store.checkpointDone(c) ? "Answered" : "Due now") : "Opens in " + (c - bp.days) + " days — you can look ahead"));
+  const rec = g.cpq[c] || {};
+  CP_Q.forEach(([k, q]) => {
+    const seg = el("div", {class:"seg yn"});
+    STANDARD_A.forEach(([v, nm]) => seg.appendChild(el("button", {type:"button", "aria-pressed": String(rec[k] === v), "data-v": v, onclick: () => { Store.putCheckpoint(c, k, v); State.cpOpen = c; renderGoals(); }}, nm)));
+    card.appendChild(el("div", {class:"item sq"}, el("div", {class:"nm"}, el("b", null, q)), seg));
+  });
+  card.appendChild(el("label", {class:"f", for:"cp" + c}, c === 90 ? "The end of the block: what improved, what transferred to games, what is next" : "What I will adjust, and why"));
+  card.appendChild(el("textarea", {id:"cp" + c, value: g.checkpoints[c] || "", placeholder: "Record the reason, so the plan does not change with mood.", oninput: ev => { const ck = Object.assign({}, g.checkpoints); ck[c] = ev.target.value; Store.setGoals({checkpoints: ck}); }}));
+  if(c === 90){
+    const pr = Store.priorities();
+    if(pr.length) card.appendChild(el("h3", null, "The next decision, per priority"));
+    pr.forEach(x => {
+      const seg = el("div", {class:"seg wrap"});
+      DECISIONS.forEach(dn => seg.appendChild(el("button", {type:"button", "aria-pressed": String(g.decisions[x.t] === dn), onclick: () => { const d = Object.assign({}, g.decisions); d[x.t] = d[x.t] === dn ? undefined : dn; if(!d[x.t]) delete d[x.t]; Store.setGoals({decisions: d}); State.cpOpen = 90; renderGoals(); }}, dn)));
+      card.appendChild(el("div", {class:"item"}, el("div", {class:"nm"}, el("span", {class:"ptype"}, x.nm), x.p.what), seg));
+    });
+  }
+  return card;
 }
 
 /* ================= Read ================= */
@@ -828,23 +1331,30 @@ function fieldBox(fd){
     el("textarea", {id:"ans-" + fd.k, rows: fd.rows || 4, value: Store.data.answers[fd.k] || "", placeholder: fd.ph || "", oninput: ev => Store.setAnswer(fd.k, ev.target.value)}),
     el("div", {class:"mute"}, "Shows on Today."));
 }
+/* written answers in a chapter: one pip per field, gold when filled */
+function pips(done, total){ const d = el("span", {class:"dots"}); for(let k=0; k<total; k++) d.appendChild(el("i", {class: k < done ? "on" : null})); return d; }
 function renderRead(){
   const slot = $("readSlot"); clear(slot);
   if(State.readChapter == null){
     slot.appendChild(el("h1", null, "Read"));
     const nRead = CHAPTERS.filter(ch => Store.data.read[ch.n]).length;
     const m = el("div", {class:"meter"}); const mi = el("i"); mi.style.width = Math.round(nRead / (CHAPTERS.length || 1) * 100) + "%"; m.appendChild(mi);
+    const allF = CHAPTERS.flatMap(ch => FIELDS[ch.n] || []), aTot = allF.length, aDone = allF.filter(fd => (Store.data.answers[fd.k]||"").trim()).length;
+    const am = el("div", {class:"meter"}); const ai = el("i"); ai.style.width = Math.round(aDone / (aTot || 1) * 100) + "%"; am.appendChild(ai);
     slot.appendChild(el("div", {class:"card front"}, el("img", {src:"cover.jpg", alt:"The printed manual's cover: Player Development Manual, for Gavin Andersen"}),
-      el("div", null, el("div", {class:"mute"}, "The manual"), el("div", {style:"font:800 26px/1 var(--disp);text-transform:uppercase;margin:4px 0 8px"}, "Written for Gavin"), el("div", {class:"sub", id:"readCount"}, nRead + " of " + CHAPTERS.length + " chapters read"), m)));
+      el("div", null, el("div", {class:"mute"}, "The manual"), el("div", {style:"font:800 26px/1 var(--disp);text-transform:uppercase;margin:4px 0 8px"}, "Written for Gavin"), el("div", {class:"sub", id:"readCount"}, nRead + " of " + CHAPTERS.length + " chapters read"), m,
+        aTot ? el("div", {class:"sub", id:"readAnswers", style:"margin-top:10px"}, aDone + " of " + aTot + " answers written") : null, aTot ? am : null)));
     const l = el("div", {class:"chgrid"});
     CHAPTERS.forEach((ch, i) => {
       const nf = (FIELDS[ch.n] || []).filter(fd => (Store.data.answers[fd.k]||"").trim()).length, tf = (FIELDS[ch.n] || []).length;
       l.appendChild(el("button", {type:"button", onclick: () => { State.readChapter = i; renderRead(); window.scrollTo(0,0); }},
         el("div", {class:"no"}, ch.n === "FINAL" ? "—" : pad(NUM[ch.n])),
-        el("div", null, el("div", {class:"ti"}, chTitle(ch)), el("small", null, chLabel(ch) + " · " + Math.max(1, Math.round(words(ch)/220)) + " min" + (tf ? " · " + nf + " of " + tf + " written" : ""))),
+        el("div", null, el("div", {class:"ti"}, chTitle(ch)), el("small", null, chLabel(ch) + " · " + Math.max(1, Math.round(words(ch)/220)) + " min"),
+          tf ? el("div", {class:"wr" + (nf === tf ? " full" : "")}, pips(nf, tf), el("span", null, nf < tf ? nf + " of " + tf + " written" : tf === 1 ? "Written" : "All " + tf + " written")) : null),
         el("div", {class:"st"}, Store.data.read[ch.n] ? "✓ Read" : "")));
     });
     slot.appendChild(l);
+    slot.appendChild(el("p", {class:"mute", id:"readNote", style:"font-size:13px;margin:12px 2px"}, "The printed manual has no Chapter 8. Chapters 10–55 are one fill-in template; it lives in Log as the practice and game entries."));
     return;
   }
   const i = State.readChapter, ch = CHAPTERS[i];
@@ -899,7 +1409,9 @@ Store.load();
   const fail = []; let ran = 0;
   const ck = (name, ok) => { ran++; if(!ok) fail.push(name); };
   const before = JSON.stringify(Store.data);
-  const keepState = JSON.stringify({tab:State.tab, openSec:State.openSec, readChapter:State.readChapter, logFilter:State.logFilter});
+  /* its taps scroll the real window (jump-to-evening, goTo) — put Gavin back where he was */
+  const keepY = window.scrollY || 0;
+  const keepState = JSON.stringify({openPri:State.openPri, cpOpen:State.cpOpen, tab:State.tab, openSec:State.openSec, readChapter:State.readChapter, logFilter:State.logFilter});
   const realSave = Store.saveLocal; Store.saveLocal = function(){};
   const realNow = Date.now;
   try {
@@ -916,6 +1428,35 @@ Store.load();
     /* readiness */
     Store.data = Store.blank(); State.tab = "today"; State.draft = null; State.ratingsDraft = null; State.openSec = {}; State.readChapter = null; State.checkStep = null; State.logFilter = "all"; State.pendingImport = null;
     const today = dayOf(Date.now());
+    /* first run: three steps in place of five empty cards */
+    renderToday();
+    ck("first run: an empty store shows Start here — three steps, step 1 open, none of the five empty cards; the evening check and backup stay",
+      !!$("setupCard") && $("setupCard").querySelectorAll(".step").length === 3 && $("setupCard").querySelectorAll(".step.cur").length === 1 && $("setupCard").querySelectorAll(".step")[0].getAttribute("aria-current") === "step" && !!$("suIdentity")
+      && !$("stateCard") && !$("habitCard") && !$("blockCard") && !$("standardCard") && !$("winCard") && !!$("eveningCard") && !!$("backupCard"));
+    $("suIdentity").value = "I am developing into a dependable two-way forward"; $("suIdentity").oninput({target: $("suIdentity")});
+    ck("first run: the identity typed in step 1 is the one Read and My standard show", Store.data.answers.identity === "I am developing into a dependable two-way forward" && setupSteps()[0] === true);
+    $("suNext").onclick();
+    ck("first run: Next moves on to Habits + plan, and step 1 carries its tick", !!$("suHabit") && !$("suIdentity") && $("setupCard").querySelectorAll(".step.done").length === 1 && /✓/.test($("setupCard").querySelectorAll(".step")[0].textContent));
+    $("suHabit").value = "Bed by 10:30"; $("suHabit").oninput({target: $("suHabit")});
+    const suHab = setupSteps()[1];
+    $("suToday").onclick();
+    ck("first run: Today starts the block today", Store.data.goals.blockStart === today);
+    const suBlk = setupSteps()[1];
+    $("suPrimary").value = "Puck protection on the wall"; $("suPrimary").oninput({target: $("suPrimary")});
+    ck("first run: step 2 is done only with a habit, a start date and the primary", suHab === false && suBlk === false && setupSteps()[1] === true && Store.habitNames()[0] === "Bed by 10:30" && Store.data.goals.priorities.skill.what === "Puck protection on the wall");
+    $("suNext").onclick();
+    ck("first run: step 3 holds the morning check inside the card", $("setupCard").querySelectorAll(".inset").length === 1 && $("setupCard").querySelectorAll(".inset .primary").length === 1 && !!$("startCheck") && !$("suHabit"));
+    $("startCheck").onclick(); $("readyCard").querySelector(".scale").querySelectorAll("button")[3].onclick();
+    ck("first run: one answer is not the first check; seven are", !!$("setupCard") && setupSteps()[2] === false);
+    for(let q = 1; q < 7; q++) $("readyCard").querySelector(".scale").querySelectorAll("button")[3].onclick();
+    ck("first run: finishing the third step opens the full page with a one-time note", !$("setupCard") && !!$("stateCard") && !!$("habitCard") && /Set up/.test($("todaySlot").textContent) && State.inSetup === false);
+    Store.data = Store.blank(); State.flash = ""; State.setupStep = null; State.checkStep = null; renderToday();
+    Store.putPractice({id:"su1", date: today, at: Date.now(), focus:"x"}); renderToday();
+    ck("first run: any history ends it (a logged practice, no steps done)", !$("setupCard") && !!$("stateCard"));
+    Store.data = Store.blank(); renderToday(); $("suSkip").onclick();
+    ck("first run: Skip shows the full page and stays skipped", !$("setupCard") && !!$("stateCard") && Store.data.meta.setupSkipped === true && (renderToday(), !$("setupCard")));
+    /* the rest of Today's checks run on the full page (setup skipped) */
+    Store.data = Store.blank(); Store.data.meta.setupSkipped = true; State.setupStep = null; State.inSetup = false; State.flash = ""; State.checkStep = null;
     ck("fresh: readiness is null, not 0, when nothing is answered", Store.readinessPct(today) === null);
     renderToday();
     ck("today fresh: the ring says — and 'not checked', the check offers Start, no columns drawn", $("kpiReady").textContent === "—" && /not checked/.test($("stateCard").textContent) && /Start check/.test($("startCheck").textContent) && $("todaySlot").querySelectorAll("rect.col").length === 0);
@@ -928,6 +1469,7 @@ Store.load();
     Store.putReadiness(today, {sleep: 2});
     ck("readiness: one answer changed, the day's record keeps the other six", Store.readinessPct(today) === Math.round((( (2+4*6)/7 ) - 1)/4*100) && Store.data.readiness[today].drive === 4);
     State.checkStep = null; renderToday();
+    ck("today: the one low answer (sleep 2) is flagged, the six 4s are not", $("readyCard").querySelectorAll(".chip.low").length === 1 && /Sleep/.test($("readyCard").querySelector(".chip.low").textContent));
     ck("today: the ring shows the same number as the card line, and the answers show as chips", $("kpiReady").textContent === Store.readinessPct(today) + "%" && /Today's readiness: \d+%/.test($("readyLine").textContent) && $("readyCard").querySelectorAll(".chip").length === 7);
     State.checkStep = 0; renderToday();
     const sleepRow = $("readyCard").querySelector(".scale");
@@ -936,12 +1478,35 @@ Store.load();
     $("readyCard").querySelector(".scale").querySelectorAll("button")[4].onclick();
     ck("today: answering the last question closes the check", State.checkStep === null && Store.data.readiness[today].drive === 5);
     ck("today: the 7-day strip draws one column (today) and six honest gaps", $("todaySlot").querySelectorAll("rect.col").length === 1 && $("todaySlot").querySelectorAll("rect.gap").length === 6);
+    const stVals = $("stateCard").querySelectorAll(".vals span");
+    ck("today: the one column carries its own number, the ring's; the six gaps carry none", stVals.length === 1 && stVals[0].textContent === String(Store.readinessPct(today)));
+    ck("today: one check today reads '1 of the last 7 days', no run claimed", /1 of the last 7 days$/.test($("checkStreak").textContent));
+    const streakDays = [-1, -2, -4].map(n => addDays(today, n));
+    streakDays.forEach(d => Store.putReadiness(d, {sleep: 3}));
+    renderToday();
+    ck("today: a gap breaks the run: today, -1, -2 in a row (3), the day at -4 counts in the 7 but not the run", checkStreak(today) === 3 && /4 of the last 7 days · 3 in a row/.test($("checkStreak").textContent));
+    ck("today: before the morning check is done the run still stands (ends yesterday)", checkStreak(addDays(today, 1)) === 3);
+    ck("backup: 4 days of work and no backup → a nudge at the top of Today", !!$("backupNudge") && /4 days of work and no backup yet/.test($("backupNudge").textContent));
+    Store.data.meta.lastBackup = tsOfDay(addDays(today, -20)); renderToday();
+    ck("backup: a backup 20 days old nudges again, naming its age", /Last backup 20 days ago/.test($("backupNudge").textContent));
+    Store.data.meta.lastBackup = Date.now(); renderToday();
+    ck("backup: a backup today clears the nudge", !$("backupNudge"));
+    Store.data.meta.lastBackup = null;
+    streakDays.forEach(d => delete Store.data.readiness[d]);
+    renderToday();
     /* habits */
     ck("fresh habits: honest empty state on Today, no percentage", Store.habitPct(today) === null && /No habit goals yet/.test($("habitCard").textContent));
+    $("goHabits").onclick();
+    ck("today: 'Write my habits' opens Goals", State.tab === "goals" && !!$("habit0"));
+    State.tab = "today"; renderToday();
     Store.setGoals({habits:["Bed by 10:30","Breakfast","", "", ""]});
     Store.toggleHabit(today, 0);
     ck("habits: one of two ticked today = 50%", Store.habitPct(today) === 50);
     ck("habits: the week is 7 days x 2 habits; one tick = 7%", Store.habitWeekPct(today) === 7);
+    Store.toggleHabit(addDays(today, -3), 0); renderToday();
+    const hw0 = $("habitCard").querySelectorAll(".habit")[0].querySelectorAll(".hweek i"), hw1 = $("habitCard").querySelectorAll(".habit")[1];
+    ck("habits: each habit shows its own last 7 days, today on the right, and N/7", hw0.length === 7 && hw0[6].className === "on" && hw0[3].className === "on" && hw0[5].className !== "on" && /2\/7/.test($("habitCard").querySelectorAll(".habit")[0].textContent) && /0\/7/.test(hw1.textContent) && hw1.querySelectorAll(".hweek i.on").length === 0 && /^Last 7 days: /.test($("habitWeek").textContent));
+    Store.toggleHabit(addDays(today, -3), 0);
     renderToday();
     ck("today: two habit rows, the first ticked, the KPI says 50%", $("habitCard").querySelectorAll(".habit").length === 2 && $("habitCard").querySelectorAll("button.tick")[0].getAttribute("aria-pressed") === "true" && $("kpiHabits").textContent === "50%");
     $("habitCard").querySelectorAll("button.tick")[1].onclick();
@@ -956,9 +1521,12 @@ Store.load();
     const t0 = tsOfDay(today);
     ck("block: 45 days in = 50%, 45 left", blockProgress(addDays(today, -45), t0).pct === 50 && blockProgress(addDays(today, -45), t0).left === 45);
     ck("block: before the start is 0%, after day 90 is 100% and stays there", blockProgress(addDays(today, 5), t0).pct === 0 && blockProgress(addDays(today, -200), t0).pct === 100);
-    Store.setGoals({blockStart: addDays(today, -31), primary:"Puck protection on the wall under pressure"});
+    Store.setGoals({blockStart: addDays(today, -31)}); Store.setPriority("skill", "what", "Puck protection on the wall under pressure");
     renderToday();
     ck("today: block KPI 34%, the primary priority named, the 30-day checkpoint flagged as due, the header says Day 32 of 90", $("kpiBlock").textContent === "34%" && /Puck protection/.test($("blockCard").textContent) && /30-day checkpoint is due/.test($("blockCard").textContent) && !/60-day/.test($("blockCard").textContent) && /Day 32 of 90/.test($("heroDate").textContent));
+    $("blockCard").querySelector("button.flag").onclick();
+    ck("today: the due checkpoint flag opens Goals at that checkpoint", State.tab === "goals" && !!$("cp30"));
+    State.tab = "today"; renderToday();
     Store.setGoals({checkpoints:{30:"held up"}}); renderToday();
     ck("today: a written checkpoint clears its flag", !/30-day checkpoint is due/.test($("blockCard").textContent));
     /* the standard card and the answers behind it */
@@ -971,6 +1539,8 @@ Store.load();
     const rows = $("draft").querySelectorAll(".scale");
     rows[0].querySelectorAll("button")[4].onclick(); rows[1].querySelectorAll("button")[2].onclick(); rows[2].querySelectorAll("button")[3].onclick();
     ck("log: effort 5, execution 3, correction 4 = 75% shown live", /Score: 75%/.test($("draftScore").textContent));
+    const dAt = x => Array.prototype.indexOf.call($("draft").children, x), dItems = $("draft").querySelectorAll(".item");
+    ck("log: in the locker room Save sits right under the ratings, above every reflection line, and again at the bottom", !!$("quickSave") && dAt($("quickSave")) > dAt(dItems[dItems.length-1]) && dAt($("quickSave")) < dAt($("d-happened")) && dAt($("draftScore")) < dAt($("d-happened")) && !!$("saveDraft2"));
     ck("log: the half-filled draft is in the store, so a reload keeps it", Store.data.drafts.log.effort === 5 && Store.data.drafts.log.correction === 4);
     State.draft.focus = "Wall retrievals"; State.draft.cue = "scan before the puck arrives";
     $("saveDraft").onclick();
@@ -982,11 +1552,14 @@ Store.load();
     Store.drop("practices", "unrated");
     $("btnGame").onclick();
     const grows = $("draft").querySelectorAll(".scale");
-    ck("log: a game draft has six ratings and five inputs (date, opponent, goals, assists, shots)", grows.length === 6 && $("draft").querySelectorAll("input").length === 5);
+    ck("log: a game draft has six ratings and six inputs (date, opponent, goals, assists, shots, TOI)", grows.length === 6 && $("draft").querySelectorAll("input").length === 6);
     grows.forEach((r_, i) => r_.querySelectorAll("button")[i % 2 ? 1 : 3].onclick());
     State.draft.opp = "Prince Albert"; State.draft.g = "1"; State.draft.a = "0";
     ck("log: three 4s and three 2s = 50%", gameScore(State.draft) === 50);
-    $("saveDraft").onclick();
+    const gAt = x => Array.prototype.indexOf.call($("draft").children, x), gItems = $("draft").querySelectorAll(".item");
+    ck("log: a game's Save sits under its ratings and numbers, above what happened", !!$("quickSave") && gAt($("quickSave")) > gAt(gItems[gItems.length-1]) && gAt($("quickSave")) < gAt($("d-note")));
+    const sv2 = $("saveDraft2"); if(sv2 && typeof sv2.onclick === "function") sv2.onclick();
+    ck("log: the Save at the bottom saves the game too", Store.list("games").length === 1 && State.draft === null);
     ck("log: the game is listed newest-first with opponent and 1G 0A", Store.list("games").length === 1 && /vs Prince Albert · 1G 0A/.test($("entries").querySelectorAll(".entry")[0].textContent));
     State.logFilter = "practice"; renderLog();
     ck("log: the Practices filter hides the game", $("entries").querySelectorAll(".entry").length === 1 && !/Prince Albert/.test($("entries").textContent));
@@ -1000,6 +1573,27 @@ Store.load();
     ck("log: the first tap only asks; the entry is still there", Store.list("games").length === 1 && Array.from($("draft").querySelectorAll("button")).some(b => /Yes, remove it/.test(b.textContent)));
     Array.from($("draft").querySelectorAll("button")).filter(b => /Yes, remove it/.test(b.textContent))[0].onclick();
     ck("log: the second tap removes it", Store.list("games").length === 0 && State.draft === null);
+    /* the manual's entry language (Ch 10–55), scratches, TOI */
+    Store.setCue("tactical", "Know the next play before the puck arrives"); Store.setCue("practice", "Scan twice");
+    $("btnGame").onclick();
+    ck("log: the game form shows his game cues at the top (not the practice cue) and says blank is fine", !!$("draftCues") && /Know the next play/.test($("draftCues").textContent) && !/Scan twice/.test($("draftCues").textContent) && /blank is fine/.test($("blankOk").textContent));
+    ck("log: a game entry asks the manual's four lines: intended, happened, learned, next cue", !!$("d-intended") && !!$("d-note") && !!$("d-learned") && !!$("d-cue"));
+    $("draft").querySelectorAll(".scale")[0].querySelectorAll("button")[4].onclick();
+    $("scratchToggle").onclick();
+    ck("log: a scratched game hides ratings and stats and asks the scratch reflection", $("draft").querySelectorAll(".scale").length === 0 && !$("d-toi") && !$("draftCues") && /stay ready/.test($("draft").textContent) && /didn't dress/.test($("draftScore").textContent));
+    State.draft.opp = "Moose Jaw"; $("saveDraft").onclick();
+    const sg = Store.list("games")[0];
+    ck("log: a saved scratch keeps no rating from before the toggle, and lists as Scratched with no score", sg.scratched === true && sg.ready === undefined && /Scratched/.test($("entries").textContent) && /didn't dress/.test($("entries").textContent) && /scratch noted/.test(State.flash));
+    ck("stats: a scratch counts on its own line, never as a zero game", (() => { const s = seasonStats([{g:"1",a:"0",shots:"2"},{scratched:true}]); return s.gp === 1 && s.scratched === 1 && s.g === 1 && s.counted === 1; })());
+    ck("stats: TOI 14:30 reads 14.5 minutes; 14 reads 14; junk is not a number", toiMin("14:30") === 14.5 && toiMin("14") === 14 && toiMin("abc") === null && toiMin("") === null && toiText(14.5) === "14:30");
+    Store.putGame({id:"t1", date: addDays(today, -1), at:1, opp:"Swift Current", ready:4, g:"1", a:"0", shots:"2", toi:"15:00"}); renderLog();
+    ck("log: a scratch is left out of every game chart; the Games tile says 1 scratched; TOI averages", $("logSlot").querySelectorAll("rect.gap").length === 0 && $("statGames").querySelector(".val").textContent === "1" && /1 scratched/.test($("statGames").textContent) && /15:00 over 1 game with TOI/.test($("toiLine").textContent));
+    Store.drop("games", "t1"); Store.drop("games", sg.id);
+    $("btnPractice").onclick();
+    ck("log: a new practice offers the last focus in one tap", !!$("sameFocus") && /Same as last time: Wall retrievals/.test($("sameFocus").textContent));
+    $("sameFocus").onclick();
+    ck("log: 'Same as last time' fills the focus and the offer goes", State.draft.focus === "Wall retrievals" && !$("sameFocus"));
+    State.draft = null; Store.keepDraft("log", null); Store.data.goals.cues = {}; renderLog();
     /* ratings */
     State.tab = "ratings"; State.ratingsDraft = null; renderRatings();
     ck("ratings fresh: overall —, save disabled, 0 of 175, empty history", $("overall").textContent === "—" && $("saveAssess").getAttribute("disabled") === "disabled" && /0 of 175 rated/.test($("ratingsSlot").textContent) && /None saved yet/.test($("history").textContent));
@@ -1011,7 +1605,8 @@ Store.load();
     $("sections").querySelectorAll(".sec")[0].querySelectorAll(".item")[1].querySelectorAll("button")[0].onclick();
     const sp = sectionPct(SECTIONS[0], State.ratingsDraft);
     ck("ratings: a 5 and a 1 in Skating = 50% over the 2 rated, 11 unrated ignored", sp.p === 50 && sp.n === 2 && /2 of 13 rated/.test($("sections").querySelectorAll(".sec")[0].textContent));
-    ck("ratings: overall equals the same two items; Foundation names the 5, Watch names the 1", $("overall").textContent === "50%" && new RegExp("5 · " + SECTIONS[0].items[0]).test($("ratingsSlot").textContent) && new RegExp("1 · " + SECTIONS[0].items[1]).test($("ratingsSlot").textContent));
+    ck("ratings: 2 of 13 rated in Skating is marked too few to trust, its % and its dots dimmed", !!$("sections").querySelectorAll(".sec")[0].querySelector(".pct.thin") && !!$("sections").querySelectorAll(".sec")[0].querySelector(".dumb.thin") && !$("sections").querySelectorAll(".sec")[1].querySelector(".dumb.thin") && /too few to trust/.test($("sections").querySelectorAll(".sec")[0].textContent));
+    ck("ratings: overall equals the same two items; Foundational strengths names the 5, Current limitations names the 1", $("overall").textContent === "50%" && $("extHi").querySelector(".xv").textContent === "5" && $("extHi").querySelector(".xn").textContent === SECTIONS[0].items[0] && $("extLo").querySelector(".xv").textContent === "1" && $("extLo").querySelector(".xn").textContent === SECTIONS[0].items[1]);
     ck("ratings: unsaved taps are kept in the store and flagged as unsaved", Store.data.drafts.ratings && Store.data.drafts.ratings[SECTIONS[0].key + "0"] === 5 && !!$("unsavedNote"));
     State.ratingsDraft = null; renderRatings();
     ck("ratings: after a reload the unsaved taps come back", overallPct(State.ratingsDraft) === 50 && $("overall").textContent === "50%");
@@ -1039,6 +1634,10 @@ Store.load();
     State.tab = "today"; renderToday();
     ck("backup: Today says when the last backup was (never, so far)", /Last backup: never/.test($("backupLine").textContent));
     State.tab = "ratings"; State.ratingsDraft = Object.assign({}, Store.data.assessments[0].r, {sk1: 5}); Store.saveAssessment(State.ratingsDraft); renderRatings();
+    renderToday();
+    const ovL = overallPct(Store.lastAssessment().r), ovB = overallPct(Store.baseline().r);
+    ck("today: the Ratings tile shows the latest overall and the change since the baseline", ovL !== ovB && $("kpiRatings").querySelector(".val").textContent.replace(/\s+/g, " ") === ovL + "% " + signed(ovL - ovB) && /since baseline/.test($("kpiRatings").textContent));
+    renderRatings();
     ck("ratings: after a second save the ring stays on the first (baseline) assessment, not the latest", $("sections").querySelectorAll(".sec")[0].querySelector(".dot.base").style.left === "50%" && $("sections").querySelectorAll(".sec")[0].querySelector(".dot.now").style.left === "100%");
     /* end-of-day standard check */
     ck("standard check: seven questions read from Chapter Three, Preparation first, Response last", STANDARD_Q.length === 7 && STANDARD_Q[0].nm === "Preparation" && STANDARD_Q[6].nm === "Response" && /prepare with purpose/.test(STANDARD_Q[0].q));
@@ -1057,13 +1656,45 @@ Store.load();
     ck("stats: a game with no numbers is not a zero; totals, points and shooting % from the rest", (() => { const s = seasonStats([{g:"1",a:"2",shots:"4"},{g:"",a:"",shots:""},{g:"0",a:"1",shots:"6"}]); return s.gp === 3 && s.counted === 2 && s.g === 1 && s.a === 3 && s.p === 4 && s.shots === 10 && s.shPct === 10; })());
     State.tab = "log"; Store.putGame({id:"s1", date: addDays(today, -3), at:1, opp:"Regina", g:"2", a:"1", shots:"5"}); Store.putGame({id:"s2", date: addDays(today, -1), at:2, opp:"Brandon", g:"", a:"", shots:""}); renderLog();
     ck("log: the season stats card shows 3 points and one gap for the game with no numbers", /Points\s*3/.test($("seasonStats").textContent) && $("seasonStats").querySelectorAll("rect.gap").length === 2 && $("seasonStats").querySelectorAll("rect.col").length === 2);
+    ck("log: the Games tile is the bare count with its stats note under it; each entry row carries its kind", $("statGames").querySelector(".val").textContent === "2" && /1 with stats/.test($("statGames").textContent) && $("entryList").querySelectorAll(".entry.k-game").length === Store.list("games").length && $("entryList").querySelectorAll(".entry.k-practice").length === Store.list("practices").length);
+    State.tab = "ratings"; renderRatings();
+    ck("ratings: the 1-5 scale key sits inside the sections card", $("secCard").querySelectorAll(".keyrow").length === 1 && $("ratingsSlot").querySelectorAll(".keyrow").length === 1);
+    State.tab = "log";
     Store.drop("games", "s1"); Store.drop("games", "s2");
     /* goals + read */
-    State.tab = "goals"; renderGoals();
+    State.tab = "goals"; State.cpOpen = null; renderGoals();
     ck("goals: five habit inputs carry the saved names", $("habitGoals").querySelectorAll("input").length === 5 && $("habitGoals").querySelectorAll("input")[0].value === "Bed by 10:30");
     $("habitGoals").querySelectorAll("input")[3].oninput({target:{value:"Video 10 min"}});
     ck("goals: typing a fourth habit adds it to Today's list", Store.habitNames().length === 4);
-    ck("goals: the block shows 34% and three checkpoint boxes when a start date is set", /Progress · 34%/.test($("blockGoals").textContent) && $("blockGoals").querySelectorAll("textarea").length === 4);
+    const node = c => $("timeline").querySelectorAll(".tl-node")[CP_DAYS.indexOf(c)];
+    ck("goals: day 31 of the plan: 34%, six checkpoint nodes, 14 due, 30 answered, 45 ahead", /Progress · 34%/.test($("blockGoals").textContent) && $("timeline").querySelectorAll(".tl-node").length === 6 && node(14).classList.contains("due") && node(30).classList.contains("done") && !node(45).classList.contains("due") && !node(45).classList.contains("done"));
+    ck("goals: the timeline labels today's position (Day 32)", $("tlToday").textContent === "Day 32");
+    ck("goals: five priority slots, the skill one written and marked primary", $("priCard").querySelectorAll(".pri").length === 5 && /Primary · Hockey skill/.test($("priCard").querySelectorAll(".pri")[0].textContent) && /Puck protection/.test($("priCard").textContent));
+    ck("goals: the open checkpoint is the latest one due (Day 30) with six questions", /Day 30 checkpoint/.test($("cpBox").textContent) && $("cpBox").querySelectorAll(".seg.yn").length === 6);
+    const keepCk = Store.data.goals.checkpoints, keepBs = Store.data.goals.blockStart;
+    Store.setGoals({blockStart: addDays(today, -30), checkpoints: {}}); renderGoals();
+    ck("goals: on day 30 the 30-day node is due (the boundary day counts)", node(30).classList.contains("due") && !node(45).classList.contains("due"));
+    Store.setGoals({blockStart: keepBs, checkpoints: keepCk}); renderGoals();
+    Store.setPriority("team", "what", "Bench energy after a bad shift"); Store.setGoals({primaryType: "team"});
+    ck("plan: the primary comes first in the list, the rest keep Chapter Nine's order", Store.priorities().map(x => x.t).join() === "team,skill");
+    Store.setGoals({primaryType: "skill"}); delete Store.data.goals.priorities.team;
+    State.cpOpen = 14; renderGoals();
+    $("cpBox").querySelectorAll(".seg.yn")[0].querySelectorAll("button")[0].onclick();
+    ck("plan: answering one Day 14 question marks it answered", Store.data.goals.cpq[14].done === 2 && Store.checkpointDone(14) && $("timeline").querySelectorAll(".tl-node")[0].classList.contains("done"));
+    delete Store.data.goals.cpq[14];
+    Store.setGoals({checkpoints: {}}); renderToday();
+    ck("today: only the checkpoint whose window he is in flags (30), not the skipped 14", $("blockCard").querySelectorAll("button.flag").length === 1 && $("blockCard").querySelector("button.flag").getAttribute("data-cp") === "30");
+    Store.setGoals({checkpoints: {30: "held up"}});
+    Store.setCue("prep", "First shift: feet moving"); renderToday();
+    ck("today: a written cue shows on the cue card", !!$("cueCard") && /First shift: feet moving/.test($("cueCard").textContent) && /preparation/.test($("cueCard").textContent));
+    delete Store.data.goals.cues.prep;
+    State.cpOpen = 90; renderGoals();
+    ck("plan: the Day 90 checkpoint asks the next decision for each written priority", /The next decision/.test($("cpBox").textContent) && $("cpBox").querySelectorAll(".seg.wrap").length === Store.priorities().length);
+    State.cpOpen = null; State.tab = "goals"; renderGoals();
+    const legacy = Store.normalize({goals: {primary: "Wall puck protection", measure: "Video count", supporting: ["Outlet reads", "", "Bed by 10:30", ""]}});
+    const LP = t => legacy.goals.priorities[t] || {};
+    ck("plan: a first-build record migrates: primary → skill (with its measure), supporting → tactical, physical, recovery, team; the old keys go", LP("skill").what === "Wall puck protection" && LP("skill").measure === "Video count" && LP("tactical").what === "Outlet reads" && LP("recovery").what === "Bed by 10:30" && !legacy.goals.priorities.physical && !("primary" in legacy.goals) && !("supporting" in legacy.goals));
+    ck("plan: migrating twice changes nothing", JSON.stringify(Store.normalize(JSON.parse(JSON.stringify(legacy)))) === JSON.stringify(legacy));
     State.tab = "read"; State.readChapter = null; renderRead();
     ck("read: nine chapter buttons, none labelled 'Chapter Final'", $("readSlot").querySelectorAll("button").length === 9 && !/Chapter Final/.test($("readSlot").textContent) && /Final Thoughts/.test($("readSlot").textContent));
     $("readSlot").querySelectorAll("button")[0].onclick();
@@ -1077,8 +1708,117 @@ Store.load();
     $("ans-identity").oninput({target:{value:"I am a two-way forward coaches trust late."}});
     State.readChapter = CHAPTERS.findIndex(c => c.n === "THREE"); renderRead();
     $("ans-nonneg").oninput({target:{value:"Early to the rink\n\nStretch after every skate"}});
+    State.readChapter = null; renderRead();
+    Store.setAnswer("v1", "   "); Store.setAnswer("v3", "Play big minutes in the WHL"); renderRead();
+    const fourCard = $("readSlot").querySelectorAll(".chgrid button")[CHAPTERS.findIndex(c => c.n === "FOUR")];
+    ck("read: Chapter Four's pips count only what was written (a blank answer is not one)", /^3 of 7 answers written$/.test($("readAnswers").textContent) && fourCard.querySelectorAll(".wr .dots i").length === 4 && fourCard.querySelectorAll(".wr .dots i.on").length === 1 && /1 of 4 written/.test(fourCard.textContent));
+    delete Store.data.answers.v1; delete Store.data.answers.v3; renderRead();
+    const twoCard = $("readSlot").querySelectorAll(".chgrid button")[CHAPTERS.findIndex(c => c.n === "TWO")], nTwo = FIELDS.TWO.length;
+    ck("read: the answer count on the front and Chapter Two's pips match what was written", /^2 of \d+ answers written$/.test($("readAnswers").textContent) && twoCard.querySelectorAll(".wr .dots i").length === nTwo && twoCard.querySelectorAll(".wr .dots i.on").length === 1 && (nTwo === 1 ? /Written/.test(twoCard.querySelector(".wr").textContent) && !!twoCard.querySelector(".wr.full") : new RegExp("1 of " + nTwo + " written").test(twoCard.textContent)));
     State.tab = "today"; renderToday();
     ck("today: the identity statement and each non-negotiable show on the standard card", /two-way forward coaches trust/.test($("standardCard").textContent) && $("standardCard").querySelectorAll("li").length === 2);
+    /* the week: Sunday closes the loop, the win carries into the next week (a fixed clock, a fresh store) */
+    const keepD = Store.data; Store.data = Store.blank(); State.tab = "today";
+    ck("week: a week ends on Sunday; a Sunday is its own end", weekEnd("2026-09-24") === "2026-09-27" && weekEnd("2026-09-27") === "2026-09-27" && weekEnd("2026-09-28") === "2026-10-04");
+    const sun = "2026-09-27", mon = "2026-09-28", wed = "2026-09-23", at = (d, h) => () => tsOfDay(d) + h * 3600e3;
+    Store.setGoals({habits:["Bed by 10:30","","","",""]});
+    [["2026-09-22", 4], ["2026-09-25", 2], ["2026-09-15", 3]].forEach(([d, v]) => READY_FIELDS.forEach(f => Store.putReadiness(d, {[f[0]]: v})));
+    Store.toggleHabit("2026-09-22", 0);
+    Store.putPractice({id:"w1", date:"2026-09-23", at:1, focus:"f", effort:5, execution:5, correction:5});
+    Store.putPractice({id:"w0", date:"2026-09-20", at:1, focus:"f", effort:1, execution:1, correction:1});
+    Store.putGame({id:"wg1", date:"2026-09-26", at:1, opp:"x", ready:3}); Store.putGame({id:"wg2", date:sun, at:2, opp:"y", scratched:true});
+    const ws = weekSummary(sun);
+    ck("week: the summary counts only Mon–Sun: readiness 50% over 2 checks (1 under 50%), 1 practice at 100%, 1 game at 50% + 1 scratch, habits 1 of 7", ws.readyN === 2 && ws.readyAvg === 50 && ws.low === 1 && ws.pN === 1 && ws.pAvg === 100 && ws.gN === 1 && ws.gAvg === 50 && ws.scr === 1 && ws.habits === 14);
+    Date.now = at(wed, 12); renderToday();
+    ck("week: midweek, Today asks for the week's win and shows no loop", !!$("winInput") && !$("loopCard"));
+    $("winInput").oninput({target:{value:"First three strides hard"}}); $("winDone").onclick();
+    ck("week: the win written midweek shows on Today", !!$("winText") && /First three strides hard/.test($("winText").textContent) && Store.data.weekly[sun].win === "First three strides hard");
+    Date.now = at(sun, 20); renderToday();
+    ck("week: on Sunday the loop opens above the columns with the week's numbers, +0 vs a 50% week shows no delta; the tiles answer completion, quality, health", !!$("loopCard") && $("todaySlot").querySelectorAll(".cols .hero").length === 0 && !$("winCard") && /^50%/.test($("wkReady").querySelector(".val").textContent) && !$("wkReady").querySelector(".dl") && /1 day under 50%/.test($("wkReady").textContent) && $("wkChecks").querySelector(".val").textContent.replace(/\s+/g, " ") === "2/7 +1" && /Completion/.test($("wkChecks").textContent) && /Quality/.test($("wkGames").textContent) && /Health/.test($("wkReady").textContent) && /1 scratched/.test($("wkGames").textContent) && !!$("wkBackup"));
+    ck("week: the loop asks whether the win happened, and about transfer (a game was played)", /First three strides hard/.test($("wkHit").textContent) && !!$("wkTransfer"));
+    $("wkHit").querySelectorAll("button")[1].onclick();
+    ck("week: answering the win question stores it and closes the week", Store.data.weekly[sun].hit === 1 && Store.weekClosed(sun));
+    $("wkHit").querySelectorAll("button")[1].onclick();
+    ck("week: tapping the same answer again clears it; the week is open again", Store.data.weekly[sun].hit === undefined && !Store.weekClosed(sun));
+    Date.now = at(mon, 8); renderToday();
+    ck("week: Monday, last week not closed: the loop is still offered, for last week", !!$("loopCard") && /Last week/.test($("loopCard").textContent) && !$("winCard"));
+    $("wkNextWin").oninput({target:{value:"Talk on every breakout"}}); renderToday();
+    ck("week: next week's win written in the loop closes it; Monday's Today shows it as this week's win", !$("loopCard") && /Talk on every breakout/.test($("winText").textContent));
+    Date.now = at("2026-09-29", 8); Store.data.weekly = {}; renderToday();
+    ck("week: Tuesday lets an unclosed week go (no loop)", !$("loopCard") && !!$("winCard"));
+    Date.now = realNow; Store.data = keepD; State.editWin = false;
+    /* Chapter Five: the team, conversations, the quarter-season review (a fresh store) */
+    const keepD5 = Store.data; Store.data = Store.blank(); Store.data.meta.setupSkipped = true;   /* a team alone is not history: the full page */
+    ck("team: Chapter Two's four coach questions and Chapter Five's four review questions are read from the manual", COACH_Q.length === 4 && /valuable to the team/.test(COACH_Q[0]) && /next four weeks/.test(COACH_Q[3]) && TEAM_REVIEW_Q.length === 4 && /most useful/.test(TEAM_REVIEW_Q[0]));
+    State.tab = "goals"; renderGoals();
+    ck("team: empty team says so; no review card yet; Add is disabled until a name and a role", /No one named yet/.test($("teamCard").textContent) && !$("teamReview") && $("teamAdd").getAttribute("disabled") === "disabled");
+    $("teamName").oninput({target:{value:"Coach Ryan"}}); renderGoals();
+    ck("team: Add is disabled until a name and a role: a name alone is not enough", $("teamAdd").getAttribute("disabled") === "disabled" && $("teamName").value === "Coach Ryan");
+    $("teamRoles").querySelectorAll("button")[0].onclick();
+    $("teamAdd").onclick();
+    ck("team: a named head coach is added, the form clears, the review card appears", Store.teamList().length === 1 && Store.teamList()[0].role === "Head coach" && /Coach Ryan/.test($("teamCard").textContent) && State.teamNew.name === "" && !!$("teamReview") && $("teamReview").querySelectorAll("textarea").length === 4);
+    State.tab = "today"; renderToday();
+    ck("team: a new team is not due for review", !Store.reviewDue(today) && !$("reviewFlag"));
+    Store.data.team[Store.teamList()[0].id].day = addDays(today, -44);
+    ck("team: 44 days in, still not due", !Store.reviewDue(today));
+    Store.data.team[Store.teamList()[0].id].day = addDays(today, -45); renderToday();
+    ck("team: 45 days after the team was named, Today flags the quarter-season review", Store.reviewDue(today) && !!$("reviewFlag"));
+    $("reviewFlag").onclick();
+    ck("team: the flag opens the review's first question on Goals", State.tab === "goals" && !!$("rv0"));
+    $("rv0").oninput({target:{value:"Coach Ryan's video sessions"}});
+    State.tab = "today"; renderToday();
+    ck("team: one answer written today clears the flag", !Store.reviewDue(today) && !$("reviewFlag") && Store.data.teamReviews[today][0] === "Coach Ryan's video sessions");
+    Store.data.teamReviews = {[addDays(today, -10)]: {0: "x"}};
+    ck("team: answers within 14 days belong to the same review; after that a new one starts", Store.reviewKey(today) === addDays(today, -10) && (Store.data.teamReviews = {[addDays(today, -14)]: {0: "x"}}, Store.reviewKey(today) === today));
+    State.tab = "log"; renderLog();
+    $("btnTalk").onclick();
+    ck("talk: + Conversation opens a talk draft with the team as one-tap names and no score", State.draft.kind === "talk" && $("talkWho").querySelectorAll("button").length === 1 && !$("draftScore") && $("draft").querySelectorAll(".scale").length === 0);
+    $("talkWho").querySelectorAll("button")[0].onclick();
+    ck("talk: tapping a name sets who", State.draft.who === "Coach Ryan" && $("talkWho").querySelectorAll("button")[0].getAttribute("aria-pressed") === "true");
+    $("coachQs").querySelectorAll("button")[0].onclick();
+    $("coachQs").querySelectorAll("button")[0].onclick();
+    ck("talk: two coach questions tapped go into my questions, one per line, and leave the list", State.draft.questions === COACH_Q[0] + "\n" + COACH_Q[1] && $("coachQs").querySelectorAll("button").length === 2);
+    State.draft.purpose = "My role on the PK"; State.draft.todo = "Stick on the inside lane all week";
+    $("saveDraft").onclick();
+    ck("talk: saved once and listed as a Talk with who, purpose and what I'll do; the charts are untouched", Store.list("talks").length === 1 && /with Coach Ryan · My role on the PK/.test($("entries").textContent) && /I'll do: Stick on the inside/.test($("entries").textContent) && $("logSlot").querySelectorAll("rect.col").length === 0 && /Conversation saved/.test(State.flash));
+    State.logFilter = "talk"; renderLog();
+    ck("talk: the Talks filter shows only conversations", $("entries").querySelectorAll(".entry").length === 1 && $("entries").querySelectorAll(".entry.k-talk").length === 1);
+    State.logFilter = "all";
+    const bk = Store.exportText();
+    ck("backup: a file whose team is not an object is refused", !!Store.parseBackup(JSON.stringify({app:"pdm", data:Object.assign(JSON.parse(bk).data, {team:[]})})).err);
+    State.tab = "goals"; State.teamDel = null; renderGoals();
+    Array.from($("teamCard").querySelectorAll("button")).filter(b => b.textContent === "Remove")[0].onclick();
+    ck("team: the first Remove only asks", Store.teamList().length === 1 && /Yes, remove/.test($("teamCard").textContent));
+    Array.from($("teamCard").querySelectorAll("button")).filter(b => b.textContent === "Yes, remove")[0].onclick();
+    ck("team: the second removes, and the review card goes with the last member", Store.teamList().length === 0 && !$("teamReview"));
+    Store.data = keepD5; State.teamNew = {name:"", role:""}; State.teamDel = null; State.draft = null;
+    /* Chapter Six in its own words: the lists, the next gap, "Prioritize The Baseline" (a fresh store) */
+    const keepD6 = Store.data; Store.data = Store.blank(); State.tab = "ratings"; State.openSec = {};
+    State.ratingsDraft = {}; SECTIONS[0].items.forEach((_, i) => State.ratingsDraft[SECTIONS[0].key + i] = 1 + (i % 5)); State.ratingsDraft[SECTIONS[1].key + "0"] = 3; renderRatings();
+    ck("ratings: the lists use the manual's words and quote Chapter Six on the lowest rating", /Foundational strengths/.test($("extHi").textContent) && /Current limitations/.test($("extLo").textContent) && /not always the most important priority/.test($("extNote").textContent));
+    ck("ratings: the next gap is named: Skating is full, the next section is part-rated and still named", new RegExp((175 - SECTIONS[0].items.length - 1) + " not rated yet · rate " + SECTIONS[1].name + " next").test($("rateNext").textContent));
+    $("rateNext").onclick();
+    ck("ratings: 'rate next' opens that section", State.openSec[SECTIONS[1].key] === true && $("sections").querySelectorAll(".sec")[1].querySelectorAll(".item").length === SECTIONS[1].items.length);
+    ck("ratings: no Prioritize card before an assessment is saved", !$("prioritize"));
+    $("saveAssess").onclick();
+    ck("ratings: after the first save, Prioritize the baseline asks its four questions, its buttons off until written", !!$("prioritize") && $("prioritize").querySelectorAll("textarea").length === 4 && $("pzGo-limiting").getAttribute("disabled") === "disabled");
+    $("pz-limiting").oninput({target:{value:"Scanning before the puck arrives"}}); renderRatings();
+    $("pzGo-limiting").onclick();
+    ck("ratings: 'Make it a 90-day priority' offers the five kinds", $("pzTypes").querySelectorAll("button").length === 5);
+    $("pzTypes").querySelectorAll("button")[1].onclick();
+    ck("ratings: an empty kind takes the limiting factor at once and it becomes the primary; Goals opens", Store.data.goals.priorities.tactical.what === "Scanning before the puck arrives" && Store.data.goals.primaryType === "tactical" && State.tab === "goals");
+    Store.setPriority("skill", "what", "Wall battles"); State.tab = "ratings"; State.toPlan = true; renderRatings();
+    $("pzTypes").querySelectorAll("button")[0].onclick();
+    ck("ratings: a kind that already has a priority asks before replacing it", Store.data.goals.priorities.skill.what === "Wall battles" && /Replace “Wall battles”\?/.test($("pzTypes").querySelectorAll("button")[0].textContent));
+    $("pzTypes").querySelectorAll("button")[0].onclick();
+    ck("ratings: the second tap replaces it", Store.data.goals.priorities.skill.what === "Scanning before the puck arrives" && Store.data.goals.primaryType === "skill");
+    State.tab = "ratings"; Store.setGoals({habits:["Bed by 10:30","","","",""]}); Store.setPrioritize("habit", "Stretch after every skate"); renderRatings();
+    $("pzGo-habit").onclick();
+    ck("ratings: the habit goes into the first empty habit slot and shows on Today", Store.data.goals.habits[1] === "Stretch after every skate" && Store.habitNames().length === 2);
+    State.tab = "ratings"; Store.setPrioritize("coach", "My role on the penalty kill"); renderRatings();
+    $("pzGo-coach").onclick();
+    ck("ratings: the coach question becomes a conversation draft on Log", State.tab === "log" && State.draft.kind === "talk" && State.draft.purpose === "Clarify: My role on the penalty kill");
+    Store.data = keepD6; State.draft = null; State.toPlan = null; State.openSec = {}; State.ratingsDraft = null;
     /* tabs */
     TABS.forEach(t => setTab(t));
     ck("tabs: five buttons with drawn icons, the last one current after cycling", $("tabbar").querySelectorAll("button").length === 5 && $("tabbar").querySelectorAll(".ic").length === 5 && $("tabbar").querySelectorAll("button")[4].getAttribute("aria-current") === "page" && document.body.getAttribute("data-tab") === "read");
@@ -1088,20 +1828,46 @@ Store.load();
     /* tokens */
     const gold = getComputedStyle(document.documentElement).getPropertyValue("--gold").trim();
     ck("tokens: --gold is a hex colour on :root", /^#[0-9a-f]{6}$/i.test(gold));
+    /* Chapter Seven: season goals */
+    const keepD8 = Store.data; Store.data = Store.blank(); State.tab = "goals"; State.goalNew = {type:"", what:"", min:"", target:"", stretch:"", measure:""}; State.goalDel = null;
+    const six = (CHAPTERS.find(ch => ch.n === "SEVEN") || {blocks:[]}).blocks.find(b => b.h === "The Six Types Of Season Goals"), sixT = six ? six.p.join(" ") : "";
+    ck("season goals: six types read against Chapter Seven, with the manual's counts (1 · 2–3 · 3 · 3–5 · 1 · 1)", GOAL_TYPES.length === 6 && GOAL_TYPES.every(t => sixT.indexOf(t[1].split(" ")[0] + " goals") >= 0 || sixT.indexOf(t[1].split(" ")[0] + " and") >= 0) && GOAL_TYPES.map(t => t[2] + "-" + t[3]).join(",") === "1-1,2-3,3-3,3-5,1-1,1-1");
+    Store.setGoals({habits:["Bed by 10:30","Stretch","","",""]}); renderGoals();
+    const gtRow = t => $("seasonCard").querySelectorAll(".gt")[GOAL_TYPES.findIndex(x => x[0] === t)];
+    ck("season goals: six rows; habit goals ARE the daily habits — counted 2 of 3–5, named, and not offered as a second list", $("seasonCard").querySelectorAll(".gt").length === 6 && /2 of 3–5/.test(gtRow("habit").textContent) && /Bed by 10:30 · Stretch/.test(gtRow("habit").textContent) && $("goalTypes").querySelectorAll("button").length === 5);
+    ck("season goals: Add is disabled until a kind and the goal", $("goalAdd").getAttribute("disabled") === "disabled");
+    $("goalWhat").oninput({target:{value:"Reduce avoidable turnovers"}});
+    ck("season goals: Add is disabled until a kind and the goal: the goal alone is not enough", $("goalAdd").disabled === true && State.goalNew.type === "");
+    $("goalTypes").querySelectorAll("button")[1].onclick();
+    ck("season goals: Add is disabled until a kind and the goal: both given, it enables", State.goalNew.type === "performance" && $("goalAdd").getAttribute("disabled") !== "disabled" && !$("goalAdd").disabled);
+    $("goal-min").oninput({target:{value:"3 a game"}}); $("goal-target").oninput({target:{value:"2 a game"}}); $("goalMeasure").oninput({target:{value:"video tags"}});
+    $("goalAdd").onclick();
+    ck("season goals: a performance goal lists under Performance with its minimum and target (no empty stretch), counted 1 of 2–3, and the form clears", Store.seasonGoals("performance").length === 1 && /Reduce avoidable turnovers/.test(gtRow("performance").textContent) && /Minimum: 3 a game · Target: 2 a game$/.test(gtRow("performance").querySelector(".lv").textContent) && /Measured by: video tags/.test(gtRow("performance").textContent) && /1 of 2–3/.test(gtRow("performance").textContent) && State.goalNew.what === "" && $("goalWhat").value === "");
+    ["Regular lineup spot", "Power-play time"].forEach(w => Store.addSeasonGoal({type:"outcome", what: w})); Store.addSeasonGoal({type:"team", what:"Bench energy"}); renderGoals();
+    ck("season goals: a second outcome goal is flagged as more than the manual suggests; one team goal is not", /2 of 1 · more than the manual suggests/.test(gtRow("outcome").textContent) && gtRow("outcome").querySelectorAll(".gcount.over").length === 1 && gtRow("team").querySelectorAll(".gcount.over").length === 0 && gtRow("team").querySelectorAll(".gcount.ok").length === 1);
+    gtRow("outcome").querySelectorAll("button")[0].onclick();
+    const oneTap = Store.seasonGoals("outcome").length;
+    gtRow("outcome").querySelectorAll("button")[0].onclick();
+    ck("season goals: remove takes two taps", oneTap === 2 && Store.seasonGoals("outcome").length === 1 && State.goalDel === null);
+    const nSeason = Store.normalize({goals:{season:{a:null, b:{type:"x", what:"y"}, h:{type:"habit", what:"z"}, c:{type:"team", what:"Bench energy"}}}}).goals.season;
+    ck("store: a stored season list with a null, an unknown kind or a habit entry loads with only the real goal", Object.keys(nSeason).join() === "c" && typeof Store.normalize({goals:{season:null}}).goals.season === "object");
+    Store.data = keepD8; State.goalNew = {type:"", what:"", min:"", target:"", stretch:"", measure:""}; State.goalDel = null;
   } catch(e){
     fail.push("threw: " + (e && e.message || e));
   } finally {
     Store.saveLocal = realSave; Date.now = realNow;
     Store.data = JSON.parse(before);
-    const ks = JSON.parse(keepState); State.tab = ks.tab; State.openSec = ks.openSec; State.readChapter = ks.readChapter; State.logFilter = ks.logFilter;
-    State.draft = Store.data.drafts.log || null; State.ratingsDraft = null; State.checkStep = null; State.pendingImport = null; State.confirmDiscard = false; State.flash = ""; clearTimeout(flashT);
+    const ks = JSON.parse(keepState); State.tab = ks.tab; State.openSec = ks.openSec; State.openPri = ks.openPri; State.cpOpen = ks.cpOpen; State.readChapter = ks.readChapter; State.logFilter = ks.logFilter;
+    State.draft = Store.data.drafts.log || null; State.ratingsDraft = null; State.checkStep = null; State.pendingImport = null; State.confirmDiscard = false; State.editWin = false; State.teamNew = {name:"", role:""}; State.teamDel = null; State.toPlan = null; State.setupStep = null; State.inSetup = false; State.goalNew = {type:"", what:"", min:"", target:"", stretch:"", measure:""}; State.goalDel = null; State.flash = ""; clearTimeout(flashT);
     /* every tab was painted with seeded data above; repaint ALL of them from the real store,
        not only the visible one — on a #ratings load the seeded Today outlived the restore */
     TABS.forEach(renderTab);
     setTab(State.tab);
+    window.scrollTo(0, keepY);
   }
+  ck("after the self-check the page opens where it was, not scrolled by its taps", (window.scrollY || 0) === keepY);
   ck("after the self-check the store is byte-identical to before it (nothing seeded ships)", JSON.stringify(Store.data) === before);
-  ck("after the self-check the Today tab shows the real (empty) state, not the seeded one", !Store.habitNames().length ? /No habit goals yet/.test($("todaySlot").textContent) : true);
+  ck("after the self-check the Today tab shows the real (empty) state, not the seeded one", !Store.habitNames().length ? (setupActive() ? !!$("setupCard") && !$("stateCard") : /No habit goals yet/.test($("todaySlot").textContent)) : true);
   if(fail.length) console.error("PDM SELF-CHECK FAILED " + fail.length + "/" + ran + ":", fail);
   else console.log("PDM self-check: " + ran + "/" + ran + " checks passed");
 })();
