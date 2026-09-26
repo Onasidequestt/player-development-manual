@@ -118,6 +118,9 @@ label.f{display:block;margin:12px 0 4px;font-size:13px;color:var(--ink2)}
 .chip{font-size:12px;background:var(--panel2);border-radius:999px;padding:4px 10px;color:var(--ink2);border:1px solid transparent}
 .chip.low{border-color:var(--warn);color:var(--ink)}
 .chip.low b{color:var(--warn)}
+#readyCard .chips button.chip{cursor:pointer}
+#streakNote{color:var(--gold);font-weight:600;margin-top:2px}
+.sw{font-size:11px;color:var(--mute);margin-top:4px}
 .chip b{color:var(--ink);font-family:var(--disp);font-size:14px;margin-left:4px}
 /* percentage bars. Track + fill, a 2px surface gap to the baseline marker ring */
 .bar{position:relative;height:10px;background:var(--panel2);border-radius:5px;overflow:visible;margin:8px 0}
@@ -244,7 +247,8 @@ button.link.flag{display:block;text-align:left;color:var(--warn)}
 .habit{display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--line)}
 .habit:first-child{border-top:0}
 .habit button.tick{position:relative;width:44px;height:44px;border-radius:50%;padding:0;font-size:20px;flex:0 0 auto;border:2px solid var(--mark2)}
-.tick .burst{position:absolute;inset:-2px;border-radius:50%;border:2px solid var(--gold2);opacity:0;pointer-events:none}
+.mile{position:relative;display:inline-block;min-width:1.3em;text-align:center}
+.tick .burst,.mile .burst{position:absolute;inset:-2px;border-radius:50%;border:2px solid var(--gold2);opacity:0;pointer-events:none}
 .habit button.tick[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:#04200f}
 .habit .nm{flex:1}
 .gt{border-top:1px solid var(--line);padding:10px 0 4px}
@@ -343,6 +347,10 @@ section[data-tab].on{display:block}
   .brand .t2 span{display:inline;margin-right:.25em}
   .brand .seven{font-size:260px;bottom:-56px;right:24px}
   .chgrid{grid-template-columns:1fr 1fr}
+  .readcols .chgrid{grid-template-columns:1fr}
+  .readcols > div:first-child{position:sticky;top:16px}
+  .readcols .front{display:block}
+  .readcols .front img{width:100%;margin-bottom:14px}
   #sections{columns:2;column-gap:28px}
   #sections .sec{break-inside:avoid}
   .narrow{max-width:760px}
@@ -369,7 +377,7 @@ section[data-tab].on{display:block}
   </section>
   <section data-tab="log" id="tab-log"><h1>Log</h1><p class="sub">Practices and games. Rate what happened, not what you hoped.</p><div id="logSlot"></div></section>
   <section data-tab="ratings" id="tab-ratings"><h1>Ratings</h1><p class="sub">Chapter Six, 1 to 5. Rate what appears consistently, not your best day.</p><div id="ratingsSlot"></div></section>
-  <section data-tab="goals" id="tab-goals"><h1>Goals</h1><p class="sub">Season purpose and goals, five habits, the 90-day plan, and your team.</p><div id="goalsSlot" class="narrow"></div></section>
+  <section data-tab="goals" id="tab-goals"><h1>Goals</h1><p class="sub">Season purpose and goals, five habits, the 90-day plan, and your team.</p><div id="goalsSlot"></div></section>
   <section data-tab="read" id="tab-read"><div id="readSlot"></div></section>
 </main>
 <nav class="tabs" id="tabbar"></nav>
@@ -749,7 +757,7 @@ const Store = {
   },
   restore(d){ this.data = this.normalize(JSON.parse(JSON.stringify(d))); this.save(); }
 };
-const State = { openPri:{}, cpOpen:null, tab:"today", draft:null, ratingsDraft:null, openSec:{}, flash:"", readChapter:null, checkStep:null, checkFrom:null, logFilter:"all", pendingImport:null, confirmDiscard:false, editWin:false, teamNew:{name:"", role:""}, teamDel:null, toPlan:null, pzFilter:{}, wsOpen:{}, evOpen:{}, teachOpen:{}, cnOpen:{}, setupStep:null, inSetup:false, goalNew:{type:"", what:"", min:"", target:"", stretch:"", measure:""}, goalDel:null, beat:null };
+const State = { openPri:{}, cpOpen:null, tab:"today", draft:null, ratingsDraft:null, openSec:{}, flash:"", readChapter:null, checkStep:null, checkFrom:null, checkOne:false, logFilter:"all", pendingImport:null, confirmDiscard:false, editWin:false, teamNew:{name:"", role:""}, teamDel:null, toPlan:null, pzFilter:{}, wsOpen:{}, evOpen:{}, teachOpen:{}, cnOpen:{}, setupStep:null, inSetup:false, goalNew:{type:"", what:"", min:"", target:"", stretch:"", measure:""}, goalDel:null, beat:null };
 /* score of one entry, from its 1..5 fields */
 function practiceScore(e){ return pct(PRACTICE_FIELDS.map(f => e[f[0]])); }
 function gameScore(e){ return pct(GAME_FIELDS.map(f => e[f[0]])); }
@@ -813,7 +821,7 @@ function sixField(nd, r, id){
   const keep = () => Store.keepDraft("ratings", r);
   const put = v => { if(v === "" || v == null) delete r[nd.k]; else r[nd.k] = v; keep(); };
   if(nd.t === "note") return el("p", {class:"mute note"}, nd.text);
-  if(nd.t === "rate") return el("div", {class:"rrow"}, el("div", {class:"nm"}, nd.lab), scale(r[nd.k], v => { put(r[nd.k] === v ? null : v); renderRatings(); }, "", ""));
+  if(nd.t === "rate") return el("div", {class:"rrow"}, el("div", {class:"nm"}, nd.lab), scale(r[nd.k], v => { put(r[nd.k] === v ? null : v); renderRatings(); }, "", "", "sf:" + nd.k));
   if(nd.t === "one") return el("div", {class:"seg wrap", id: id, role:"group"}, ...nd.o.map(o => el("button", {type:"button", "aria-pressed": String(r[nd.k] === o), onclick: () => { put(r[nd.k] === o ? null : o); renderRatings(); }}, o)));
   return el("div", null, el("label", {class:"f", for: id}, nd.lab),
     el(nd.rows > 1 ? "textarea" : "input", {id: id, type: nd.rows > 1 ? null : "text", rows: nd.rows > 1 ? nd.rows : null, value: r[nd.k] || "", oninput: ev => put(ev.target.value.trim() ? ev.target.value : null), onchange: () => renderRatings()}));
@@ -821,10 +829,14 @@ function sixField(nd, r, id){
 function sameRatings(a, b){ const ka = Object.keys(a||{}).filter(k => a[k]), kb = Object.keys(b||{}).filter(k => b[k]); return ka.length === kb.length && ka.every(k => a[k] === b[k]); }
 
 /* ================= small UI pieces ================= */
-function scale(value, onPick, lo, hi){
+/* a keyed scale presses in the button he tapped, on the repaint that tap caused (Simon 09-25 round 3): the tap sets
+   Motion.pressed, the pick repaints (the new pressed button reads it), then it is cleared, so a later repaint plays nothing */
+function scale(value, onPick, lo, hi, key){
   const wrap = el("div");
   const row = el("div", {class:"scale"});
-  for(let v=1; v<=5; v++) row.appendChild(el("button", {type:"button", "aria-pressed": String(value === v), "data-v": v, onclick: () => onPick(v)}, String(v)));
+  for(let v=1; v<=5; v++){ const b = el("button", {type:"button", "aria-pressed": String(value === v), "data-v": v, onclick: () => { Motion.pressed = key ? key + "=" + v : null; try{ onPick(v); } finally { Motion.pressed = null; } }}, String(v));
+    row.appendChild(b);
+    if(key && value === v && Motion.pressed === key + "=" + v) Motion.play("press", key, b, [{transform:"scale(.88)"}, {transform:"scale(1.04)", offset:.6}, {transform:"scale(1)"}], {duration: 180}); }
   wrap.appendChild(row);
   if(lo || hi) wrap.appendChild(el("div", {class:"scale-key"}, el("span", null, "1 " + (lo||"")), el("span", null, "5 " + (hi||""))));
   return wrap;
@@ -878,7 +890,16 @@ function bars(points, emptyText, opts){
   return wrap;
 }
 let flashT = 0;
-function flash(msg){ State.flash = msg; clearTimeout(flashT); flashT = setTimeout(() => { State.flash = ""; renderAll(); }, 4000); }
+function flash(msg){ State.flash = msg; clearTimeout(flashT); flashT = setTimeout(() => flashEnd(msg), 4000); }
+/* the note leaves as it came (Simon 09-25 round 3): 200 ms fade, then the repaint that removes it; reduced motion, at once.
+   A newer note is never cut by an older one's timer */
+function flashEnd(msg){
+  if(State.flash !== msg) return false;
+  const slot = $(State.tab + "Slot"), f = slot && slot.querySelector(".flash");
+  const go = () => { if(State.flash === msg){ State.flash = ""; renderAll(); } };
+  if(Motion.play("noteOut", State.tab, f, [{opacity:1}, {opacity:0}], {duration: 200, fill: "forwards"})){ flashT = setTimeout(go, 200); return true; }
+  go(); return false;
+}
 /* a save sets its note down (Simon 09-24 M5): the same for any score; "Removed", "Backup file saved" stay plain */
 function flashBox(beat){
   const f = State.flash ? el("div", {class:"flash", role:"status"}, State.flash) : null;
@@ -994,7 +1015,12 @@ function renderToday(){
       ratingsMini()));
   const streak = checkStreak(today), in7 = pts.filter(p => p.v != null).length;
   const stN = streak > 1 ? el("b", {id:"streakN"}, String(streak)) : null;
-  if(in7) st.appendChild(el("p", {class:"sub", id:"checkStreak"}, "Morning check: " + in7 + " of the last 7 days", ...(stN ? [" · ", stN, " in a row"] : [])));
+  /* a milestone run (7, 14, 30, then every 30) gets the habit tick's gold burst + one line, only on the landing that reached it (Simon 09-25 Q3);
+     the burst sits beside the number in a wrapper, so the number's count-up (which rewrites its text) cannot remove it */
+  const mile = beat && beat.kind === "check" && beat.fresh && stN && isMilestone(streak) ? el("i", {class:"burst", "aria-hidden":"true"}) : null;
+  if(in7) st.appendChild(el("p", {class:"sub", id:"checkStreak"}, "Morning check: " + in7 + " of the last 7 days", ...(stN ? [" · ", mile ? el("span", {class:"mile"}, stN, mile) : stN, " in a row"] : [])));
+  if(mile){ st.appendChild(el("p", {class:"sub", id:"streakNote"}, streak + " days in a row"));
+    Motion.play("milestone", "streak", mile, [{transform:"scale(1)", opacity:.8}, {transform:"scale(1.75)", opacity:0}], {duration: 340, easing: "cubic-bezier(.2,.8,.2,1)"}); }
   /* the run grew by today: its number steps up once — only on the landing that completed today (a Change is not a new day), whatever the answers; a run that ends is shown plainly */
   if(beat && beat.kind === "check" && beat.fresh && stN) Motion.count("streak", "streak", stN, streak - 1, streak);
   const eveDone = STANDARD_Q.filter(q => (Store.data.standardCheck[today] || {})[q.k] != null).length;
@@ -1134,29 +1160,35 @@ function checkCard(today, beat){
   const firstOpen = READY_FIELDS.findIndex(f => !(rec[f[0]] >= 1));
   /* a run of the check opens with the answers as they stand; it lands only if they moved (a first check, or any changed answer) */
   const answers = () => READY_FIELDS.map(f => (Store.data.readiness[today] || {})[f[0]] || "").join();
-  const openRun = k => () => { State.checkStep = k; State.checkFrom = answers(); renderToday(); };
+  const openRun = (k, one) => () => { State.checkStep = k; State.checkFrom = answers(); State.checkOne = !!one; renderToday(); };
   if(State.checkStep != null){
     const k = State.checkStep, fd = READY_FIELDS[k];
     const dots = el("div", {class:"dots", "aria-hidden":"true"});
     READY_FIELDS.forEach((f, i) => dots.appendChild(el("i", {class: i === k ? "cur" : rec[f[0]] >= 1 ? "on" : ""})));
     const wrap = el("div", {class:"stepper"}, el("div", {class:"row"}, el("span", {class:"mute"}, "Question " + (k+1) + " of 7"), el("span", {class:"right"}, dots)), el("div", {class:"q"}, fd[1]),
-      scale(rec[fd[0]], v => { const p = {}; p[fd[0]] = v; Store.putReadiness(today, p); State.checkStep = k < 6 ? k + 1 : null;
-        const all = READY_FIELDS.every(f => (Store.data.readiness[today] || {})[f[0]] >= 1);
-        State.beat = k === 6 && all && answers() !== State.checkFrom ? {kind:"check", fresh: /(^|,)(,|$)/.test(State.checkFrom || ",")} : null; renderToday(); }, fd[2], fd[3]),
+      scale(rec[fd[0]], v => { const p = {}; p[fd[0]] = v; Store.putReadiness(today, p); State.checkStep = k < 6 && !State.checkOne ? k + 1 : null;
+        /* a run ends on the seventh answer, or on the one answer a chip opened; it lands only if the answers moved */
+        const all = READY_FIELDS.every(f => (Store.data.readiness[today] || {})[f[0]] >= 1), end = State.checkStep === null;
+        if(end) State.checkOne = false;
+        State.beat = end && all && answers() !== State.checkFrom ? {kind:"check", fresh: /(^|,)(,|$)/.test(State.checkFrom || ",")} : null; renderToday(); }, fd[2], fd[3]),
       el("div", {class:"row"},
         el("button", {type:"button", class:"ghost", disabled: k === 0 ? "disabled" : null, onclick: () => { State.checkStep = k - 1; renderToday(); }}, "Back"),
-        el("button", {type:"button", class:"ghost right", onclick: () => { State.checkStep = null; renderToday(); }}, "Close")));
+        el("button", {type:"button", class:"ghost right", onclick: () => { State.checkStep = null; State.checkOne = false; renderToday(); }}, "Close")));
     card.appendChild(wrap);
   } else if(done === 7){
     const chips = el("div", {class:"chips"});
-    READY_FIELDS.forEach(f => chips.appendChild(el("span", {class:"chip" + (rec[f[0]] <= 2 ? " low" : "")}, f[1], el("b", null, rec[f[0]]))));
+    /* a chip opens that one question to change it (Simon 09-25 Q2) */
+    READY_FIELDS.forEach((f, i) => chips.appendChild(el("button", {type:"button", class:"chip" + (rec[f[0]] <= 2 ? " low" : ""), id:"chip" + i, "aria-label": "Change " + f[1] + ": " + rec[f[0]], onclick: openRun(i, true)}, f[1], el("b", null, rec[f[0]]))));
     card.appendChild(chips);
     /* the check lands: the seven answers set down left to right (up or down, the check is done — no number is dressed here) */
     if(beat && beat.kind === "check") chips.querySelectorAll(".chip").forEach((c, i) => Motion.play(i ? "chip" : "chips", "ready", c, [{opacity:0, transform:"translateY(4px)"}, {opacity:1, transform:"none"}], {duration: 160, delay: i * 30, fill: "backwards"}));
     card.appendChild(el("button", {type:"button", class:"link", id:"changeCheck", onclick: openRun(0)}, "Change answers"));
   } else {
     card.appendChild(el("p", {class:"mute"}, "Seven questions, one tap each. The direction over a week matters more than one number."));
-    card.appendChild(el("button", {type:"button", class:"primary", id:"startCheck", onclick: openRun(firstOpen)}, done ? "Continue check" : "Start check"));
+    /* yesterday's seven, one tap (Simon 09-25 Q2): only when yesterday is complete and today is untouched; it lands as today's check */
+    const yRec = Store.data.readiness[addDays(today, -1)] || {};
+    const same = !done && READY_FIELDS.every(f => yRec[f[0]] >= 1) ? el("button", {type:"button", class:"ghost", id:"sameCheck", onclick: () => { const p = {}; READY_FIELDS.forEach(f => { p[f[0]] = yRec[f[0]]; }); Store.putReadiness(today, p); State.beat = {kind:"check", fresh:true}; renderToday(); }}, "Same as yesterday") : null;
+    card.appendChild(el("div", {class:"row"}, el("button", {type:"button", class:"primary", id:"startCheck", onclick: openRun(firstOpen)}, done ? "Continue check" : "Start check"), same));
   }
   card.appendChild(el("p", {class:"sub", id:"readyLine"}, done === 7 ? "Today's readiness: " + rp + "%" : done + " of 7 answered" + (done ? " — readiness so far " + pctText(rp) : "")));
   card.appendChild(teachRows("check"));
@@ -1215,6 +1247,7 @@ function standardCard(){
 /* jump to a tab and bring one field into view (focus it when it takes text) */
 function goTo(tab, id){ setTab(tab); const e = $(id); if(e){ if(e.scrollIntoView) e.scrollIntoView({block:"center"}); if(e.focus) e.focus(); } }
 /* morning checks in a row, ending today — or yesterday while today's is still open, so the run is not "broken" at 7am */
+const isMilestone = n => n === 7 || n === 14 || (n >= 30 && n % 30 === 0);
 function checkStreak(today){
   let d = Store.readinessPct(today) == null ? addDays(today, -1) : today, n = 0;
   while(Store.readinessPct(d) != null && n < 3660){ n++; d = addDays(d, -1); }
@@ -1379,7 +1412,7 @@ function draftForm(){
   } else {
     if(!isP) txt("intended", "What I intended to do", Store.data.goals.cues.tactical ? "e.g. " + Store.data.goals.cues.tactical : "");
     c.appendChild(el("p", {class:"mute", id:"blankOk"}, "Rate what you can — blank is fine. Only what you rate counts."));
-    (isP ? PRACTICE_FIELDS : GAME_FIELDS).forEach(([k, nm]) => c.appendChild(el("div", {class:"item"}, el("div", {class:"nm"}, nm), scale(d[k], v => { d[k] = v; keep(); renderLog(); }, "", ""))));
+    (isP ? PRACTICE_FIELDS : GAME_FIELDS).forEach(([k, nm]) => c.appendChild(el("div", {class:"item"}, el("div", {class:"nm"}, nm), scale(d[k], v => { d[k] = v; keep(); renderLog(); }, "", "", "log:" + k))));
     if(isP){
       quick();
       txt("happened", "What actually happened");
@@ -1498,7 +1531,9 @@ function renderRatings(){
       const form = sixForm(sec) || {ev: {}, pre: [], post: [], sum: []};
       form.pre.forEach((nd, j) => body.appendChild(sixField(nd, r, "sf-" + sec.key + "-p" + j)));
       sec.items.forEach((nm, i) => {
-        const it = el("div", {class:"item"}, el("div", {class:"nm"}, nm), scale(r[sec.key+i], v => { r[sec.key+i] = v; Store.keepDraft("ratings", r); renderRatings(); }, "", ""));
+        const it = el("div", {class:"item"}, el("div", {class:"nm"}, nm), scale(r[sec.key+i], v => { r[sec.key+i] = v; Store.keepDraft("ratings", r); renderRatings(); }, "", "", "r:" + sec.key + i));
+        /* the scale's words under the section's first item only (Simon 09-25 Q4); not an .item, so item counts hold */
+        if(i === 0) it.appendChild(el("div", {class:"sw", id:"sw-" + sec.key}, "1 major limitation · 3 functional · 5 distinguishing"));
         const evL = form.ev[i], evK = sec.key + i + "|ev", evId = "ev-" + sec.key + i;
         if(evL && (State.evOpen[evK] || (r[evK] || "").trim())) it.appendChild(el("div", {class:"ev"}, el("label", {class:"f", for: evId}, evL),
           el("textarea", {id: evId, rows: 2, value: r[evK] || "", oninput: ev => { if(ev.target.value.trim()) r[evK] = ev.target.value; else delete r[evK]; Store.keepDraft("ratings", r); }, onchange: () => renderRatings()})));
@@ -1519,7 +1554,10 @@ function renderRatings(){
    question and the support; each one can be sent where it gets worked on (the plan, a habit, a conversation) */
 const PRIORITIZE = [["limiting","One primary limiting factor","It restricts several other parts of performance."],["habit","One habit requiring immediate attention",""],["coach","One area requiring coach clarification",""],["support","One area requiring professional support","Medical, strength, nutrition, mental performance…"]];
 function prioritizeCard(){
-  const P = Store.data.prioritize, c = el("div", {class:"card", id:"prioritize"}, el("h2", null, "Prioritize the baseline"), el("p", {class:"mute"}, "Chapter Six: \u201cThe baseline should narrow attention.\u201d"));
+  const P = Store.data.prioritize, c = el("div", {class:"card", id:"prioritize"}, el("h2", null, "Prioritize the baseline"), el("p", {class:"mute"}, "Chapter Six: \u201cThe baseline should narrow attention.\u201d"),
+    /* the manual's seven asks are one exercise; the three it keeps elsewhere are named here (Simon 09-25 round 3) */
+    el("p", {class:"sub", id:"pzMap"}, "The other asks: your three strengths and three limitations are this tab's Foundational strengths and Current limitations; the 90-day priorities live on Goals. ",
+      el("button", {type:"button", class:"link", id:"pzGoals", onclick: () => goTo("goals", "priCard")}, "Open the 90-day plan →")));
   PRIORITIZE.forEach(([k, lab, hint]) => {
     c.appendChild(el("label", {class:"f", for:"pz-" + k}, lab)); if(hint) c.appendChild(el("div", {class:"mute hint"}, hint));
     c.appendChild(el("textarea", {id:"pz-" + k, rows:2, value: P[k] || "", oninput: ev => { Store.setPrioritize(k, ev.target.value); const b = $("pzGo-" + k); if(b) b.disabled = !ev.target.value.trim(); }}));
@@ -1554,13 +1592,16 @@ function renderGoals(){
   const slot = $("goalsSlot"); clear(slot);
   const f = flashBox(); if(f) slot.appendChild(f);
   const g = Store.data.goals;
+  /* two columns at desktop width (Simon 09-25 round 3); on a phone A then B is the same order as before */
+  const colA = el("div", {id:"goalsA"}), colB = el("div", {id:"goalsB"});
+  slot.appendChild(el("div", {class:"cols"}, colA, colB));
   const c1 = el("div", {class:"card"}, el("h2", null, "Season purpose"), el("p", {class:"mute"}, "At the end of the season, I want to be able to say…"));
   c1.appendChild(el("textarea", {id:"purpose", value:g.purpose, oninput: ev => Store.setGoals({purpose: ev.target.value})}));
-  slot.appendChild(c1);
-  slot.appendChild(seasonCard());
+  colA.appendChild(c1);
+  colA.appendChild(seasonCard());
   const c2 = el("div", {class:"card", id:"habitGoals"}, el("h2", null, "Habit goals"), el("p", {class:"mute"}, "Up to five. Each one becomes a daily tick on Today. Write the behaviour, not the wish."));
   for(let i=0;i<5;i++){ c2.appendChild(el("input", {type:"text", id:"habit" + i, value:g.habits[i]||"", placeholder: "Habit " + (i+1), "aria-label": "Habit " + (i+1), oninput: ev => { const h = g.habits.slice(); h[i] = ev.target.value; Store.setGoals({habits:h}); }})); }
-  slot.appendChild(c2);
+  colA.appendChild(c2);
   /* Chapter Nine: the 90-day development plan */
   const bp = blockProgress(g.blockStart, Date.now());
   const c3 = el("div", {class:"card", id:"blockGoals"}, el("h2", null, "90-day plan"), el("p", {class:"mute"}, "Assess honestly, choose deliberately, plan specifically, act consistently, review the evidence, and adjust."));
@@ -1570,7 +1611,7 @@ function renderGoals(){
     c3.appendChild(timeline(bp));
   }
   c3.appendChild(teachRows("block"));
-  slot.appendChild(c3);
+  colB.appendChild(c3);
   /* five priorities, one of each kind; one is the primary */
   const pc = el("div", {class:"card", id:"priCard"}, el("h2", null, "Priorities"), el("p", {class:"mute"}, "No more than five: one of each kind. One is the primary — the rest support it."));
   PRI_TYPES.forEach(([t, nm]) => {
@@ -1589,15 +1630,15 @@ function renderGoals(){
     }
     pc.appendChild(box);
   });
-  slot.appendChild(pc);
+  colB.appendChild(pc);
   /* cues */
   const cc = el("div", {class:"card", id:"cueGoals"}, el("h2", null, "Cues"), el("p", {class:"mute"}, "A cue directs attention to one useful detail — short enough to remember during action. They show on Today."));
   CUE_FIELDS.forEach(([k, nm]) => { cc.appendChild(el("label", {class:"f", for:"cue-" + k}, nm)); cc.appendChild(el("input", {type:"text", id:"cue-" + k, value: g.cues[k] || "", oninput: ev => Store.setCue(k, ev.target.value)})); });
-  slot.appendChild(cc);
+  colB.appendChild(cc);
   /* checkpoints: Day 14, 30, 45, 60, 75, 90 */
-  if(bp) slot.appendChild(checkpointCard(bp));
-  slot.appendChild(teamCard());
-  if(Store.teamList().length) slot.appendChild(reviewCard());
+  if(bp) colB.appendChild(checkpointCard(bp));
+  colB.appendChild(teamCard());
+  if(Store.teamList().length) colB.appendChild(reviewCard());
 }
 /* Chapter Five: "You are responsible for the center." Who helps, and what each one is for */
 /* Chapter Seven: season goals by type, counted against the manual's structure; habit goals ARE the daily habits */
@@ -1808,10 +1849,13 @@ function renderRead(){
     const m = el("div", {class:"meter"}); const mi = el("i"); mi.style.width = Math.round(nRead / (CHAPTERS.length || 1) * 100) + "%"; m.appendChild(mi);
     const allF = CHAPTERS.flatMap(ch => FIELDS[ch.n] || []), aTot = allF.length, aDone = allF.filter(fd => (Store.data.answers[fd.k]||"").trim()).length;
     const am = el("div", {class:"meter"}); const ai = el("i"); ai.style.width = Math.round(aDone / (aTot || 1) * 100) + "%"; am.appendChild(ai);
-    slot.appendChild(el("div", {class:"card front"}, el("img", {src:"cover.jpg", alt:"The printed manual's cover: Player Development Manual, for Gavin Andersen"}),
+    /* two columns at desktop width (Simon 09-25 round 3): the manual on the left, its chapters on the right; phone order unchanged */
+    const rA = el("div", {id:"readA"}), rB = el("div", {id:"readB"});
+    slot.appendChild(el("div", {class:"cols readcols"}, rA, rB));
+    rA.appendChild(el("div", {class:"card front"}, el("img", {src:"cover.jpg", alt:"The printed manual's cover: Player Development Manual, for Gavin Andersen"}),
       el("div", null, el("div", {class:"mute"}, "The manual"), el("div", {style:"font:800 26px/1 var(--disp);text-transform:uppercase;margin:4px 0 8px"}, "Written for Gavin"), el("div", {class:"sub", id:"readCount"}, nRead + " of " + CHAPTERS.length + " chapters read"), m,
         aTot ? el("div", {class:"sub", id:"readAnswers", style:"margin-top:10px"}, aDone + " of " + aTot + " answers written") : null, aTot ? am : null)));
-    if(FRONT) slot.appendChild(el("div", {class:"chfront"}, el("button", {type:"button", id:"frontCard", onclick: () => { State.readChapter = -1; renderRead(); window.scrollTo(0,0); }},
+    if(FRONT) rA.appendChild(el("div", {class:"chfront"}, el("button", {type:"button", id:"frontCard", onclick: () => { State.readChapter = -1; renderRead(); window.scrollTo(0,0); }},
       el("div", {class:"no"}, "—"), el("div", null, el("div", {class:"ti"}, FRONT.title), el("small", null, chLabel(FRONT) + " · " + Math.max(1, Math.round(words(FRONT)/220)) + " min")),
       el("div", {class:"st"}, Store.data.read.FRONT ? "✓ Read" : ""))));
     const l = el("div", {class:"chgrid"});
@@ -1824,10 +1868,10 @@ function renderRead(){
           wt.of ? el("small", {class:"wsn", id:"wsn-" + ch.n}, "Worksheets: " + wt.n + " of " + wt.of + " answered") : null),
         el("div", {class:"st"}, Store.data.read[ch.n] ? "✓ Read" : "")));
     });
-    slot.appendChild(l);
-    slot.appendChild(el("div", {class:"chfront"}, el("button", {type:"button", id:"teachCard", onclick: () => { State.readChapter = "TEACH"; renderRead(); window.scrollTo(0,0); }},
+    rB.appendChild(l);
+    rB.appendChild(el("div", {class:"chfront"}, el("button", {type:"button", id:"teachCard", onclick: () => { State.readChapter = "TEACH"; renderRead(); window.scrollTo(0,0); }},
       el("div", {class:"no"}, "9–55"), el("div", null, el("div", {class:"ti"}, "Chapters 9–55 · what each teaches"), el("small", null, TEACH.length + " chapters · five principles each")), el("div", {class:"st"}))));
-    slot.appendChild(el("p", {class:"mute", id:"readNote", style:"font-size:13px;margin:12px 2px"}, "The printed pages have no Chapter Eight. Chapters 9–55 each teach five principles of their own; each one sits beside the part of the app it teaches, and all of them are listed under Chapters 9–55."));
+    rB.appendChild(el("p", {class:"mute", id:"readNote", style:"font-size:13px;margin:12px 2px"}, "The printed pages have no Chapter Eight. Chapters 9–55 each teach five principles of their own; each one sits beside the part of the app it teaches, and all of them are listed under Chapters 9–55."));
     return;
   }
   /* Chapters 9–55: all 47, each with where it shows in the app (the 14 with no home show only here) */
@@ -1933,7 +1977,7 @@ Seen.load();
     /* calendar arithmetic */
     ck("dates: addDays steps calendar days across a month end and the March DST change", addDays("2026-03-01", -1) === "2026-02-28" && addDays("2026-03-09", -1) === "2026-03-08" && addDays("2026-11-02", -1) === "2026-11-01" && daysBetween("2026-03-07", "2026-03-10") === 3);
     /* readiness */
-    Store.data = Store.blank(); State.tab = "today"; State.draft = null; State.ratingsDraft = null; State.openSec = {}; State.readChapter = null; State.checkStep = null; State.checkFrom = null; State.logFilter = "all"; State.pendingImport = null; State.teachOpen = {}; State.cnOpen = {};
+    Store.data = Store.blank(); State.tab = "today"; State.draft = null; State.ratingsDraft = null; State.openSec = {}; State.readChapter = null; State.checkStep = null; State.checkFrom = null; State.checkOne = false; State.logFilter = "all"; State.pendingImport = null; State.teachOpen = {}; State.cnOpen = {};
     Object.keys(TEACH_SEEN).forEach(k => delete TEACH_SEEN[k]);   /* the boot paint does not count: the registry below is what the checks paint */
     const today = dayOf(Date.now());
     /* first run: three steps in place of five empty cards */
@@ -2119,6 +2163,58 @@ Seen.load();
       ck("motion: the check that grows the run steps its number up by one (2 → 3), the same for seven 1s", stk() === "2>3" && ($("streakN") || {}).textContent === "3" && within());
       Motion.log = []; if($("changeCheck")) $("changeCheck").onclick(); [1, 1, 2, 1, 1, 1, 1].forEach(ans);
       ck("motion: a Change on a day already checked lands the check but does not step the run", /ring,arc/.test(beats()) && stk() === "");
+      /* "Same as yesterday" (Simon 09-25 Q2): only when yesterday is complete; one tap = yesterday's seven, today's landing, one run step */
+      const yd = addDays(today, -1), y7 = {}; READY_FIELDS.forEach((f, i) => { y7[f[0]] = [2, 3, 4, 5, 1, 3, 4][i]; });
+      Store.data.readiness = {[yd]: {sleep: 3}, [addDays(today, -2)]: r64}; renderToday();
+      ck("same as yesterday: hidden when yesterday's check is incomplete", !$("sameCheck") && !!$("startCheck"));
+      Store.data.readiness = {[yd]: Object.assign({}, y7), [addDays(today, -2)]: r64}; Motion.log = []; renderToday();
+      const sameShown = !!$("sameCheck"); if(sameShown) $("sameCheck").onclick();
+      const tRec = Store.data.readiness[today] || {};
+      ck("same as yesterday: one tap fills exactly yesterday's seven, shown as chips", sameShown && READY_FIELDS.every(f => tRec[f[0]] === y7[f[0]]) && Object.keys(tRec).filter(k => k !== "at").length === 7 && $("readyCard").querySelectorAll(".chip").length === 7);
+      ck("same as yesterday: it lands as today's check and steps the run once (2 → 3)", beats() === "streak,ring,arc,num,chips|6" && stk() === "2>3" && ($("streakN") || {}).textContent === "3");
+      renderToday();
+      ck("same as yesterday: a repaint steps nothing more", stk() === "2>3" && beats() === "streak,ring,arc,num,chips|6");
+      Motion.log = []; const chip2 = $("chip2"); if(chip2) chip2.onclick();
+      const oneOpen = State.checkStep === 2 && State.checkOne === true; ans(1);
+      const tRec2 = Store.data.readiness[today] || {};
+      ck("same as yesterday: a chip tap opens that one question and changes only it", oneOpen && State.checkStep === null && tRec2[READY_FIELDS[2][0]] === 1 && READY_FIELDS.every((f, i) => i === 2 || tRec2[f[0]] === y7[f[0]]) && /ring,arc/.test(beats()) && stk() === "");
+      /* the run's milestones (Simon 09-25 Q3): 7, 14, 30, then every 30 — the gold burst + one line, once, on the landing that reached it */
+      const seedRun = n => { const o = {}; for(let j = 1; j <= n; j++) o[addDays(today, -j)] = r64; Store.data.readiness = o; };
+      const miles = () => Motion.log.filter(x => x.kind === "milestone").length;
+      const runCheck = v => { Motion.log = []; renderToday(); if($("startCheck")) $("startCheck").onclick(); for(let q = 0; q < 7; q++) ans(v); };
+      ck("milestone: the milestone days are 7, 14, 30 and every 30 after", [7, 14, 30, 60, 90, 120].every(isMilestone) && ![1, 2, 6, 8, 13, 15, 21, 29, 31, 45, 59, 61].some(isMilestone));
+      seedRun(6); runCheck(1);
+      ck("milestone: 6 → 7 plays the gold burst on the run number with one line, for seven 1s", miles() === 1 && stk() === "6>7" && /^7 days in a row$/.test(($("streakNote") || {}).textContent || "") && !!$("stateCard").querySelector(".mile .burst") && Array.prototype.indexOf.call(($("stateCard").querySelector(".mile") || {children: []}).children, $("streakN")) >= 0);
+      Motion.log = []; renderToday();
+      ck("milestone: a repaint plays it no more and the line goes", miles() === 0 && !$("streakNote") && !$("stateCard").querySelector(".mile"));
+      Motion.log = []; if($("changeCheck")) $("changeCheck").onclick(); [1, 1, 2, 1, 1, 1, 1].forEach(ans);
+      ck("milestone: a Change on the milestone day plays it no more", /ring,arc/.test(beats()) && miles() === 0 && !$("streakNote"));
+      seedRun(7); runCheck(5);
+      ck("milestone: 7 → 8 plays no milestone", stk() === "7>8" && miles() === 0 && !$("streakNote"));
+      seedRun(29); runCheck(3);
+      ck("milestone: 29 → 30 plays it", stk() === "29>30" && miles() === 1 && /^30 days in a row$/.test(($("streakNote") || {}).textContent || ""));
+      Motion.reduced = () => true; seedRun(13); runCheck(5);
+      ck("milestone: with reduced motion 13 → 14 shows the line and plays nothing", Motion.log.length === 0 && /^14 days in a row$/.test(($("streakNote") || {}).textContent || ""));
+      Motion.reduced = () => false;
+      /* round 3 (Simon 09-25): a tapped 1–5 button presses in, once; the save note fades out */
+      State.tab = "ratings"; State.ratingsDraft = null; State.openSec = {[SECTIONS[0].key]: true}; renderRatings(); Motion.log = [];
+      const pr1 = () => $("sections").querySelectorAll(".sec")[0].querySelectorAll(".item")[0].querySelectorAll("button");
+      pr1()[3].onclick();
+      const prs = () => Motion.log.filter(x => x.kind === "press").map(x => x.key).join();
+      ck("motion: a tapped 1–5 button presses in, once, on that item", prs() === "r:" + SECTIONS[0].key + "0" && Motion.pressed === null);
+      Motion.log = []; renderRatings();
+      ck("motion: a repaint after a 1–5 tap plays nothing", prs() === "");
+      Motion.reduced = () => true; Motion.log = []; pr1()[1].onclick();
+      ck("motion: with reduced motion a 1–5 tap plays nothing", Motion.log.length === 0 && State.ratingsDraft[SECTIONS[0].key + "0"] === 2);
+      Motion.reduced = () => false; State.ratingsDraft = null; Store.keepDraft("ratings", null); State.openSec = {};
+      State.tab = "log"; flash("Test note"); clearTimeout(flashT); renderLog(); Motion.log = [];
+      const fOut = flashEnd("Test note"); clearTimeout(flashT);
+      ck("motion: the save note fades out over 200 ms before it goes", fOut === true && (Motion.log.find(x => x.kind === "noteOut") || {}).ms === 200 && State.flash === "Test note");
+      flash("Newer note"); clearTimeout(flashT);
+      ck("motion: an older note's timer never cuts a newer note", flashEnd("Test note") === false && State.flash === "Newer note");
+      Motion.reduced = () => true; renderLog(); Motion.log = []; flashEnd("Newer note"); clearTimeout(flashT);
+      ck("motion: with reduced motion the save note goes at once", State.flash === "" && Motion.log.length === 0 && !$("logSlot").querySelector(".flash"));
+      Motion.reduced = () => false; State.tab = "today";
       Store.data.readiness = rdT;
       Store.data.readiness[today] = r64;
       /* the evening standard: the answer that completes the day lands it, the same for any answers; a change after that plays nothing */
@@ -2159,7 +2255,7 @@ Seen.load();
         Motion.log = []; $("btnPractice").onclick(); if($("saveDraft")) $("saveDraft").onclick(); const a = played();
         Motion.log = []; $("btnPractice").onclick(); const sc5 = $("logSlot").querySelector(".scale"); if(sc5) sc5.querySelectorAll("button")[4].onclick(); if($("saveDraft")) $("saveDraft").onclick(); const b = played(), rated = /Practice saved · 100%/.test(State.flash);
         Motion.log = []; const row = $("entryList").querySelector(".rowbtn"); if(row) row.onclick(); const rm = btn(/^Remove$/); if(rm) rm.onclick(); const yes = btn(/Yes, remove it/); if(yes) yes.onclick();
-        ck("motion: a save sets its note down (a log save, the same for an unrated practice and a 100% one) — a removal's note stays plain", a === "notelog" && b === "notelog" && rated && played() === "" && State.flash === "Removed"); }
+        ck("motion: a save sets its note down (a log save, the same for an unrated practice and a 100% one) — a removal's note stays plain", a === "notelog" && /^presslog:\w+,notelog$/.test(b) && rated && played() === "" && State.flash === "Removed"); }
       ck("count-up: the last-seen memory is not his data — its own storage key, never in the store or a backup", Seen.KEY !== Store.KEY && !("seen" in Store.data) && !("seen" in Store.data.meta));
       { const v1 = localStorage.getItem(Store.KEY), ks = localStorage.getItem(Seen.KEY);
         Seen.map = {}; realSeenPut.call(Seen, "x", 42); const wrote = localStorage.getItem(Seen.KEY); Seen.map = {}; Seen.load(); const back = Seen.map.x === 42;
@@ -2273,6 +2369,13 @@ Seen.load();
     ck("ratings: 15 section rows, each with its count and no dot", $("sections").querySelectorAll(".sec").length === 15 && /0 of 13 rated/.test($("sections").querySelectorAll(".sec")[0].textContent) && !$("sections").querySelector(".dot"));
     $("sections").querySelectorAll(".sec")[0].querySelector("button.hd").onclick();
     ck("ratings: opening Skating shows its 13 items", $("sections").querySelectorAll(".sec")[0].querySelectorAll(".item").length === 13);
+    /* the scale's words (Simon 09-25 Q4): under the first item of every open section, nowhere else */
+    const openKeep = State.openSec; State.openSec = {}; SECTIONS.forEach(x => { State.openSec[x.key] = true; }); renderRatings();
+    const secs = $("sections").querySelectorAll(".sec"), swAll = $("sections").querySelectorAll(".sw");
+    ck("ratings: the scale words sit under the first item of every open section only", secs.length === 15 && swAll.length === 15 && Array.prototype.every.call(secs, x => { const its = x.querySelectorAll(".item"), w = x.querySelectorAll(".sw"); return w.length === 1 && its[0].querySelectorAll(".sw").length === 1 && w[0].textContent === "1 major limitation · 3 functional · 5 distinguishing"; }) && $("sections").querySelectorAll(".item .sw").length === 15);
+    State.openSec = {}; renderRatings();
+    ck("ratings: a closed section shows no scale words", $("sections").querySelectorAll(".sw").length === 0);
+    State.openSec = openKeep; renderRatings();
     const sk = $("sections").querySelectorAll(".sec")[0];
     sk.querySelectorAll(".item")[0].querySelectorAll("button")[4].onclick();
     $("sections").querySelectorAll(".sec")[0].querySelectorAll(".item")[1].querySelectorAll("button")[0].onclick();
@@ -2408,7 +2511,18 @@ Seen.load();
     ck("read: nine chapter buttons, none labelled 'Chapter Final'", $("readSlot").querySelectorAll(".chgrid button").length === 9 && !/Chapter Final/.test($("readSlot").textContent) && /Final Thoughts/.test($("readSlot").textContent));
     /* front matter, pinned from the MANUAL TEXT (lines 16–42 of manual_text.txt), never from chapters.json */
     const fmTxt = x => ((x || {}).textContent || "").replace(/\s+/g, " ").trim();
-    const fmKids = Array.from($("readSlot").children), fmAt = fmKids.findIndex(k => k.className === "chfront"), fmGrid = fmKids.findIndex(k => k.className === "chgrid");
+    const fmKids = Array.from($("readA").children).concat(Array.from($("readB").children)), fmAt = fmKids.findIndex(k => k.className === "chfront"), fmGrid = fmKids.findIndex(k => k.className === "chgrid");
+    /* round 3 (Simon 09-25): Goals and Read in two columns at desktop width; a phone reads A then B, the order it had */
+    { const kid = (col, id) => !!col && !!$(id) && Array.prototype.indexOf.call(col.children, $(id)) >= 0;
+      const tabKeep = State.tab; renderGoals(); const gA = $("goalsA"), gB = $("goalsB"), gC = $("goalsSlot").querySelector(".cols");
+      ck("layout: Goals is two columns — purpose, season goals, habits | the 90-day plan, priorities, cues, team", !!gC && gC.children[0] === gA && gC.children[1] === gB && kid(gA, "habitGoals") && kid(gB, "blockGoals") && kid(gB, "priCard") && kid(gB, "cueGoals") && !gA.querySelector(".pri"));
+      const rA = $("readA"), rB = $("readB");
+      ck("layout: Read is two columns — the manual and its front matter | the chapters and Chapters 9–55", !!rA && !!rB && !!rA.querySelector(".front") && !!rA.querySelector(".chfront") && !rA.querySelector(".chgrid") && !!rB.querySelector(".chgrid") && /Chapters 9–55 · what each teaches/.test(rB.textContent));
+      const pzc = prioritizeCard(), pzb = pzc.querySelector(".link");
+      const pzT = /Foundational strengths and Current limitations/.test(pzc.textContent) && /90-day priorities live on Goals/.test(pzc.textContent);
+      if(pzb && /90-day plan/.test(pzb.textContent)) pzb.onclick();
+      ck("ratings: the Prioritize card names where its other asks live and opens the 90-day plan", pzT && State.tab === "goals");
+      setTab(tabKeep); }
     ck("read: the front matter is Read's first section, above Chapter One", !!$("frontCard") && fmAt >= 0 && fmAt < fmGrid && /Foreword · How To Use This Manual · Player Commitment/.test(fmTxt($("frontCard"))) && /Before Chapter One/.test(fmTxt($("frontCard"))));
     if($("frontCard")) $("frontCard").onclick();
     const fmT = fmTxt($("readSlot")), fmH = Array.from($("readSlot").querySelectorAll(".prose h3")).map(h => fmTxt(h));
@@ -2800,7 +2914,7 @@ Seen.load();
     Store.saveLocal = realSave; Date.now = realNow; Seen.map = keepSeen; Seen.put = realSeenPut; Motion.reduced = realReduced; Motion.log = []; window.IntersectionObserver = realIO; Motion.watch = {};
     Store.data = JSON.parse(before);
     const ks = JSON.parse(keepState); State.tab = ks.tab; State.openSec = ks.openSec; State.openPri = ks.openPri; State.cpOpen = ks.cpOpen; State.readChapter = ks.readChapter; State.logFilter = ks.logFilter;
-    State.draft = Store.data.drafts.log || null; State.ratingsDraft = null; State.evOpen = {}; State.teachOpen = {}; State.cnOpen = {}; State.checkStep = null; State.checkFrom = null; State.pendingImport = null; State.confirmDiscard = false; State.editWin = false; State.teamNew = {name:"", role:""}; State.teamDel = null; State.toPlan = null; State.pzFilter = {}; State.wsOpen = {}; State.setupStep = null; State.inSetup = false; State.goalNew = {type:"", what:"", min:"", target:"", stretch:"", measure:""}; State.goalDel = null; State.beat = null; State.flash = ""; clearTimeout(flashT);
+    State.draft = Store.data.drafts.log || null; State.ratingsDraft = null; State.evOpen = {}; State.teachOpen = {}; State.cnOpen = {}; State.checkStep = null; State.checkFrom = null; State.checkOne = false; State.pendingImport = null; State.confirmDiscard = false; State.editWin = false; State.teamNew = {name:"", role:""}; State.teamDel = null; State.toPlan = null; State.pzFilter = {}; State.wsOpen = {}; State.setupStep = null; State.inSetup = false; State.goalNew = {type:"", what:"", min:"", target:"", stretch:"", measure:""}; State.goalDel = null; State.beat = null; State.flash = ""; clearTimeout(flashT);
     /* every tab was painted with seeded data above; repaint ALL of them from the real store,
        not only the visible one — on a #ratings load the seeded Today outlived the restore */
     /* motion opens here: the tab he sees is painted once, so a beat or count-up is not thrown away by a second paint */
