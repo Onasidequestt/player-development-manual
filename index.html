@@ -299,6 +299,13 @@ button.link.flag{display:block;text-align:left;color:var(--warn)}
 .wshd .t{font:700 15px var(--disp);letter-spacing:1px;text-transform:uppercase}
 .wshd .mute{margin-left:auto}
 .teach{margin:10px 0}
+.cnrow{border-top:1px solid var(--line)}
+.cnrow.open{padding-bottom:12px}
+.cnhd{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;background:none;border:0;border-radius:0;padding:10px 0;text-align:left;color:var(--ink)}
+.cnhd .cnq{font-size:14px}
+.cnhd .cna{font-size:14px;margin-top:2px;white-space:pre-wrap}
+.cnhd .chev{margin-left:auto;margin-right:4px}
+.cnhd[aria-expanded="true"] .chev{transform:rotate(45deg)}
 .trow{border-top:1px solid var(--line)}
 .trow:last-child{border-bottom:1px solid var(--line)}
 .thd{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;background:none;border:0;border-radius:0;padding:8px 0;text-align:left;color:var(--ink)}
@@ -561,12 +568,12 @@ const Motion = {
 Motion.dur = (from, to) => Math.min(400, 160 + Math.abs(to - from) * 10);
 /* the digits in between keep the final number's decimals: shooting 20 → 21.1 → 22.2, not 21, 22, then a jump to 22.2 */
 Motion.at = (from, to, e) => { const f = Math.pow(10, (String(to).split(".")[1] || "").length); return Math.round((from + (to - from) * e) * f) / f; };
-Motion.count = function(kind, key, node, from, to){
+Motion.count = function(kind, key, node, from, to, ms){
   if(!node || from == null || to == null || !(to > from) || !this.ok()) return false;
-  this.log.push({kind: kind, key: key, from: from, to: to, node: node}); if(this.log.length > 40) this.log.shift();
+  this.log.push({kind: kind, key: key, from: from, to: to, node: node, ms: ms || this.dur(from, to)}); if(this.log.length > 40) this.log.shift();
   if(node.animate && window.requestAnimationFrame){
     /* the digits follow a Web Animation's clock (a no-op opacity 1→1), so they keep time with every other beat */
-    const fin = node.textContent, suf = fin.replace(/^-?[0-9.]+/, ""), dur = this.dur(from, to);
+    const fin = node.textContent, suf = fin.replace(/^-?[0-9.]+/, ""), dur = ms || this.dur(from, to);
     const clock = node.animate([{opacity:1}, {opacity:1}], {duration: dur});
     const step = () => { const live = node.isConnected && (clock.playState === "running" || clock.playState === "paused");
       const k = live ? Math.min(1, (clock.currentTime || 0) / dur) : 1, e = 1 - Math.pow(1 - k, 3);
@@ -742,7 +749,7 @@ const Store = {
   },
   restore(d){ this.data = this.normalize(JSON.parse(JSON.stringify(d))); this.save(); }
 };
-const State = { openPri:{}, cpOpen:null, tab:"today", draft:null, ratingsDraft:null, openSec:{}, flash:"", readChapter:null, checkStep:null, checkFrom:null, logFilter:"all", pendingImport:null, confirmDiscard:false, editWin:false, teamNew:{name:"", role:""}, teamDel:null, toPlan:null, pzFilter:{}, wsOpen:{}, evOpen:{}, teachOpen:{}, setupStep:null, inSetup:false, goalNew:{type:"", what:"", min:"", target:"", stretch:"", measure:""}, goalDel:null, beat:null };
+const State = { openPri:{}, cpOpen:null, tab:"today", draft:null, ratingsDraft:null, openSec:{}, flash:"", readChapter:null, checkStep:null, checkFrom:null, logFilter:"all", pendingImport:null, confirmDiscard:false, editWin:false, teamNew:{name:"", role:""}, teamDel:null, toPlan:null, pzFilter:{}, wsOpen:{}, evOpen:{}, teachOpen:{}, cnOpen:{}, setupStep:null, inSetup:false, goalNew:{type:"", what:"", min:"", target:"", stretch:"", measure:""}, goalDel:null, beat:null };
 /* score of one entry, from its 1..5 fields */
 function practiceScore(e){ return pct(PRACTICE_FIELDS.map(f => e[f[0]])); }
 function gameScore(e){ return pct(GAME_FIELDS.map(f => e[f[0]])); }
@@ -997,7 +1004,9 @@ function renderToday(){
   if(beat && beat.kind === "check") Motion.play("ring", "ready", st.querySelector(".ring"), [{transform:"scale(.93)"}, {transform:"scale(1)"}], {duration: 240, easing: "cubic-bezier(.33,1,.68,1)"});
   /* the arc draws in from empty: one fixed 360 ms for any answer — a low day is drawn, never passed over, and a high one is not drawn longer */
   const arc = st.querySelector(".arc");
-  if(beat && beat.kind === "check" && arc){ const C = (2 * Math.PI * 52).toFixed(1); Motion.play("arc", "ready", arc, [{strokeDasharray: "0 " + C}, {strokeDasharray: arc.getAttribute("stroke-dasharray")}], {duration: 360, easing: "cubic-bezier(.33,1,.68,1)"}); }
+  if(beat && beat.kind === "check" && arc){ const C = (2 * Math.PI * 52).toFixed(1); Motion.play("arc", "ready", arc, [{strokeDasharray: "0 " + C}, {strokeDasharray: arc.getAttribute("stroke-dasharray")}], {duration: 360, easing: "cubic-bezier(.33,1,.68,1)"});
+    /* the number climbs with its arc, 0 → today's value over the same 360 ms (Simon 09-25 P3): the same for any answer, never remembered */
+    Motion.count("num", "ready", st.querySelector(".ring").querySelector("b"), 0, rp, 360); }
   /* figures that rose since he last saw them; the readiness average is only recorded while his answers are moving it */
   Motion.seen("today", "habitsToday", $("kpiHabits"), hp);
   Motion.seen("today", "ratingsOverall", $("kpiRatingsN"), ratingsOverallSaved());
@@ -1037,6 +1046,9 @@ function renderToday(){
     }
   }
   colA.appendChild(hc);
+  /* his cues right under the habits (Simon 09-25 P2): before practice or a game he reads them without scrolling past the block */
+  const cues = CUE_FIELDS.filter(([k]) => (g.cues[k]||"").trim());
+  if(cues.length) colA.appendChild(el("div", {class:"card", id:"cueCard"}, el("h2", null, "My cues"), ...cues.map(([k, nm]) => el("div", {class:"cue"}, el("span", {class:"ptype"}, nm), el("div", {class:"cue-t"}, g.cues[k])))));
   /* block */
   const bc = el("div", {class:"card", id:"blockCard"}, el("h2", null, "90-day block"));
   if(!bp){ bc.appendChild(el("div", {class:"empty"}, "No block started. Set a start date and a primary priority.")); bc.appendChild(el("button", {type:"button", class:"link", id:"goBlock", onclick: () => goTo("goals", "blockStart")}, "Start my 90-day block →")); }
@@ -1055,8 +1067,6 @@ function renderToday(){
      On a phone the two stack in that order, so the evening check reads last. */
   colA.appendChild(bc);
   if(!loopEnd) colA.appendChild(winCard(wkEnd));
-  const cues = CUE_FIELDS.filter(([k]) => (g.cues[k]||"").trim());
-  if(cues.length) colA.appendChild(el("div", {class:"card", id:"cueCard"}, el("h2", null, "My cues"), ...cues.map(([k, nm]) => el("div", {class:"cue"}, el("span", {class:"ptype"}, nm), el("div", {class:"cue-t"}, g.cues[k])))));
   /* My standard heads the right column, above the check against it: the desktop columns balance and the phone order is unchanged */
   colB.appendChild(standardCard());
   colB.appendChild(eveningCard(today, beat));
@@ -1632,9 +1642,14 @@ function seasonCard(){
   if(!la) c.appendChild(el("div", {class:"empty", id:"connectNone"}, "No assessment saved yet. Save one on the Ratings tab and its three highest and three lowest ratings show here as a starting point."));
   CONNECT_Q.forEach((q, i) => {
     const evd = ex && (/Strongest/.test(q) ? ["Highest", ex.hi, "connectHigh"] : /Limitations/.test(q) ? ["Lowest", ex.lo, "connectLow"] : null);
-    c.appendChild(el("label", {class:"f", for:"cn" + i}, q));
-    if(evd && evd[1].length) c.appendChild(el("div", {class:"mute", id: evd[2]}, evd[0] + " in your " + shortDay(la.day) + " assessment: " + evd[1].map(x => x.nm + " " + x.v + "/5").join(" · ")));
-    c.appendChild(el("textarea", {id:"cn" + i, rows:2, value: cn[q] || "", oninput: ev => Store.setConnect(q, ev.target.value)}));
+    /* a closed row: the question and his line, or "Not written"; a tap opens it to write (Simon 09-25 P4) */
+    const open = !!State.cnOpen[i], ans = (cn[q] || "").trim(), row = el("div", {class:"cnrow" + (open ? " open" : ""), id:"cnRow" + i});
+    row.appendChild(el("button", {type:"button", class:"cnhd", "aria-expanded": String(open), onclick: () => { State.cnOpen[i] = !open; renderGoals(); const t = $("cn" + i); if(t && t.focus && !open) t.focus(); }},
+      el("div", null, el("b", {class:"cnq"}, q), el("div", {class: ans ? "cna" : "cna mute"}, ans || "Not written")), el("div", {class:"chev"})));
+    c.appendChild(row);
+    if(!open) return;
+    if(evd && evd[1].length) row.appendChild(el("div", {class:"mute", id: evd[2]}, evd[0] + " in your " + shortDay(la.day) + " assessment: " + evd[1].map(x => x.nm + " " + x.v + "/5").join(" · ")));
+    row.appendChild(el("textarea", {id:"cn" + i, rows:2, "aria-label": q, value: cn[q] || "", oninput: ev => Store.setConnect(q, ev.target.value), onchange: () => renderGoals()}));
   });
   return c;
 }
@@ -1918,7 +1933,7 @@ Seen.load();
     /* calendar arithmetic */
     ck("dates: addDays steps calendar days across a month end and the March DST change", addDays("2026-03-01", -1) === "2026-02-28" && addDays("2026-03-09", -1) === "2026-03-08" && addDays("2026-11-02", -1) === "2026-11-01" && daysBetween("2026-03-07", "2026-03-10") === 3);
     /* readiness */
-    Store.data = Store.blank(); State.tab = "today"; State.draft = null; State.ratingsDraft = null; State.openSec = {}; State.readChapter = null; State.checkStep = null; State.checkFrom = null; State.logFilter = "all"; State.pendingImport = null; State.teachOpen = {};
+    Store.data = Store.blank(); State.tab = "today"; State.draft = null; State.ratingsDraft = null; State.openSec = {}; State.readChapter = null; State.checkStep = null; State.checkFrom = null; State.logFilter = "all"; State.pendingImport = null; State.teachOpen = {}; State.cnOpen = {};
     Object.keys(TEACH_SEEN).forEach(k => delete TEACH_SEEN[k]);   /* the boot paint does not count: the registry below is what the checks paint */
     const today = dayOf(Date.now());
     /* first run: three steps in place of five empty cards */
@@ -2082,20 +2097,22 @@ Seen.load();
       Motion.log = []; renderToday(); if($("startCheck")) $("startCheck").onclick(); [1, 2, 3, 4, 5, 3].forEach(ans);   /* it rises on the way: a beat on every answer would show */
       ck("motion: the first six morning answers play nothing", beats() === "|0" && Store.readinessPct(today) === 50);
       ans(5);
-      ck("motion: the seventh answer lands the check — the ring sets, the seven answers set down", beats() === "ring,arc,chips|6" && within() && $("kpiReady").textContent === "57%" && State.beat === null);
+      ck("motion: the seventh answer lands the check — the ring sets, the seven answers set down", beats() === "ring,arc,num,chips|6" && within() && $("kpiReady").textContent === "57%" && State.beat === null);
+      const num5 = Motion.log.find(x => x.kind === "num") || {};
+      ck("motion: the readiness % climbs with its arc, 0 → 57 over the same 360 ms, and is never remembered", num5.from === 0 && num5.to === 57 && num5.ms === 360 && num5.node === $("kpiReady") && !Object.keys(Seen.map).some(k => /ready/i.test(k)));
       renderToday();
       const arc5 = (Motion.log.find(x => x.kind === "arc") || {}).ms;
-      ck("motion: the check lands once — a later paint plays nothing more", beats() === "ring,arc,chips|6");
+      ck("motion: the check lands once — a later paint plays nothing more", beats() === "ring,arc,num,chips|6");
       ck("count-up: how he feels is never a score — readiness (today's or the 7-day average) counts nothing and is not remembered", !/ready/i.test(counted()) && !Object.keys(Seen.map).some(k => /ready/i.test(k)));
       Store.data.readiness = {}; Motion.log = []; renderToday(); if($("startCheck")) $("startCheck").onclick(); for(let q = 0; q < 6; q++) ans(4); ans(1);
-      ck("motion: the check lands the same for a 1 as for a 5 — an honest answer is never rewarded or passed over", beats() === "ring,arc,chips|6" && $("kpiReady").textContent === "64%");
+      ck("motion: the check lands the same for a 1 as for a 5 — an honest answer is never rewarded or passed over", beats() === "ring,arc,num,chips|6" && $("kpiReady").textContent === "64%");
       ck("motion: the ring's arc draws in over the same 360 ms for a low day as for a high one", arc5 === 360 && (Motion.log.find(x => x.kind === "arc") || {}).ms === 360);
       /* Change answers: the same seven again is not a new check; moving one answer is (up or down — the same landing) */
       const r64 = Store.data.readiness[today];
       Motion.log = []; if($("changeCheck")) $("changeCheck").onclick(); [4, 4, 4, 4, 4, 4, 1].forEach(ans);
       ck("motion: Change answers with the same seven answers lands nothing — nothing changed", beats() === "|0" && State.checkStep === null && $("kpiReady").textContent === "64%");
       Motion.log = []; if($("changeCheck")) $("changeCheck").onclick(); [4, 4, 2, 4, 4, 4, 1].forEach(ans);
-      ck("motion: Change answers that move one answer lands the check — the same landing, up or down", beats() === "ring,arc,chips|6" && within() && $("kpiReady").textContent === "57%");
+      ck("motion: Change answers that move one answer lands the check — the same landing, up or down", beats() === "ring,arc,num,chips|6" && within() && $("kpiReady").textContent === "57%");
       /* the run: two days already checked; today's first complete check steps it 2 → 3, whatever the answers; a Change does not */
       const rdT = Store.data.readiness, stk = () => Motion.log.filter(x => x.kind === "streak").map(x => x.from + ">" + x.to).join();
       Store.data.readiness = {[addDays(today, -1)]: r64, [addDays(today, -2)]: r64}; Motion.log = []; renderToday(); if($("startCheck")) $("startCheck").onclick(); [1, 1, 1, 1, 1, 1, 1].forEach(ans);
@@ -2365,6 +2382,8 @@ Seen.load();
     Store.setGoals({checkpoints: {30: "held up"}});
     Store.setCue("prep", "First shift: feet moving"); renderToday();
     ck("today: a written cue shows on the cue card", !!$("cueCard") && /First shift: feet moving/.test($("cueCard").textContent) && /preparation/.test($("cueCard").textContent));
+    { const kA = $("todaySlot").querySelectorAll(".card"), ix = x => x ? Array.prototype.indexOf.call(kA, x) : -1;
+      ck("today: the cue card sits right under the habits, ahead of the 90-day block and the week's win", ix($("cueCard")) === ix($("habitCard")) + 1 && ix($("cueCard")) < ix($("blockCard")) && (!$("winCard") || ix($("cueCard")) < ix($("winCard")))); }
     delete Store.data.goals.cues.prep;
     State.cpOpen = 90; renderGoals();
     ck("plan: the Day 90 checkpoint asks the next decision for each written priority", /The next decision/.test($("cpBox").textContent) && $("cpBox").querySelectorAll(".seg.wrap").length === Store.priorities().length);
@@ -2595,17 +2614,23 @@ Seen.load();
     const nSeason = Store.normalize({goals:{season:{a:null, b:{type:"x", what:"y"}, h:{type:"habit", what:"z"}, c:{type:"team", what:"Bench energy"}}}}).goals.season;
     ck("store: a stored season list with a null, an unknown kind or a habit entry loads with only the real goal", Object.keys(nSeason).join() === "c" && typeof Store.normalize({goals:{season:null}}).goals.season === "object");
     /* Chapter Seven's Baseline Connection: five lines from the manual, the latest assessment's highest and lowest three as evidence */
-    const bcLabels = () => { const ls = $("seasonCard").querySelectorAll("label"), out = []; for(let i = 0; i < ls.length; i++) out.push(ls[i].textContent); return out; };
+    const bcLabels = () => { const ls = $("seasonCard").querySelectorAll(".cnq"), out = []; for(let i = 0; i < ls.length; i++) out.push(ls[i].textContent); return out; };
     const bcText = id => (($(id || "connectLow") || {}).textContent || "").replace(/\s+/g, " ");
-    const bcAbove = (id, f) => { const k = $("seasonCard").children, at = x => { for(let i = 0; i < k.length; i++) if(k[i] === x) return i; return -2; }; return !!$(id) && at($(id)) === at($(f)) - 1; };
-    ck("baseline connection: Chapter Seven's five lines, read from the manual, label five fields on the season card", CONNECT_Q.length === 5 && CONNECT_Q[0] === "My Three Strongest Current Qualities" && CONNECT_Q[1] === "My Three Most Important Current Limitations" && CONNECT_Q[2] === "My Primary Limiting Factor" && CONNECT_Q[3] === "The Current Role I Am Preparing to Perform" && CONNECT_Q[4] === "What the Next Level of Responsibility Requires" && CONNECT_Q.every(q => bcLabels().indexOf(q) >= 0) && !!$("cn0") && !!$("cn4"));
+    const bcAbove = (id, f) => { const k = ($("cnRow" + f.slice(2)) || {children: []}).children, at = x => { for(let i = 0; i < k.length; i++) if(k[i] === x) return i; return -2; }; return !!$(id) && at($(id)) === at($(f)) - 1; };
+    ck("baseline connection: Chapter Seven's five lines, read from the manual, head five closed rows on the season card", CONNECT_Q.length === 5 && CONNECT_Q[0] === "My Three Strongest Current Qualities" && CONNECT_Q[1] === "My Three Most Important Current Limitations" && CONNECT_Q[2] === "My Primary Limiting Factor" && CONNECT_Q[3] === "The Current Role I Am Preparing to Perform" && CONNECT_Q[4] === "What the Next Level of Responsibility Requires" && CONNECT_Q.every(q => bcLabels().indexOf(q) >= 0) && bcLabels().length === 5 && !$("cn0") && !$("cn4")
+      && CONNECT_Q.every((q, i) => /Not written/.test((($("cnRow" + i) || {}).textContent || ""))));
+    { const b0 = $("cnRow0") ? $("cnRow0").querySelector("button") : null; if(b0) b0.onclick();
+      ck("baseline connection: a tap opens a line to write, and only that one", !!$("cn0") && !$("cn1") && State.cnOpen[0] === true && ($("cnRow0").querySelector("button").onclick(), !$("cn0") && !State.cnOpen[0])); }
+    State.cnOpen = {0: true, 1: true}; renderGoals();
     ck("baseline connection: with no assessment saved, one line says so plainly and no evidence is shown", /No assessment saved yet/.test(bcText("connectNone")) && !$("connectLow") && !$("connectHigh"));
     const s0 = SECTIONS[0] || {key:"", items:[]}, rA = {}, rB = {};
     s0.items.forEach((_, i) => { rA[s0.key + i] = 4; rB[s0.key + i] = 4; });
     rA[s0.key + 0] = 1; rB[s0.key + 0] = 5; rB[s0.key + 1] = 2; rB[s0.key + 2] = 2; rB[s0.key + 3] = 3;
     Store.data.assessments.push({at: 1, day: "2026-09-01", r: rA}, {at: 2, day: "2026-09-20", r: rB}); renderGoals();
     ck("baseline connection: the latest saved assessment's three lowest ratings sit under the limitations line and its three highest under the strongest qualities — not the first assessment, and nothing is written for him", s0.items.length > 4 && [1, 2, 3].every(i => bcText().indexOf(s0.items[i] + " " + rB[s0.key + i] + "/5") >= 0) && bcText().indexOf(s0.items[0]) < 0 && bcText("connectHigh").indexOf("assessment: " + s0.items[0] + " 5/5") >= 0 && [1, 2, 3].every(i => bcText("connectHigh").indexOf(s0.items[i]) < 0) && bcText().indexOf(shortDay("2026-09-20")) >= 0 && bcAbove("connectHigh", "cn0") && bcAbove("connectLow", "cn1") && !$("connectNone") && ($("cn0") || {}).value === "" && !Object.keys(Store.data.goals.connect).length);
-    ($("cn1") || {oninput(){}}).oninput({target:{value:"Second-pair D, 16 minutes a night"}}); renderGoals();
+    ($("cn1") || {oninput(){}}).oninput({target:{value:"Second-pair D, 16 minutes a night"}}); State.cnOpen = {}; renderGoals();
+    ck("baseline connection: closed, a written line shows under its question; an empty one says 'Not written'", /Second-pair D, 16 minutes a night/.test(($("cnRow1") || {}).textContent || "") && !/Not written/.test(($("cnRow1") || {}).textContent || "") && /Not written/.test(($("cnRow2") || {}).textContent || "") && !$("cn1"));
+    State.cnOpen = {1: true}; renderGoals();
     const bcTyped = Store.data.goals.connect[CONNECT_Q[1]] === "Second-pair D, 16 minutes a night" && ($("cn1") || {}).value === "Second-pair D, 16 minutes a night";
     ($("cn1") || {oninput(){}}).oninput({target:{value:"  "}});
     ck("baseline connection: a line he types is kept under its own words and shown again; cleared, it is gone", bcTyped && !Object.keys(Store.data.goals.connect).length);
@@ -2775,7 +2800,7 @@ Seen.load();
     Store.saveLocal = realSave; Date.now = realNow; Seen.map = keepSeen; Seen.put = realSeenPut; Motion.reduced = realReduced; Motion.log = []; window.IntersectionObserver = realIO; Motion.watch = {};
     Store.data = JSON.parse(before);
     const ks = JSON.parse(keepState); State.tab = ks.tab; State.openSec = ks.openSec; State.openPri = ks.openPri; State.cpOpen = ks.cpOpen; State.readChapter = ks.readChapter; State.logFilter = ks.logFilter;
-    State.draft = Store.data.drafts.log || null; State.ratingsDraft = null; State.evOpen = {}; State.teachOpen = {}; State.checkStep = null; State.checkFrom = null; State.pendingImport = null; State.confirmDiscard = false; State.editWin = false; State.teamNew = {name:"", role:""}; State.teamDel = null; State.toPlan = null; State.pzFilter = {}; State.wsOpen = {}; State.setupStep = null; State.inSetup = false; State.goalNew = {type:"", what:"", min:"", target:"", stretch:"", measure:""}; State.goalDel = null; State.beat = null; State.flash = ""; clearTimeout(flashT);
+    State.draft = Store.data.drafts.log || null; State.ratingsDraft = null; State.evOpen = {}; State.teachOpen = {}; State.cnOpen = {}; State.checkStep = null; State.checkFrom = null; State.pendingImport = null; State.confirmDiscard = false; State.editWin = false; State.teamNew = {name:"", role:""}; State.teamDel = null; State.toPlan = null; State.pzFilter = {}; State.wsOpen = {}; State.setupStep = null; State.inSetup = false; State.goalNew = {type:"", what:"", min:"", target:"", stretch:"", measure:""}; State.goalDel = null; State.beat = null; State.flash = ""; clearTimeout(flashT);
     /* every tab was painted with seeded data above; repaint ALL of them from the real store,
        not only the visible one — on a #ratings load the seeded Today outlived the restore */
     /* motion opens here: the tab he sees is painted once, so a beat or count-up is not thrown away by a second paint */
