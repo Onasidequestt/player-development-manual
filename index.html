@@ -347,6 +347,11 @@ section[data-tab].on{display:block}
 .cols{display:block}
 @media (min-width:560px){ .ext{grid-template-columns:1fr 1fr} }
 @media (min-width:960px){
+  /* U3d: bottom tab bar becomes a fixed left rail; same buttons, same order, same active state */
+  body{padding-bottom:0;padding-left:220px}
+  nav.tabs{left:0;right:auto;top:0;bottom:0;width:220px;flex-direction:column;justify-content:flex-start;align-items:stretch;border-top:0;border-right:1px solid var(--line);padding-bottom:0;padding-top:20px;overflow-y:auto}
+  nav.tabs button{flex:0 0 auto;max-width:none;width:100%;flex-direction:row;justify-content:flex-start;align-items:center;gap:14px;padding:12px 20px;min-height:44px;font-size:13px;text-align:left}
+  nav.tabs button .ic{flex:0 0 auto}
   main{max-width:1080px;padding:0 28px}
   .cols{display:grid;grid-template-columns:1.1fr 1fr;gap:18px;align-items:start}
   .brand{min-height:210px;padding:26px 28px}
@@ -446,14 +451,38 @@ function chwsBox(t, rid){
     body.appendChild(el("button", {type:"button", class:"ghost", id:rid + "-add", onclick: () => { if(!Store.addChwsEntry(toc, dayOf(Date.now()))){ flash("Write at least one line of the entry first."); return; } fill(); tick(); }}, "Add an entry"));
     const log = (R().log || []).slice().reverse();
     if(log.length){ const ol = el("div", {class:"wspast", id:rid + "-past"}, el("h4", {class:"wsub"}, "Past entries · newest first"));
-      log.forEach(e => { const ls = CHWS.log.filter(([q]) => (e.f[q] || "").trim());
-        ol.appendChild(el("details", {class:"wsold"}, el("summary", null, niceDay(e.day) + (ls.length ? " · " + e.f[ls[0][0]].trim() : "")), ...ls.map(([q]) => el("div", {class:"wsq"}, el("div", {class:"mute"}, q), el("div", null, e.f[q]))))); });
+      log.forEach(e => { const eid = rid + "-e" + e.id;
+        if(State.chwsEdit[toc] === e.id){
+          const eb = el("div", {class:"wsold wsedit", id: eid});
+          eb.appendChild(el("div", {class:"mute"}, niceDay(e.day) + (e.edited ? " · edited" : "")));
+          CHWS.log.forEach((f, j) => field("le" + e.id, f, j, e.f[f[0]], (q, v) => Store.editChwsEntry(toc, e.id, q, v)).forEach(x => eb.appendChild(x)));
+          eb.appendChild(el("button", {type:"button", class:"ghost", id: eid + "-done", onclick: () => { State.chwsEdit[toc] = null; fill(); tick(); }}, "Done"));
+          ol.appendChild(eb);
+        } else {
+          const ls = CHWS.log.filter(([q]) => (e.f[q] || "").trim()), del = State.chwsDel[toc] === e.id;
+          ol.appendChild(el("details", {class:"wsold", id: eid, open: del ? "" : null},
+            el("summary", null, niceDay(e.day) + (e.edited ? " · edited" : "") + (ls.length ? " · " + e.f[ls[0][0]].trim() : "")),
+            ...ls.map(([q]) => el("div", {class:"wsq"}, el("div", {class:"mute"}, q), el("div", null, e.f[q]))),
+            el("div", {class:"row"},
+              el("button", {type:"button", class:"ghost", id: eid + "-edit", onclick: () => { State.chwsEdit[toc] = e.id; fill(); tick(); }}, "Edit"),
+              del
+                ? el("button", {type:"button", id: eid + "-delyes", onclick: () => { Store.deleteChwsEntry(toc, e.id); State.chwsDel[toc] = null; fill(); tick(); }}, "Yes, delete it")
+                : el("button", {type:"button", class:"ghost", id: eid + "-del", onclick: () => { State.chwsDel[toc] = e.id; fill(); tick(); }}, "Delete"))));
+        }
+      });
       body.appendChild(ol); }
     body.appendChild(el("h4", {class:"wsub"}, "Chapter commitment"));
     [t.c].concat(CHWS.commit).forEach(x => body.appendChild(el("p", {class:"commit"}, x)));
-    const g = R().sign;
-    body.appendChild(el("div", {class:"sign", id:rid + "-sign"}, el("div", {class: g ? "" : "mute"}, g ? "Signed: " + g.name + " · " + niceDay(g.day) : "Player signature and date: not signed"),
-      el("button", {type:"button", class: g ? "ghost" : "primary", "aria-pressed": String(!!g), id:rid + "-signb", onclick: () => { Store.signChws(toc, PLAYER, dayOf(Date.now())); fill(); tick(); }}, g ? "Unsign" : "Sign")));
+    const g = R().sign, sn = Store.data.meta.signName || "";
+    const nameInput = el("input", {type:"text", id:rid + "-signname", value: sn, "aria-label":"Type your name to sign",
+      oninput: ev => { Store.setSignName(ev.target.value); signBtn.disabled = !ev.target.value.trim(); }});
+    const signBtn = el("button", {type:"button", class: g ? "ghost" : "primary", "aria-pressed": String(!!g), id:rid + "-signb", disabled: !g && !sn.trim() ? "disabled" : null,
+      onclick: () => { const nm = (Store.data.meta.signName || "").trim(); if(!g && !nm) return; Store.signChws(toc, nm, dayOf(Date.now())); fill(); tick(); }}, g ? "Unsign" : "Sign");
+    body.appendChild(el("div", {class:"sign", id:rid + "-sign"},
+      el("div", {class: g ? "" : "mute"}, g ? "Signed: " + g.name + " · " + niceDay(g.day) : "Player signature and date: not signed"),
+      g ? null : el("label", {class:"f", for:rid + "-signname"}, "Type your name to sign"),
+      g ? null : nameInput,
+      signBtn));
   };
   let built = false; const paint = () => { const o = !!State.chwsOpen[toc]; if(o && !built){ built = true; fill(); } hd.setAttribute("aria-expanded", String(o)); box.className = "ws" + (o ? " open" : ""); body.hidden = !o; };
   paint();
@@ -523,6 +552,9 @@ const CONNECT_Q = chapterQs("SEVEN", "Baseline Connection", /\S/);
    helping verb ("Does it…", "Can it…") is answered Yes or No; the rest ("Who should guide the work?") in his words */
 const FILTER_Q = chapterQs("SIX", "Development Priority Filter");
 function filterOpen(q){ return !/^(Does|Do|Is|Are|Has|Have|Can|Could|Will|Would|Should)\b/.test(q); }
+/* Chapter Six's "Rate Consistency, Not Potential": heading + its three lines, read from the manual so they
+   cannot drift, shown under the scale key on Ratings (U3c). null if the heading ever moves — never a silent blank. */
+const RATE_CONSISTENCY = (() => { const ch = CHAPTERS.find(c => c.n === "SIX"), b = ch && ch.blocks.find(x => x.h === "Rate Consistency, Not Potential"); return b && b.p.length ? {head: b.h, lines: b.p.map(p => p.trim())} : null; })();
 /* Chapter Nine's "Priority Ranking": four check-box lines, printed once per priority — read once each, with their answers,
    and kept under a key named for the manual's own label (never its place in the list), with a short name for the header */
 const RANK_KEYS = {"Importance": ["importance","Importance"], "Evidence strength": ["evidence","Evidence"], "Impact on current role": ["impact","Impact"], "Can it be trained safely now?": ["safe","Safe now"]};
@@ -712,14 +744,22 @@ const Store = {
       if(to) g.decisions[t] = to; else if(DECISIONS.length && DECISIONS.indexOf(v) < 0) delete g.decisions[t]; });
     if(!PRI_TYPES.some(t => t[0] === g.primaryType)) g.primaryType = "skill";
     ["readiness","practices","games","answers","read","drafts","meta","notes","habitsDone","standardCheck","weekly","team","talks","teamReviews","prioritize","assess","chws"].forEach(k => { if(!obj(out[k])) out[k] = {}; });
+    /* the half-typed season-goal add form (U5a): kept the same shape it is written in, or dropped */
+    if("season" in out.drafts){ const s = out.drafts.season;
+      if(!obj(s)) delete out.drafts.season;
+      else { ["type","what","min","target","stretch","measure"].forEach(k => { if(k in s && typeof s[k] !== "string") delete s[k]; });
+        Object.keys(s).forEach(k => { if(["type","what","min","target","stretch","measure"].indexOf(k) < 0) delete s[k]; });
+        if(s.type && !GOAL_TYPES.some(t => t[0] === s.type && t[0] !== "habit")) delete s.type;
+        if(!Object.keys(s).length) delete out.drafts.season; } }
     /* a Ch 9–55 worksheet keeps only its own shape: text answers by prompt, dated log entries, a name + date signature */
     const txts = o => { if(!obj(o)) return {}; Object.keys(o).forEach(k => { if(typeof o[k] !== "string") delete o[k]; }); return o; }, isDay = v => typeof v === "string" && /^\d{4}-\d\d-\d\d$/.test(v);
     Object.keys(out.chws).forEach(toc => { const w = out.chws[toc]; if(!/^\d+$/.test(toc) || !obj(w)){ delete out.chws[toc]; return; }
       ["a","p","draft"].forEach(k => { w[k] = txts(w[k]); if(!Object.keys(w[k]).length) delete w[k]; });
-      w.log = Array.isArray(w.log) ? w.log.filter(e => obj(e) && typeof e.id === "string" && isDay(e.day) && obj(e.f)).map(e => Object.assign(e, {f: txts(e.f)})) : []; if(!w.log.length) delete w.log;
+      w.log = Array.isArray(w.log) ? w.log.filter(e => obj(e) && typeof e.id === "string" && isDay(e.day) && obj(e.f)).map(e => { e.f = txts(e.f); if(typeof e.edited !== "number") delete e.edited; return e; }) : []; if(!w.log.length) delete w.log;
       if(!(obj(w.sign) && typeof w.sign.name === "string" && isDay(w.sign.day))) delete w.sign;
       if(!Object.keys(w).length) delete out.chws[toc]; });
     if(typeof out.meta.backupSnooze !== "string" || !/^\d{4}-\d\d-\d\d$/.test(out.meta.backupSnooze)) delete out.meta.backupSnooze;
+    if(typeof out.meta.signName !== "string") delete out.meta.signName;
     Object.keys(out.standardCheck).forEach(day => { const d = out.standardCheck[day]; if(!obj(d)){ delete out.standardCheck[day]; return; }
       if("w" in d){ if(!obj(d.w)) delete d.w; else Object.keys(d.w).forEach(k => { if(typeof d.w[k] !== "string") delete d.w[k]; }); } });
     Object.keys(out.assess).forEach(k => { const v = out.assess[k]; if(!(typeof v === "string" || Array.isArray(v) && v.every(x => typeof x === "string"))) delete out.assess[k]; });
@@ -768,7 +808,15 @@ const Store = {
   /* the draft becomes a dated entry; nothing written, nothing added */
   addChwsEntry(toc, day){ const w = this.data.chws[toc] || {}, f = w.draft || {}; if(!Object.keys(f).some(q => (f[q] || "").trim())) return false;
     (w.log || (w.log = [])).push({id: uid(), day, at: Date.now(), f}); delete w.draft; this.data.chws[toc] = w; this.save(); return true; },
+  /* Q4: a past entry's own fields, edited in place; its date and day never change */
+  editChwsEntry(toc, id, q, v){ const w = this.data.chws[toc] || {}, e = (w.log || []).find(x => x.id === id); if(!e) return;
+    if((v || "").trim()) e.f[q] = v; else delete e.f[q]; e.edited = Date.now(); this.save(); },
+  /* Q4: removes only the one entry named by id */
+  deleteChwsEntry(toc, id){ const w = this.data.chws[toc]; if(!w || !w.log) return; w.log = w.log.filter(x => x.id !== id);
+    if(!w.log.length){ delete w.log; if(!Object.keys(w).length) delete this.data.chws[toc]; } this.save(); },
   signChws(toc, name, day){ const w = this.data.chws[toc] || (this.data.chws[toc] = {}); if(w.sign) delete w.sign; else w.sign = {name, day}; if(!Object.keys(w).length) delete this.data.chws[toc]; this.save(); },
+  /* Q5: the typed name is remembered for the next chapter's Sign row */
+  setSignName(v){ this.data.meta.signName = v; this.save(); },
   setReview(today, q, v){ const k = this.reviewKey(today), r = this.data.teamReviews[k] || (this.data.teamReviews[k] = {}); if((v||"").trim()) r[q] = v; else delete r[q]; if(!Object.keys(r).length) delete this.data.teamReviews[k]; this.save(); },
   reviewDue(today){ const m = this.teamList(); if(!m.length) return false; const ks = Object.keys(this.data.teamReviews).sort(); return daysBetween(ks.length ? ks[ks.length-1] : m.map(x => x.day).sort()[0], today) >= REVIEW_EVERY; },
   drop(kind, id){ delete this.data[kind][id]; this.save(); },
@@ -800,7 +848,7 @@ const Store = {
   /* Chapter Three's daily standard check: Yes = 2, Partially = 1, No = 0; unanswered never counts */
   putStandardLine(day, line, v){ const d = this.data.standardCheck[day] || (this.data.standardCheck[day] = {}), w = d.w || (d.w = {});
     if((v || "").trim()) w[line] = v; else delete w[line]; if(!Object.keys(w).length) delete d.w; if(!Object.keys(d).length) delete this.data.standardCheck[day]; this.save(); },
-  putStandard(day, k, v){ const d = this.data.standardCheck[day] || (this.data.standardCheck[day] = {}); d[k] = v; this.save(); },
+  putStandard(day, k, v){ const d = this.data.standardCheck[day] || (this.data.standardCheck[day] = {}); if(d[k] === v) delete d[k]; else d[k] = v; this.save(); },
   standardPct(days){
     let got = 0, n = 0;
     days.forEach(day => { const d = this.data.standardCheck[day] || {}; STANDARD_Q.forEach(q => { if(d[q.k] === 0 || d[q.k] === 1 || d[q.k] === 2){ got += d[q.k]; n++; } }); });
@@ -819,12 +867,12 @@ const Store = {
     let o = null;
     try{ o = JSON.parse(text); }catch(e){ return {err:"That file could not be read as a backup."}; }
     const obj = v => !!v && typeof v === "object" && !Array.isArray(v);
-    if(!o || o.app !== "pdm" || !obj(o.data) || !Array.isArray(o.data.assessments) || ["readiness","practices","games"].some(k => !obj(o.data[k])) || ["habitsDone","answers","notes","standardCheck","goals","weekly","team","talks","teamReviews","prioritize","chws"].some(k => k in o.data && !obj(o.data[k]))) return {err:"That file is not a Player Development Manual backup, or it is damaged. Nothing was changed."};
+    if(!o || o.app !== "pdm" || !obj(o.data) || !Array.isArray(o.data.assessments) || ["readiness","practices","games"].some(k => !obj(o.data[k])) || ["habitsDone","answers","notes","standardCheck","goals","weekly","team","talks","teamReviews","prioritize","chws","drafts"].some(k => k in o.data && !obj(o.data[k]))) return {err:"That file is not a Player Development Manual backup, or it is damaged. Nothing was changed."};
     return {data:o.data, at:o.at};
   },
   restore(d){ this.data = this.normalize(JSON.parse(JSON.stringify(d))); this.save(); }
 };
-const State = { openPri:{}, cpOpen:null, tab:"today", draft:null, ratingsDraft:null, openSec:{}, flash:"", readChapter:null, checkStep:null, checkFrom:null, checkOne:false, eveStep:null, eveOne:false, chwsOpen:{}, logFilter:"all", pendingImport:null, confirmDiscard:false, editWin:false, teamNew:{name:"", role:""}, teamDel:null, toPlan:null, pzFilter:{}, wsOpen:{}, evOpen:{}, teachOpen:{}, cnOpen:{}, setupStep:null, inSetup:false, goalNew:{type:"", what:"", min:"", target:"", stretch:"", measure:""}, goalDel:null, beat:null };
+const State = { openPri:{}, cpOpen:null, tab:"today", draft:null, ratingsDraft:null, openSec:{}, flash:"", readChapter:null, checkStep:null, checkFrom:null, checkOne:false, eveStep:null, eveOne:false, chwsOpen:{}, chwsEdit:{}, chwsDel:{}, logFilter:"all", pendingImport:null, confirmDiscard:false, editWin:false, teamNew:{name:"", role:""}, teamDel:null, toPlan:null, pzFilter:{}, wsOpen:{}, evOpen:{}, teachOpen:{}, cnOpen:{}, setupStep:null, inSetup:false, goalNew:{type:"", what:"", min:"", target:"", stretch:"", measure:""}, goalDel:null, beat:null };
 /* score of one entry, from its 1..5 fields */
 function practiceScore(e){ return pct(PRACTICE_FIELDS.map(f => e[f[0]])); }
 function gameScore(e){ return pct(GAME_FIELDS.map(f => e[f[0]])); }
@@ -963,6 +1011,20 @@ function bars(points, emptyText, opts){
   const wrap = el("div", null, box, ax);
   return wrap;
 }
+/* U5b: Chapter Six ratings as percentage visuals over time, per open section. Reuses bars() (the same engine
+   as the overall over-time chart) with a per-section series: one bar per saved assessment, oldest to newest,
+   the last 10 at most. A snapshot that rated none of the section is an honest gap (bars() already draws v==null
+   as a floor tick, never a 0). Fewer than 2 saved assessments: an honest one-line empty state, never a fake chart. */
+function sectionHistory(sec){
+  const snaps = Store.data.assessments.slice(-10);
+  const wrap = el("div", {class:"sechist", id:"sechist-" + sec.key}, el("h4", {class:"wsub"}, "Over time"));
+  if(snaps.length < 2){
+    wrap.appendChild(el("div", {class:"empty"}, (snaps.length === 0 ? "No saved assessments yet." : "One saved assessment so far.") + " Save another to see this section over time."));
+    return wrap;
+  }
+  wrap.appendChild(bars(snaps.map(a => ({v: sectionPct(sec, a.r).p, label: shortDay(a.day)})), ""));
+  return wrap;
+}
 let flashT = 0;
 function flash(msg){ State.flash = msg; clearTimeout(flashT); flashT = setTimeout(() => flashEnd(msg), 4000); }
 /* the note leaves as it came (Simon 09-25 round 3): 200 ms fade, then the repaint that removes it; reduced motion, at once.
@@ -1050,27 +1112,25 @@ function renderToday(){
   ht.appendChild(el("div", {class:"t3", id:"heroDate"}, niceDay(today) + (bp && bp.days >= 0 && bp.left ? " · Day " + (bp.days + 1) + " of " + BLOCK_DAYS : "")));
   const f = flashBox(); if(f) slot.appendChild(f);
   if(Store.saveFailed) slot.appendChild(el("div", {class:"unsaved", id:"saveFail", role:"alert"}, "This phone refused to save (storage full or private browsing). Your last changes are NOT kept — tap Save backup file below now."));
-  /* "Not now" quiets the nudge for SNOOZE_DAYS (meta.backupSnooze = the day it comes back); the loop card's backup line is the week's own, not snoozed */
+  /* ONE backup surface (Simon's U3a ruling — the nudge below the ring): the Backup card itself carries the due words
+     and "Not now" (meta.backupSnooze = the day it comes back) and moves up next to the ring when due; otherwise it
+     stays put at the bottom of the right column. The loop card's own backup line is the week's own, never snoozed. */
   const due = backupDue(today), snoozed = Store.data.meta.backupSnooze && today < Store.data.meta.backupSnooze;
-  const nudge = due && !snoozed ? el("div", {class:"nudge", id:"backupNudge"}, el("span", null, due), el("div", {class:"nb"},
-    el("button", {type:"button", class:"ghost", id:"nudgeSnooze", onclick: () => { Store.data.meta.backupSnooze = addDays(today, SNOOZE_DAYS); Store.save(); renderToday(); }}, "Not now"),
-    el("button", {type:"button", class:"ghost", onclick: downloadBackup}, "Save backup file"))) : null;
   /* first run: three steps in place of five empty cards; backup stays, the end-of-day check waits (Simon 09-24 R4) */
   const su = setupActive();
   if(State.inSetup && !su && !Store.data.meta.setupSkipped){ State.inSetup = false; flash("Set up. From here this page is your day."); renderToday(); return; }
   State.inSetup = su;
   const beat = takeBeat();
   if(su){
-    if(nudge) slot.appendChild(nudge);
     slot.appendChild(setupCard(today));
-    slot.appendChild(backupCard());
+    slot.appendChild(backupCard(due && !snoozed ? due : null, true));
     return;
   }
   /* Sunday closes the week; on Monday an unclosed week is still offered, then it lets go */
   const wkEnd = weekEnd(today), lastEnd = addDays(wkEnd, -7);
   const loopEnd = !hasData() ? null : wkEnd === today ? today : daysBetween(lastEnd, today) === 1 && !Store.weekClosed(lastEnd) ? lastEnd : null;
-  /* one backup control up top: on the loop day the loop card's backup line carries the nudge's words */
-  if(nudge && !loopEnd) slot.appendChild(nudge);
+  /* on the loop day the loop card's own backup line carries the due words; the Backup card never doubles it, and drops its own Save button there */
+  const cardDue = due && !snoozed && !loopEnd ? due : null;
   if(loopEnd) slot.appendChild(loopCard(loopEnd));
   const colA = el("div"), colB = el("div");
   slot.appendChild(el("div", {class:"cols"}, colA, colB));
@@ -1115,6 +1175,8 @@ function renderToday(){
   Motion.seen("today", "ratingsOverall", $("kpiRatingsN"), ratingsOverallSaved());
   if(bp) Motion.seen("today", "block", $("kpiBlock"), bp.pct);
   if(eveUp) colA.appendChild(eveningCard(today, beat));
+  /* a due backup card sits right under the ring (or right after the evening card when that is under the ring, Simon's U3a ruling) */
+  if(cardDue) colA.appendChild(backupCard(cardDue, true));
   colA.appendChild(checkCard(today, beat));
   /* habits */
   const slots = Store.habitSlots();
@@ -1170,22 +1232,36 @@ function renderToday(){
   /* column A = the morning (state, check, habits, block, standard); column B = end of day + backup.
      On a phone the two stack in that order, so the evening check reads last. */
   colA.appendChild(bc);
-  if(!loopEnd) colA.appendChild(winCard(wkEnd));
+  if(!loopEnd) colA.appendChild(winCard(wkEnd, beat));
   /* My standard heads the right column, above the check against it: the desktop columns balance and the phone order is unchanged */
   colB.appendChild(standardCard());
   if(!eveUp) colB.appendChild(eveningCard(today, beat));
-  colB.appendChild(backupCard());
+  /* not due (or snoozed): the Backup card stays in its usual place, last in the right column (the bottom on a phone), and stays quiet */
+  if(!cardDue) colB.appendChild(backupCard(null, !loopEnd));
 }
 /* the manual's weekly template: "Choose one development behavior that would make the week productive even if statistics fluctuate" */
 const WIN_HINT = "One behaviour that makes the week productive even if the stats don't go your way.";
-function winCard(end){
-  const w = Store.data.weekly[end] || {}, c = el("div", {class:"card", id:"winCard"}, el("h2", null, "This week's win"));
+function winCard(end, beat){
+  const w = Store.data.weekly[end] || {}, startVal = w.win || "", c = el("div", {class:"card", id:"winCard"}, el("h2", null, "This week's win"));
+  /* it still saves on every keystroke (oninput); a small "Saved" mark plays only when he stops typing (change/blur) AND the text actually moved —
+     the same fade-in note any other save uses (flashBox's "note" beat, Simon's U3b ruling): nothing on a repaint, nothing when nothing changed.
+     The mark can land in either branch below: a first-ever win flips straight to the read-only line on that same blur. */
+  const savedMark = () => {
+    if(!(beat && beat.kind === "winSaved")) return null;
+    const mark = el("span", {class:"mute", id:"winSaved"}, "Saved");
+    Motion.play("note", "win", mark, [{opacity:0, transform:"translateY(-6px)"}, {opacity:1, transform:"none"}], {duration: 200});
+    return mark;
+  };
   if((w.win||"").trim() && !State.editWin){
     c.appendChild(el("div", {class:"cue-t", id:"winText"}, w.win));
-    c.appendChild(el("div", {class:"row"}, el("span", {class:"mute"}, "Sunday: close the loop on it."), el("button", {type:"button", class:"link right", onclick: () => { State.editWin = true; renderToday(); }}, "Change")));
+    c.appendChild(el("div", {class:"row"}, el("span", {class:"mute"}, "Sunday: close the loop on it."), el("button", {type:"button", class:"link right", id:"winChange", onclick: () => { State.editWin = true; renderToday(); }}, "Change")));
+    const m1 = savedMark(); if(m1) c.appendChild(m1);
   } else {
     c.appendChild(el("p", {class:"mute"}, WIN_HINT));
-    c.appendChild(el("input", {type:"text", id:"winInput", value: w.win || "", placeholder:"e.g. first three strides hard on every puck race", "aria-label":"This week's win", oninput: ev => Store.setWeek(end, "win", ev.target.value)}));
+    c.appendChild(el("input", {type:"text", id:"winInput", value: w.win || "", placeholder:"e.g. first three strides hard on every puck race", "aria-label":"This week's win",
+      oninput: ev => Store.setWeek(end, "win", ev.target.value),
+      onchange: ev => { if(ev.target.value !== startVal) State.beat = {kind:"winSaved"}; renderToday(); }}));
+    const m2 = savedMark(); if(m2) c.appendChild(m2);
     c.appendChild(el("button", {type:"button", class:"ghost", id:"winDone", onclick: () => { State.editWin = false; renderToday(); }}, "Done"));
   }
   c.appendChild(teachRows("win"));
@@ -1286,9 +1362,9 @@ function eveningCard(today, beat){
     STANDARD_Q.forEach((x, i) => dots.appendChild(el("i", {class: i === k ? "cur" : rec[x.k] != null ? "on" : ""})));
     c.appendChild(el("div", {class:"stepper", id:"eveStepper"}, el("div", {class:"row"}, el("span", {class:"mute"}, "Question " + (k + 1) + " of " + STANDARD_Q.length), el("span", {class:"right"}, dots)),
       el("div", {class:"q"}, q.nm), el("p", {class:"mute", id:"eveQ"}, q.q),
-      answerSeg("seg yn", STANDARD_A, rec[q.k], "", v => { Store.putStandard(today, q.k, v);
+      answerSeg("seg yn", STANDARD_A, rec[q.k], "", v => { const was = rec[q.k]; Store.putStandard(today, q.k, v); const cleared = was === v;
         const now = STANDARD_Q.filter(x => (Store.data.standardCheck[today] || {})[x.k] != null).length;
-        State.eveStep = k < STANDARD_Q.length - 1 && !State.eveOne && now < STANDARD_Q.length ? k + 1 : null; if(State.eveStep === null) State.eveOne = false;
+        State.eveStep = cleared ? k : k < STANDARD_Q.length - 1 && !State.eveOne && now < STANDARD_Q.length ? k + 1 : null; if(State.eveStep === null) State.eveOne = false;
         State.beat = done < STANDARD_Q.length && now === STANDARD_Q.length ? {kind:"evening"} : null; renderToday(); }),
       el("div", {class:"row"},
         el("button", {type:"button", class:"ghost", disabled: k === 0 ? "disabled" : null, onclick: () => { State.eveStep = k - 1; renderToday(); }}, "Back"),
@@ -1363,16 +1439,26 @@ function firstDay(){
 }
 function agoText(ts){ const d = daysBetween(dayOf(ts), dayOf(Date.now())); return d <= 0 ? "today" : d === 1 ? "yesterday" : d + " days ago"; }
 function hasData(){ const d = Store.data; return Object.keys(d.readiness).length || Object.keys(d.practices).length || Object.keys(d.games).length || d.assessments.length || Object.keys(d.answers).some(k => d.answers[k]); }
-function backupCard(){
+/* the ONE backup surface (Simon's U3a ruling — the nudge below the ring): `due` is the due words to carry (or null, when not
+   due, snoozed, or the loop day already carries them) and `showSave` is false only on the loop day, where the loop card's
+   own #wkBackup is Today's one Save-backup button */
+function backupCard(due, showSave){
   const last = Store.data.meta.lastBackup;
   const c = el("div", {class:"card quiet", id:"backupCard"}, el("h2", null, "Backup"));
-  c.appendChild(el("p", {class:"sub", id:"backupLine"}, "Everything lives on this phone only. Last backup: " + (last ? agoText(last) : "never") + "."));
-  if(hasData() && (!last || daysBetween(dayOf(last), dayOf(Date.now())) > 7)) c.appendChild(el("p", {class:"mute"}, "Save a backup file now and then — clearing the browser deletes everything."));
+  if(due){
+    /* the same neutral nudge box as before (I2: snoozable, never --warn) — now nested inside the one Backup card instead of
+       floating above the ring; its own "Save backup file" is dropped here, since the row below (showSave) is the one button */
+    c.appendChild(el("div", {class:"nudge", id:"backupNudge"}, el("span", null, due), el("div", {class:"nb"},
+      el("button", {type:"button", class:"ghost", id:"nudgeSnooze", onclick: () => { Store.data.meta.backupSnooze = addDays(dayOf(Date.now()), SNOOZE_DAYS); Store.save(); renderToday(); }}, "Not now"))));
+  } else {
+    c.appendChild(el("p", {class:"sub", id:"backupLine"}, "Everything lives on this phone only. Last backup: " + (last ? agoText(last) : "never") + "."));
+    if(hasData() && (!last || daysBetween(dayOf(last), dayOf(Date.now())) > 7)) c.appendChild(el("p", {class:"mute"}, "Save a backup file now and then — clearing the browser deletes everything."));
+  }
   if(State.pendingImport){
     const pi = State.pendingImport, d = pi.data;
     c.appendChild(el("div", {class:"unsaved"}, "Replace everything on this phone with the backup" + (pi.at ? " from " + niceDay(dayOf(pi.at)) : "") + "? It holds " + Object.keys(d.practices||{}).length + " practices, " + Object.keys(d.games||{}).length + " games and " + d.assessments.length + " assessments."));
     c.appendChild(el("div", {class:"row"},
-      el("button", {type:"button", class:"primary", id:"confirmRestore", onclick: () => { Store.restore(d); State.pendingImport = null; State.ratingsDraft = null; State.draft = Store.data.drafts.log || null; flash("Backup restored"); renderAll(); }}, "Yes, restore"),
+      el("button", {type:"button", class:"primary", id:"confirmRestore", onclick: () => { Store.restore(d); State.pendingImport = null; State.ratingsDraft = null; State.draft = Store.data.drafts.log || null; State.goalNew = {type:"", what:"", min:"", target:"", stretch:"", measure:""}; if(Store.data.drafts.season) Object.assign(State.goalNew, Store.data.drafts.season); flash("Backup restored"); renderAll(); }}, "Yes, restore"),
       el("button", {type:"button", class:"ghost", onclick: () => { State.pendingImport = null; renderToday(); }}, "Cancel")));
     return c;
   }
@@ -1381,9 +1467,11 @@ function backupCard(){
     fl.text().then(t => { const r = Store.parseBackup(t); if(r.err) flash(r.err); else State.pendingImport = r; renderToday(); });
   }});
   c.appendChild(file);
-  c.appendChild(el("div", {class:"row"},
-    el("button", {type:"button", class:"primary", id:"btnBackup", onclick: downloadBackup}, "Save backup file"),
-    el("button", {type:"button", class:"ghost", onclick: () => file.click()}, "Restore")));
+  /* Today holds exactly one Save-backup button: this one, unless the loop card's #wkBackup already is it */
+  const row = el("div", {class:"row"});
+  if(showSave) row.appendChild(el("button", {type:"button", class:"primary", id:"btnBackup", onclick: downloadBackup}, "Save backup file"));
+  row.appendChild(el("button", {type:"button", class:"ghost", onclick: () => file.click()}, "Restore"));
+  c.appendChild(row);
   return c;
 }
 function downloadBackup(){
@@ -1606,7 +1694,10 @@ function renderRatings(){
   if(last) colB.appendChild(prioritizeCard());
   const secCard = el("div", {class:"card", id:"secCard"}, el("h2", null, "Sections · baseline vs now"));
   secCard.appendChild(el("div", {class:"legend"}, el("span", null, el("i", {class:"now"}), "now"), base ? el("span", null, el("i", {class:"base"}), "baseline " + shortDay(base.day)) : el("span", null, "no baseline yet — your first save becomes it"), el("span", null, "tick = 50%")));
-  secCard.appendChild(el("div", {class:"keyrow", id:"scaleKey"}, el("div", {class:"scale-key"}, el("span", null, "1 major limitation"), el("span", null, "3 functional"), el("span", null, "5 distinguishing")), el("div", {class:"mute"}, "A 3 is functional, not poor. A 5 should be rare.")));
+  const rcKid = RATE_CONSISTENCY
+    ? el("div", {class:"rateConsistency"}, el("h4", {class:"wsub"}, RATE_CONSISTENCY.head), ...RATE_CONSISTENCY.lines.map(l => el("p", {class:"mute"}, l)))
+    : el("div", {class:"mute", id:"rateConsistencyMissing"}, "Chapter Six heading not found");
+  secCard.appendChild(el("div", {class:"keyrow", id:"scaleKey"}, el("div", {class:"scale-key"}, el("span", null, "1 major limitation"), el("span", null, "3 functional"), el("span", null, "5 distinguishing")), el("div", {class:"mute"}, "A 3 is functional, not poor. A 5 should be rare."), rcKid));
   const list = el("div", {id:"sections"});
   SECTIONS.forEach(sec => {
     const sp = sectionPct(sec, r), bpS = base ? sectionPct(sec, baseR).p : null;
@@ -1619,6 +1710,8 @@ function renderRatings(){
     const db = dumb(sp.p, bpS); if(thin) db.classList.add("thin"); box.appendChild(db);
     if(open){
       const body = el("div", {class:"body"});
+      /* its own history first: a 13-item section puts anything at its end ~1,400 px down on a phone */
+      body.appendChild(sectionHistory(sec));
       if(TEACH_AT.some(a => a[0] === "sec:" + sec.key)) body.appendChild(teachRows("sec:" + sec.key));
       const form = sixForm(sec) || {ev: {}, pre: [], post: [], sum: []};
       form.pre.forEach((nd, j) => body.appendChild(sixField(nd, r, "sf-" + sec.key + "-p" + j)));
@@ -1755,20 +1848,27 @@ function seasonCard(){
     c.appendChild(g);
   });
   /* add one: a kind, the goal, and the manual's minimum / target / stretch "where appropriate" */
+  /* U5a: a half-typed season goal is otherwise the only text form in the app that a reload loses (measured 09-26).
+     Restore it on repaint the same way ratingsDraft restores from Store.data.drafts.ratings: only when the live
+     form is still blank, so a restore never clobbers what he is mid-typing. */
+  const keptSeason = Store.data.drafts.season;
+  if(keptSeason && !State.goalNew.type && !State.goalNew.what && !State.goalNew.min && !State.goalNew.target && !State.goalNew.stretch && !State.goalNew.measure)
+    Object.assign(State.goalNew, keptSeason);
   const nw = State.goalNew, ty = GOAL_TYPES.find(x => x[0] === nw.type), ok = () => !!(nw.type && nw.what.trim());
   const sync = () => { const b = $("goalAdd"); if(b) b.disabled = !ok(); };
+  const keep = () => Store.keepDraft("season", nw);
   c.appendChild(el("h3", null, "Add a season goal"));
   const seg = el("div", {class:"seg wrap", id:"goalTypes"});
-  GOAL_TYPES.filter(x => x[0] !== "habit").forEach(([t, nm]) => seg.appendChild(el("button", {type:"button", "data-t": t, "aria-pressed": String(nw.type === t), onclick: () => { nw.type = nw.type === t ? "" : t; renderGoals(); }}, nm)));
+  GOAL_TYPES.filter(x => x[0] !== "habit").forEach(([t, nm]) => seg.appendChild(el("button", {type:"button", "data-t": t, "aria-pressed": String(nw.type === t), onclick: () => { nw.type = nw.type === t ? "" : t; keep(); renderGoals(); }}, nm)));
   c.appendChild(seg);
-  c.appendChild(el("input", {type:"text", id:"goalWhat", value: nw.what, placeholder: ty ? ty[4] : "Pick a kind, then write the goal", "aria-label":"The goal", oninput: ev => { nw.what = ev.target.value; sync(); }}));
+  c.appendChild(el("input", {type:"text", id:"goalWhat", value: nw.what, placeholder: ty ? ty[4] : "Pick a kind, then write the goal", "aria-label":"The goal", oninput: ev => { nw.what = ev.target.value; sync(); keep(); }}));
   const lv = el("div", {class:"row gstats"});
-  [["min","Minimum"],["target","Target"],["stretch","Stretch"]].forEach(([k, lab]) => lv.appendChild(el("div", null, el("label", {class:"f", for:"goal-" + k}, lab), el("input", {type:"text", id:"goal-" + k, value: nw[k], oninput: ev => { nw[k] = ev.target.value; }}))));
+  [["min","Minimum"],["target","Target"],["stretch","Stretch"]].forEach(([k, lab]) => lv.appendChild(el("div", null, el("label", {class:"f", for:"goal-" + k}, lab), el("input", {type:"text", id:"goal-" + k, value: nw[k], oninput: ev => { nw[k] = ev.target.value; keep(); }}))));
   c.appendChild(lv);
   c.appendChild(el("div", {class:"mute hint"}, "Minimum = still meaningful progress. Target = what you are actively pursuing. Stretch = possible if things go especially well. All optional."));
   c.appendChild(el("label", {class:"f", for:"goalMeasure"}, "How I'll measure it"));
-  c.appendChild(el("input", {type:"text", id:"goalMeasure", value: nw.measure, placeholder:"The actions and the result — track both", oninput: ev => { nw.measure = ev.target.value; }}));
-  c.appendChild(el("button", {type:"button", class:"primary", id:"goalAdd", disabled: ok() ? null : "disabled", onclick: () => { if(!ok()) return; Store.addSeasonGoal({type: nw.type, what: nw.what, min: nw.min.trim(), target: nw.target.trim(), stretch: nw.stretch.trim(), measure: nw.measure.trim()}); State.goalNew = {type:"", what:"", min:"", target:"", stretch:"", measure:""}; renderGoals(); }}, "Add goal"));
+  c.appendChild(el("input", {type:"text", id:"goalMeasure", value: nw.measure, placeholder:"The actions and the result — track both", oninput: ev => { nw.measure = ev.target.value; keep(); }}));
+  c.appendChild(el("button", {type:"button", class:"primary", id:"goalAdd", disabled: ok() ? null : "disabled", onclick: () => { if(!ok()) return; Store.addSeasonGoal({type: nw.type, what: nw.what, min: nw.min.trim(), target: nw.target.trim(), stretch: nw.stretch.trim(), measure: nw.measure.trim()}); State.goalNew = {type:"", what:"", min:"", target:"", stretch:"", measure:""}; Store.keepDraft("season", null); renderGoals(); }}, "Add goal"));
   /* Chapter Seven's "Baseline Connection": five lines, his to write. Under the two the baseline speaks to, the latest saved
      assessment's three highest (strongest qualities) and three lowest (limitations) sit as evidence, never filled in for him */
   const la = Store.lastAssessment(), ex = la ? extremes(la.r, 3) : null, cn = Store.data.goals.connect;
@@ -2075,6 +2175,7 @@ Store.load();
 Seen.load();
 (function boot(){
   State.draft = Store.data.drafts.log || null;
+  if(Store.data.drafts.season) Object.assign(State.goalNew, Store.data.drafts.season);
   try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
   const t = (location.hash || "").replace("#","");
   setTab(TABS.indexOf(t) >= 0 ? t : "today");
@@ -2096,6 +2197,8 @@ Seen.load();
   /* "on screen" inside the self-check: a stand-in IntersectionObserver reports a number in view at once (the stub has none; the real
      one answers a frame later, after the checks) — or, while offScreen, reports it out of view (as the real one does at once) and holds the in-view report until a check scrolls to it */
   const realIO = window.IntersectionObserver, held = []; let offScreen = false;
+  /* the count-up memory as the page found it: the self-check runs on every load, so any write to it here is a fixture number he never saw */
+  const seenStored = (() => { try{ return localStorage.getItem(Seen.KEY); }catch(e){ return null; } })();
   window.IntersectionObserver = function(cb){ let gone = false; this.disconnect = () => { gone = true; };
     this.observe = n => { const say = v => { if(!gone) cb([{isIntersecting: v, target: n}], this); }; if(offScreen){ say(false); held.push(() => say(true)); } else say(true); }; };
   const realNow = Date.now;
@@ -2117,7 +2220,7 @@ Seen.load();
     /* calendar arithmetic */
     ck("dates: addDays steps calendar days across a month end and the March DST change", addDays("2026-03-01", -1) === "2026-02-28" && addDays("2026-03-09", -1) === "2026-03-08" && addDays("2026-11-02", -1) === "2026-11-01" && daysBetween("2026-03-07", "2026-03-10") === 3);
     /* readiness */
-    Store.data = Store.blank(); State.tab = "today"; State.draft = null; State.ratingsDraft = null; State.openSec = {}; State.readChapter = null; State.checkStep = null; State.checkFrom = null; State.checkOne = false; State.eveStep = null; State.eveOne = false; State.logFilter = "all"; State.pendingImport = null; State.teachOpen = {}; State.cnOpen = {}; State.chwsOpen = {};
+    Store.data = Store.blank(); State.tab = "today"; State.draft = null; State.ratingsDraft = null; State.openSec = {}; State.readChapter = null; State.checkStep = null; State.checkFrom = null; State.checkOne = false; State.eveStep = null; State.eveOne = false; State.logFilter = "all"; State.pendingImport = null; State.teachOpen = {}; State.cnOpen = {}; State.chwsOpen = {}; State.chwsEdit = {}; State.chwsDel = {};
     Object.keys(TEACH_SEEN).forEach(k => delete TEACH_SEEN[k]);   /* the boot paint does not count: the registry below is what the checks paint */
     const today = dayOf(Date.now());
     /* first run: three steps in place of five empty cards */
@@ -2136,7 +2239,7 @@ Seen.load();
     for(let q = 1; q < 7; q++) suAns();
     ck("first run: the seventh answer moves on to Who I am, and step 1 carries its tick", setupSteps()[0] === true && !!$("setupCard") && !!$("suIdentity") && $("setupCard").querySelectorAll(".step.done").length === 1 && /✓/.test($("setupCard").querySelectorAll(".step")[0].textContent));
     const suRec = Store.data.readiness[today]; delete Store.data.readiness[today]; Store.putReadiness(addDays(today, -5), {sleep: 3}); renderToday();
-    ck("first run: a first check 5 days back and no backup still nudges, above Start here", /5 days of work and no backup yet/.test((($("backupNudge") || {}).textContent) || "") && !!$("setupCard"));
+    ck("first run: a first check 5 days back and no backup still nudges, inside the one Backup card after Start here", /5 days of work and no backup yet/.test((($("backupNudge") || {}).textContent) || "") && !!$("setupCard") && $("todaySlot").children[$("todaySlot").children.length - 1].id === "backupCard" && (!!$("btnBackup") + !!$("wkBackup")) === 1);
     delete Store.data.readiness[addDays(today, -5)]; Store.data.readiness[today] = suRec; renderToday();
     suType("suIdentity", "I am developing into a dependable two-way forward");
     ck("first run: the identity typed in step 2 is the one Read and My standard show", Store.data.answers.identity === "I am developing into a dependable two-way forward" && setupSteps()[1] === true);
@@ -2188,18 +2291,24 @@ Seen.load();
     ck("today: a gap breaks the run: today, -1, -2 in a row (3), the day at -4 counts in the 7 but not the run", checkStreak(today) === 3 && /4 of the last 7 days · 3 in a row/.test($("checkStreak").textContent.replace(/\s+/g, " ")));
     ck("today: before the morning check is done the run still stands (ends yesterday)", checkStreak(addDays(today, 1)) === 3);
     const bNote = () => ((($("backupNudge") || $("wkBackupNote") || {}).textContent) || "");
-    ck("backup: 4 days of work and no backup → a nudge at the top of Today (on the loop day, the loop card's backup line)", /4 days of work and no backup yet/.test(bNote()));
+    /* the ONE backup surface (Simon's U3a ruling): a due, unsnoozed card sits right after #stateCard (or right after
+       #eveningCard when that is under the ring) and carries the one Save-backup button; not due/snoozed, it sits quiet
+       at the bottom of the right column */
+    const dueAfterRing = () => { const colA = $("todaySlot").querySelectorAll(".cols")[0].children[0], ids = Array.from(colA.children).map(c => c.id), ei = ids.indexOf("eveningCard"); return ei >= 0 ? ids[ei + 1] === "backupCard" : ids[0] === "stateCard" && ids[1] === "backupCard"; };
+    const oneSaveBtn = () => (!!$("btnBackup") + !!$("wkBackup")) === 1;
+    ck("backup: 4 days of work and no backup → the Backup card itself carries the due words, right after the ring (on the loop day, the loop card's backup line)", /4 days of work and no backup yet/.test(bNote()) && dueAfterRing() && oneSaveBtn());
+    ck("backup: there is no separate nudge surface above the ring any more — its one .nudge box lives INSIDE the Backup card", $("todaySlot").querySelectorAll(".nudge").length === 1 && $("backupCard").querySelectorAll(".nudge").length === 1);
     Store.data.meta.lastBackup = tsOfDay(addDays(today, -20)); renderToday();
-    ck("backup: a backup 20 days old nudges again, naming its age", /Last backup 20 days ago/.test(bNote()));
+    ck("backup: a backup 20 days old nudges again, naming its age", /Last backup 20 days ago/.test(bNote()) && dueAfterRing() && oneSaveBtn());
     Store.data.meta.lastBackup = Date.now(); renderToday();
-    ck("backup: a backup today clears the nudge", !$("backupNudge") && !/days (ago|of work)/.test(bNote()));
+    ck("backup: a backup today clears the nudge, and the card returns to the bottom of the right column", !$("backupNudge") && !/days (ago|of work)/.test(bNote()) && !dueAfterRing() && oneSaveBtn());
     Store.data.meta.lastBackup = null; renderToday();
     const snz = $("nudgeSnooze"); if(snz) snz.onclick();
-    ck("backup: Not now hides the nudge for three days and stores the day it comes back", !!snz && !$("backupNudge") && Store.data.meta.backupSnooze === addDays(today, 3));
+    ck("backup: Not now hides the nudge for three days, stores the day it comes back, and settles the card at the bottom", !!snz && !$("backupNudge") && Store.data.meta.backupSnooze === addDays(today, 3) && !dueAfterRing() && oneSaveBtn());
     ck("store: a stored snooze survives a reload; one that is not a day is dropped", Store.normalize(JSON.parse(JSON.stringify(Store.data))).meta.backupSnooze === addDays(today, 3) && !("backupSnooze" in Store.normalize({meta:{backupSnooze: 5}}).meta));
     Store.data.meta.backupSnooze = addDays(today, 1); renderToday(); const snz1 = !$("backupNudge");
     Store.data.meta.backupSnooze = today; renderToday();
-    ck("backup: the nudge comes back the day the snooze ends (quiet the day before)", snz1 && /4 days of work and no backup yet/.test(bNote()));
+    ck("backup: the nudge comes back the day the snooze ends (quiet the day before), and the card moves back up", snz1 && /4 days of work and no backup yet/.test(bNote()) && dueAfterRing() && oneSaveBtn());
     delete Store.data.meta.backupSnooze;
     Store.data.meta.lastBackup = null;
     streakDays.forEach(d => delete Store.data.readiness[d]);
@@ -2372,6 +2481,25 @@ Seen.load();
       Store.data.standardCheck = {}; Motion.log = []; renderToday(); eveRun(); [0, 0, 0, 0, 0, 0, 0].forEach(eve);
       ck("motion: the evening check lands the same for seven Noes as for a good day — an honest No is never passed over", eveBeats() === "eve,eve,eve,eve,eve,eve,eve,eveline" && Store.standardPct([today]) === 0);
       Store.data.standardCheck = {};
+      /* This week's win: a save beat by the field when he stops typing and it changed (Simon's U3b ruling); nothing on every
+         keystroke, nothing on a repaint, nothing when the text did not move; reduced motion shows the mark without motion */
+      { const wkEnd0 = weekEnd(today); Store.data.weekly = {}; Motion.log = []; renderToday();
+        const winIn = v => { if($("winInput")) $("winInput").oninput({target:{value:v}}); };
+        const winCh = v => { if($("winInput")) $("winInput").onchange({target:{value:v}}); };
+        winIn("First three strides hard");
+        ck("win: it still saves on every keystroke, silently", (Store.data.weekly[wkEnd0]||{}).win === "First three strides hard" && !$("winSaved") && Motion.log.length === 0);
+        winCh("First three strides hard");
+        ck("win: stopping typing after a real change plays the save beat once, by the field", !!$("winSaved") && /^Saved$/.test($("winSaved").textContent) && (Motion.log.find(x => x.kind === "note" && x.key === "win") || {}).ms === 200);
+        Motion.log = []; renderToday();
+        ck("win: a repaint plays nothing — the mark is gone and nothing is logged for it, even once the text flipped to the saved line", !$("winSaved") && !!$("winText") && !Motion.log.some(x => x.kind === "note" && x.key === "win"));
+        if($("winChange")) $("winChange").onclick();
+        winCh("First three strides hard");
+        ck("win: a change event with unchanged text plays nothing", !$("winSaved"));
+        Motion.reduced = () => true; Motion.log = [];
+        winIn("Talk on every breakout");
+        winCh("Talk on every breakout");
+        ck("win: with reduced motion the Saved mark still shows, without motion", !!$("winSaved") && Motion.log.length === 0);
+        Motion.reduced = () => false; State.editWin = false; Store.data.weekly = {}; renderToday(); }
       /* Chapter Six: the SAVED overall counts (Today + Ratings share one memory); an unsaved draft never counts */
       const rr = {}; SECTIONS[0].items.forEach((_, i) => { rr[SECTIONS[0].key + i] = 4; }); Store.saveAssessment(rr); const ovR = overallPct(rr);
       Seen.map.ratingsOverall = 40; Motion.log = []; renderToday();
@@ -2533,6 +2661,9 @@ Seen.load();
     State.openSec = {}; renderRatings();
     ck("ratings: a closed section shows no scale words", $("sections").querySelectorAll(".sw").length === 0);
     State.openSec = openKeep; renderRatings();
+    /* U3c: Chapter Six's "Rate Consistency, Not Potential" heading + its three lines, read from chapters.json, sit
+       once in the scale key row */
+    ck("ratings: Rate Consistency heading and lines sit once in the scale key, word for word from the manual", !!RATE_CONSISTENCY && $("scaleKey").querySelectorAll(".rateConsistency").length === 1 && $("scaleKey").querySelector(".rateConsistency h4").textContent === "Rate Consistency, Not Potential" && Array.prototype.map.call($("scaleKey").querySelectorAll(".rateConsistency p"), p => p.textContent).join("|") === RATE_CONSISTENCY.lines.join("|") && RATE_CONSISTENCY.lines.length === 3 && RATE_CONSISTENCY.lines[2] === "A professional-level strength is repeatable." && !$("rateConsistencyMissing"));
     const sk = $("sections").querySelectorAll(".sec")[0];
     sk.querySelectorAll(".item")[0].querySelectorAll("button")[4].onclick();
     $("sections").querySelectorAll(".sec")[0].querySelectorAll(".item")[1].querySelectorAll("button")[0].onclick();
@@ -2573,6 +2704,33 @@ Seen.load();
     ck("today: the Ratings tile shows the latest overall and the change since the baseline", ovL !== ovB && $("kpiRatings").querySelector(".val").textContent.replace(/\s+/g, " ").trim() === ovL + "% " + signed(ovL - ovB) && /since baseline/.test($("kpiRatings").textContent));
     renderRatings();
     ck("ratings: after a second save the ring stays on the first (baseline) assessment, not the latest", $("sections").querySelectorAll(".sec")[0].querySelector(".dot.base").style.left === "50%" && $("sections").querySelectorAll(".sec")[0].querySelector(".dot.now").style.left === "100%");
+    /* U5b: per-section history — Chapter Six ratings as % visuals over time, reusing bars() with a per-section series */
+    { const keepAssess = Store.data.assessments, keepOpen = State.openSec, s0 = SECTIONS[0];
+      const rated = v => { const r = {}; s0.items.forEach((_, i) => r[s0.key + i] = v); return r; };
+      State.openSec = {[s0.key]: true};
+      Store.data.assessments = []; renderRatings();
+      ck("ratings: with no saved assessments, Over time shows an honest empty state, no chart", /No saved assessments yet/.test($("sechist-" + s0.key).textContent) && !$("sechist-" + s0.key).querySelector("svg"));
+      Store.data.assessments = [{at:1, day:"2026-09-01", r: rated(3)}]; renderRatings();
+      ck("ratings: with one saved assessment, Over time still shows the empty state, never a one-bar chart", /One saved assessment so far/.test($("sechist-" + s0.key).textContent) && !$("sechist-" + s0.key).querySelector("svg"));
+      Store.data.assessments = [
+        {at:1, day:"2026-09-01", r: rated(2)},
+        {at:2, day:"2026-09-08", r: {}},
+        {at:3, day:"2026-09-15", r: rated(4)},
+        {at:4, day:"2026-09-22", r: rated(5)},
+      ]; renderRatings();
+      const shBox = $("sechist-" + s0.key), rects = shBox.querySelectorAll("svg rect"), gaps = shBox.querySelectorAll("svg rect.gap"), cols = shBox.querySelectorAll("svg rect.col");
+      const vals = Array.prototype.map.call(shBox.querySelectorAll(".vals span"), s => s.textContent);
+      const want = v => sectionPct(s0, v).p; // independently recomputed, same rule the section rows use
+      const hBody = $("sec-" + s0.key).querySelectorAll(".body")[0];
+      ck("ratings: Over time opens the section, above its chapter row and its items", !!hBody && hBody.children[0] === shBox);
+      ck("ratings: Over time draws one bar per saved assessment, oldest to newest", rects.length === 4 && gaps.length === 1 && cols.length === 3);
+      ck("ratings: an assessment that rated none of the section is a gap, never a zero bar", Array.prototype.indexOf.call(rects, gaps[0]) === 1 && want({}) === null);
+      ck("ratings: each bar's value equals that snapshot's section percent, computed independently", vals.length === 3 && vals[0] === String(want(rated(2))) && vals[1] === String(want(rated(4))) && vals[2] === String(want(rated(5))) && want(rated(2)) === 25 && want(rated(4)) === 75 && want(rated(5)) === 100);
+      const many = []; for(let i = 0; i < 11; i++) many.push({at:i, day:"2026-09-0" + (i % 9 + 1), r: rated(4)});
+      Store.data.assessments = many; renderRatings();
+      ck("ratings: with more than 10 saved assessments, Over time keeps only the most recent 10", $("sechist-" + s0.key).querySelectorAll("svg rect").length === 10);
+      Store.data.assessments = keepAssess; State.openSec = keepOpen; renderRatings();
+      ck("ratings: the overall over-time chart is unchanged by the per-section one", Store.data.assessments.length === 2 && $("history").querySelectorAll(".chartbox svg rect").length === 2); }
     /* end-of-day standard check */
     ck("standard check: seven questions read from Chapter Three, Preparation first, Response last", STANDARD_Q.length === 7 && STANDARD_Q[0].nm === "Preparation" && STANDARD_Q[6].nm === "Response" && /prepare with purpose/.test(STANDARD_Q[0].q));
     State.tab = "today"; renderToday();
@@ -2587,8 +2745,14 @@ Seen.load();
     eTap(2);
     ck("standard check: adding a No makes 3 of 6 points = 50%", Store.standardPct([today]) === 50 && /Question 4 of 7/.test(eQ()));
     { const bk = $("eveStepper") && $("eveStepper").querySelectorAll(".row")[1]; if(bk) bk.querySelectorAll("button")[0].onclick(); }
+    /* motion is quiet while the self-check runs: open it for this one tap, or "plays nothing" holds whatever the code does */
+    /* …and hold Seen away from localStorage while it is open: a count-up memory written from fixture data is a number he never saw */
+    { const kq = Motion.quiet, kr = Motion.reduced, km = Seen.map, kp = Seen.put; Motion.quiet = false; Motion.reduced = () => false; Seen.map = {}; Seen.put = () => {}; Motion.log = []; eTap(2); Motion.quiet = kq; Motion.reduced = kr; Seen.map = km; Seen.put = kp; }
+    ck("evening stepper: re-tapping the chosen answer clears it and stays on that question", !("coachability" in Store.data.standardCheck[today]) && Store.standardPct([today]) === 75 && /Question 3 of 7/.test(eQ()));
+    ck("evening stepper: a clear presses nothing and plays no landing", Motion.log.length === 0);
+    ck("evening stepper: the cleared chip shows unanswered — the question can now be answered again", Array.from($("eveStepper").querySelectorAll(".seg button")).every(b => b.getAttribute("aria-pressed") === "false"));
     eTap(2);
-    ck("evening stepper: Back, then the same answer again keeps it and moves on (a tap in a stepper never clears)", Store.data.standardCheck[today].coachability === 0 && Store.standardPct([today]) === 50 && /Question 4 of 7/.test(eQ()));
+    ck("evening stepper: answering again after a clear moves on", Store.data.standardCheck[today].coachability === 0 && Store.standardPct([today]) === 50 && /Question 4 of 7/.test(eQ()));
     if($("eveClose")) $("eveClose").onclick();
     ck("evening stepper: Close keeps the answers and offers Continue", !$("eveStepper") && /Continue check/.test(($("startEvening") || {}).textContent || "") && /3 of 7 answered today/.test($("eveningLine").textContent));
     /* Ch3's three written lines, pinned from the MANUAL TEXT (manual_text.txt, Daily Standard Check) */
@@ -2741,27 +2905,33 @@ Seen.load();
     ck("week: midweek, Today asks for the week's win and shows no loop", !!$("winInput") && !$("loopCard"));
     ck("today: on a normal day the state card is Today's one hero", $("todaySlot").querySelectorAll(".hero").length === 1 && !!$("stateCard") && $("stateCard").classList.contains("hero"));
     Store.data.meta.lastBackup = null; renderToday();
-    ck("backup: midweek an overdue backup is one nudge at the top of Today", /days of work and no backup yet/.test((($("backupNudge") || {}).textContent) || "") && !$("wkBackupNote"));
+    ck("backup: midweek an overdue backup is carried by the one Backup card, right after the ring — not a separate nudge", /days of work and no backup yet/.test((($("backupNudge") || {}).textContent) || "") && !$("wkBackupNote"));
     const colIds = n => { const cs = ($("todaySlot").querySelectorAll(".cols")[0] || {children: []}).children, col = cs[n] || {children: []}, out = []; for(let i = 0; i < col.children.length; i++) out.push(col.children[i].id); return out.join(); };
-    ck("today: My standard heads the right column, above the end-of-day check — on a phone it still follows the left column, as before", colIds(1) === "standardCard,eveningCard,backupCard" && /^stateCard,/.test(colIds(0)) && colIds(0).indexOf("standardCard") < 0);
-    /* at night (Simon 09-25 T6): from 18:00 until the check is complete, the evening card sits right under the ring; the rest keeps its order */
+    /* the U3a ruling: a due, unsnoozed Backup card moves into the LEFT column, right after the ring — never the right column */
+    ck("today: My standard heads the right column, above the end-of-day check; a due Backup card sits in the left column, right after the ring", colIds(1) === "standardCard,eveningCard" && colIds(0) === "stateCard,backupCard,readyCard,habitCard,blockCard,winCard" && (!!$("btnBackup") + !!$("wkBackup")) === 1);
+    /* at night (Simon 09-25 T6): from 18:00 until the check is complete, the evening card sits right under the ring; the due backup card then follows the evening card, not the ring directly */
     const colA0 = colIds(0);
     Date.now = at(wed, 17 + 59 / 60); renderToday();
-    ck("evening at night: at 17:59 the evening card is still in its day place", colIds(1) === "standardCard,eveningCard,backupCard" && colIds(0) === colA0 && !!$("jumpEvening"));
+    ck("evening at night: at 17:59 the evening card is still in its day place, and the due backup card still follows the ring", colIds(1) === "standardCard,eveningCard" && colIds(0) === colA0 && !!$("jumpEvening"));
     Date.now = at(wed, 18); renderToday();
-    ck("evening at night: at 18:00 the unfinished evening card sits right under the ring; the rest keeps its order", colIds(0) === colA0.replace(/^stateCard,/, "stateCard,eveningCard,") && colIds(1) === "standardCard,backupCard" && !$("jumpEvening"));
+    ck("evening at night: at 18:00 the unfinished evening card sits right under the ring, and the due backup card follows IT instead", colIds(0) === "stateCard,eveningCard,backupCard,readyCard,habitCard,blockCard,winCard" && colIds(1) === "standardCard" && !$("jumpEvening"));
     if($("startEvening")) $("startEvening").onclick(); for(let q = 0; q < 7; q++){ const sg = $("eveStepper") && $("eveStepper").querySelector(".seg"); if(sg) sg.querySelectorAll("button")[0].onclick(); }
-    ck("evening at night: the answer that completes it lands right there, under the ring", colIds(0).indexOf("stateCard,eveningCard,") === 0 && !!$("eveChips"));
+    ck("evening at night: the answer that completes it lands right there, under the ring, backup card still right after it", colIds(0).indexOf("stateCard,eveningCard,backupCard,") === 0 && !!$("eveChips"));
     renderToday();
-    ck("evening at night: once it is complete, the next repaint puts it back in its day place", colIds(0) === colA0 && colIds(1) === "standardCard,eveningCard,backupCard");
+    ck("evening at night: once it is complete, the next repaint puts the evening card back, and the due backup card returns to follow the ring directly", colIds(0) === colA0 && colIds(1) === "standardCard,eveningCard");
+    if($("eveChip0")) $("eveChip0").onclick();
+    { const sg = $("eveStepper") && $("eveStepper").querySelector(".seg"); if(sg) sg.querySelectorAll("button")[0].onclick(); }
+    if($("eveClose")) $("eveClose").onclick();
+    renderToday();
+    ck("evening at night: clearing a completed day's answer is incomplete again — the next repaint puts the card back under the ring", STANDARD_Q.filter(q => (Store.data.standardCheck[wed] || {})[q.k] != null).length === STANDARD_Q.length - 1 && State.eveStep === null && colIds(0) === "stateCard,eveningCard,backupCard,readyCard,habitCard,blockCard,winCard" && colIds(1) === "standardCard");
     Store.data.standardCheck = {}; Date.now = at(wed, 12); renderToday();
-    ck("evening at night: mornings are unchanged — before 18:00 the unfinished card stays in its day place", colIds(0) === colA0 && colIds(1) === "standardCard,eveningCard,backupCard");
+    ck("evening at night: mornings are unchanged — before 18:00 the unfinished card stays in its day place, backup card still after the ring", colIds(0) === colA0 && colIds(1) === "standardCard,eveningCard");
     $("winInput").oninput({target:{value:"First three strides hard"}}); $("winDone").onclick();
     ck("week: the win written midweek shows on Today", !!$("winText") && /First three strides hard/.test($("winText").textContent) && Store.data.weekly[sun].win === "First three strides hard");
     Date.now = at(sun, 20); renderToday();
     ck("week: on Sunday the loop opens above the columns with the week's numbers, +0 vs a 50% week shows no delta; the tiles answer completion, quality, health", !!$("loopCard") && $("todaySlot").querySelectorAll(".cols .hero").length === 0 && !$("winCard") && /^50%/.test($("wkReady").querySelector(".val").textContent) && !$("wkReady").querySelector(".dl") && /1 day under 50%/.test($("wkReady").textContent) && $("wkChecks").querySelector(".val").textContent.replace(/\s+/g, " ") === "2/7 +1" && /Completion/.test($("wkChecks").textContent) && /Quality/.test($("wkGames").textContent) && /Health/.test($("wkReady").textContent) && /1 scratched/.test($("wkGames").textContent) && !!$("wkBackup"));
     ck("today: on Sunday the loop card is the one hero and the state card steps down", $("todaySlot").querySelectorAll(".hero").length === 1 && !!$("loopCard") && !!$("stateCard") && !$("stateCard").classList.contains("hero"));
-    ck("backup: on the loop day the nudge stands down — the loop card's backup line carries its words, one backup control up top", !$("backupNudge") && /days of work and no backup yet/.test((($("wkBackupNote") || {}).textContent) || "") && ($("wkBackupNote") || {}).className === "warnline");
+    ck("backup: on the loop day the nudge stands down — the loop card's backup line carries its words, one backup control up top, and the Backup card drops its own Save button", !$("backupNudge") && /days of work and no backup yet/.test((($("wkBackupNote") || {}).textContent) || "") && ($("wkBackupNote") || {}).className === "warnline" && !$("btnBackup") && !!$("backupCard") && (!!$("btnBackup") + !!$("wkBackup")) === 1);
     ck("week: the loop asks whether the win happened, and about transfer (a game was played)", /First three strides hard/.test($("wkHit").textContent) && !!$("wkTransfer"));
     $("wkHit").querySelectorAll("button")[1].onclick();
     ck("week: answering the win question stores it and closes the week", Store.data.weekly[sun].hit === 1 && Store.weekClosed(sun));
@@ -2900,8 +3070,14 @@ Seen.load();
     $("goalTypes").querySelectorAll("button")[1].onclick();
     ck("season goals: Add is disabled until a kind and the goal: both given, it enables", State.goalNew.type === "performance" && $("goalAdd").getAttribute("disabled") !== "disabled" && !$("goalAdd").disabled);
     $("goal-min").oninput({target:{value:"3 a game"}}); $("goal-target").oninput({target:{value:"2 a game"}}); $("goalMeasure").oninput({target:{value:"video tags"}});
+    /* U5a: the season-goal add form is the only text form in the app a reload used to lose (measured 09-26).
+       It now uses the same keepDraft mechanism as ratings/log drafts. */
+    ck("season draft: a half-typed season goal is kept in the store as he types", Store.data.drafts.season && Store.data.drafts.season.type === "performance" && Store.data.drafts.season.what === "Reduce avoidable turnovers" && Store.data.drafts.season.min === "3 a game" && Store.data.drafts.season.target === "2 a game" && Store.data.drafts.season.measure === "video tags");
+    State.goalNew = {type:"", what:"", min:"", target:"", stretch:"", measure:""}; renderGoals();
+    ck("season draft: a repaint (as after a reload) restores the kept fields into the live form", State.goalNew.type === "performance" && State.goalNew.what === "Reduce avoidable turnovers" && $("goalWhat").value === "Reduce avoidable turnovers" && $("goal-min").value === "3 a game" && $("goal-target").value === "2 a game" && $("goalMeasure").value === "video tags" && $("goalTypes").querySelectorAll("button")[1].getAttribute("aria-pressed") === "true");
     $("goalAdd").onclick();
     ck("season goals: a performance goal lists under Performance with its minimum and target (no empty stretch), counted 1 of 2–3, and the form clears", Store.seasonGoals("performance").length === 1 && /Reduce avoidable turnovers/.test(gtRow("performance").textContent) && /Minimum: 3 a game · Target: 2 a game$/.test(gtRow("performance").querySelector(".lv").textContent) && /Measured by: video tags/.test(gtRow("performance").textContent) && /1 of 2–3/.test(gtRow("performance").textContent) && State.goalNew.what === "" && $("goalWhat").value === "");
+    ck("season draft: adding the goal clears the kept draft", !Store.data.drafts.season);
     ["Regular lineup spot", "Power-play time"].forEach(w => Store.addSeasonGoal({type:"outcome", what: w})); Store.addSeasonGoal({type:"team", what:"Bench energy"}); renderGoals();
     ck("season goals: a second outcome goal is flagged as more than the manual suggests; one team goal is not", /2 of 1 · more than the manual suggests/.test(gtRow("outcome").textContent) && gtRow("outcome").querySelectorAll(".gcount.over").length === 1 && gtRow("team").querySelectorAll(".gcount.over").length === 0 && gtRow("team").querySelectorAll(".gcount.ok").length === 1);
     gtRow("outcome").querySelectorAll("button")[0].onclick();
@@ -2910,6 +3086,12 @@ Seen.load();
     ck("season goals: remove takes two taps", oneTap === 2 && Store.seasonGoals("outcome").length === 1 && State.goalDel === null);
     const nSeason = Store.normalize({goals:{season:{a:null, b:{type:"x", what:"y"}, h:{type:"habit", what:"z"}, c:{type:"team", what:"Bench energy"}}}}).goals.season;
     ck("store: a stored season list with a null, an unknown kind or a habit entry loads with only the real goal", Object.keys(nSeason).join() === "c" && typeof Store.normalize({goals:{season:null}}).goals.season === "object");
+    /* U5a: a wrong-typed drafts.season is repaired (bad keys/types stripped, or dropped whole) rather than crashing the app */
+    ck("season draft: a null or array drafts.season is dropped", !Store.normalize({drafts:{season:null}}).drafts.season && !Store.normalize({drafts:{season:[1,2]}}).drafts.season);
+    const repaired = Store.normalize({drafts:{season:{type:"performance", what:"ok", min:5, junk:"x", stretch:"far"}}}).drafts.season;
+    ck("season draft: a drafts.season with a wrong-typed field and an unknown key keeps only its real, string-typed fields", repaired.type === "performance" && repaired.what === "ok" && repaired.stretch === "far" && !("min" in repaired) && !("junk" in repaired));
+    ck("season draft: an unknown goal kind in drafts.season is dropped, leaving the rest", Store.normalize({drafts:{season:{type:"nope", what:"ok"}}}).drafts.season.what === "ok" && !("type" in Store.normalize({drafts:{season:{type:"nope", what:"ok"}}}).drafts.season));
+    ck("backup: a file whose drafts is not an object is refused", !!Store.parseBackup(JSON.stringify({app:"pdm", data:Object.assign(JSON.parse(Store.exportText()).data, {drafts:[]})})).err);
     /* Chapter Seven's Baseline Connection: five lines from the manual, the latest assessment's highest and lowest three as evidence */
     const bcLabels = () => { const ls = $("seasonCard").querySelectorAll(".cnq"), out = []; for(let i = 0; i < ls.length; i++) out.push(ls[i].textContent); return out; };
     const bcText = id => (($(id || "connectLow") || {}).textContent || "").replace(/\s+/g, " ");
@@ -3103,7 +3285,7 @@ Seen.load();
         && /Shown on: Today · the morning check/.test(t7($("teachR-11"))) && /the 90-day plan 8 and the monthly map 9/.test(t7($("teachNums"))));
       Store.data = keepT; State.teachOpen = {}; State.readChapter = null; State.openSec = {}; State.cpOpen = null; State.draft = null; State.tab = "today"; }
     /* T1–T4: Chapters 9–55 worksheets — the manual's fields, one answer in both places, dated log entries, Sign */
-    { const keepW = Store.data; Store.data = Store.blank(); Store.data.meta.setupSkipped = true; State.teachOpen = {}; State.chwsOpen = {}; State.readChapter = null;
+    { const keepW = Store.data; Store.data = Store.blank(); Store.data.meta.setupSkipped = true; State.teachOpen = {}; State.chwsOpen = {}; State.chwsEdit = {}; State.chwsDel = {}; State.readChapter = null;
       const t8 = x => (x && x.textContent || "").replace(/\s+/g, " ").trim(), td = dayOf(Date.now()), W = () => Store.data.chws[11] || {};
       ck("chws: the Ch 9–55 worksheet is the manual's, word for word (4 questions, 6 plan labels, 5 log labels, 4 shared commitment lines + each chapter's own)",
         CHWS.assess.map(f => f[0]).join("|") === "What currently happens in this area?|What evidence supports that conclusion?|What is already dependable?|What breaks down under pressure, fatigue, travel, or uncertainty?"
@@ -3126,26 +3308,59 @@ Seen.load();
       ck("chws: Add an entry keeps a dated entry and clears the lines; past entries newest first; nothing written, nothing added",
         none && lg.length === 2 && lg.every(e => e.day === td) && sums.length === 2 && /Friday home game/.test(t8(sums[0])) && /Tuesday, road trip/.test(t8(sums[1])) && !W().draft
         && ($("teachR-11-l0") || {}).value === "" && /2 entries/.test(t8($("teachR-11-wsc"))) && W().a["What currently happens in this area?"] === "I report sleep honestly most days");
-      const sgn = () => { const b = $("teachR-11-signb"); if(b) b.onclick(); }; sgn();
+      /* Q4: past entries get Edit and Delete; typing while editing never repaints, and only that entry is removed */
+      const eidT = "teachR-11-e" + lg[0].id, eidF = "teachR-11-e" + lg[1].id, dayBefore = lg[0].day;
+      const edBtn = $(eidT + "-edit"); if(edBtn) edBtn.onclick();
+      const editedNode = $(eidT), field0 = $("teachR-11-le" + lg[0].id + "0");
+      if(field0) field0.oninput({target:{value:"Tuesday, road trip — bus delayed"}});
+      const same1 = $("teachR-11-le" + lg[0].id + "0") === field0 && $(eidT) === editedNode;
+      if(field0) field0.oninput({target:{value:"Tuesday, road trip — rebooked"}});
+      const same2 = $("teachR-11-le" + lg[0].id + "0") === field0 && $(eidT) === editedNode;
+      ck("chws: typing in an edited entry doesn't repaint (the node stays the same element)", !!field0 && !!editedNode && same1 && same2);
+      const doneBtn = $(eidT + "-done"); if(doneBtn) doneBtn.onclick();
+      const editedEntry = (W().log || []).find(e => e.id === lg[0].id) || {};
+      ck("chws: edit keeps the entry's date", editedEntry.day === dayBefore && typeof editedEntry.edited === "number" && editedEntry.f["Date and situation"] === "Tuesday, road trip — rebooked");
+      State.tab = "today"; renderToday();
+      ck("chws: an edit shows the new text in both places", /Tuesday, road trip — rebooked/.test(t8($("teach-11-past"))) && /Tuesday, road trip — rebooked/.test(t8($("teachR-11-past"))));
+      State.tab = "read"; renderRead();
+      const delBtn = $(eidF + "-del"); if(delBtn) delBtn.onclick();
+      ck("chws: the first Delete tap only asks", (W().log || []).length === 2 && !!$(eidF + "-delyes") && !$(eidF + "-del"));
+      const delYes = $(eidF + "-delyes"); if(delYes) delYes.onclick();
+      ck("chws: Delete removes only that entry", (W().log || []).length === 1 && !!(W().log || []).find(e => e.id === lg[0].id) && !(W().log || []).find(e => e.id === lg[1].id));
+      /* Q5: Sign takes a typed name — blank cannot sign, the name is remembered for the next chapter */
+      const signAttrBefore = $("teachR-11-signb").getAttribute("disabled");
+      $("teachR-11-signb").onclick();
+      ck("chws: a blank name cannot sign", signAttrBefore === "disabled" && !W().sign);
+      const typeName = v => { const x = $("teachR-11-signname"); if(x) x.oninput({target:{value:v}}); };
+      typeName("  G. Andersen  ");
+      const signAfterType = $("teachR-11-signb").disabled === false;
+      $("teachR-11-signb").onclick();
       const signedTxt = t8($("teachR-11-sign").querySelector("div")) + " " + t8($("teachR-11-signb")), signedStore = JSON.stringify(W().sign), cm = Array.from($("teachR-11-wsb").querySelectorAll(".commit")).map(t8);
       ck("chws: the commitment reads the chapter's own first line, then the four shared ones", cm.join("|") === [TEACH.find(t => t.toc === 11).c].concat(CHWS.commit).join("|") && /morning readiness check/i.test(cm[0]));
       State.readChapter = null; renderRead(); const cardT = t8($("teachSigned")); if($("teachCard")) $("teachCard").onclick();
-      ck("chws: Sign stamps Gavin Andersen and today, and Read shows which chapters are signed",
-        signedTxt === "Signed: Gavin Andersen · " + niceDay(td) + " Unsign" && signedStore === JSON.stringify({name:"Gavin Andersen", day: td}) && /1 signed$/.test(cardT) && /Signed /.test(t8($("teachR-11").querySelector("small"))) && !/Signed/.test(t8($("teachR-12").querySelector("small"))));
-      sgn(); ck("chws: a second tap unsigns", !W().sign && /not signed/.test(t8($("teachR-11-sign"))) && ($("teachR-11-signb") || {}).textContent === "Sign");
-      const nw = Store.normalize({chws: {"11": {a: {q: "x", z: 5}, log: [{id: "e", day: "2026-09-01", f: {"What I learned": "y", n: 2}}, {id: 1, day: "2026-09-02", f: {}}], sign: {name: "G", day: "bad"}}, "x": {a: {q: "y"}}, "12": null, "13": {a: {}}}}).chws;
+      ck("chws: Sign stamps the typed name, and Read shows which chapters are signed",
+        signAfterType && signedTxt === "Signed: G. Andersen · " + niceDay(td) + " Unsign" && signedStore === JSON.stringify({name:"G. Andersen", day: td}) && /1 signed$/.test(cardT) && /Signed /.test(t8($("teachR-11").querySelector("small"))) && !/Signed/.test(t8($("teachR-12").querySelector("small"))));
+      const ch12Btn = $("teachR-12") ? $("teachR-12").querySelector("button") : null; if(ch12Btn) ch12Btn.onclick();
+      const ws12 = $("teachR-12-wshd"); if(ws12) ws12.onclick();
+      const name12 = ($("teachR-12-signname") || {}).value;
+      ck("chws: the typed name is remembered for the next chapter's Sign field", name12 === "  G. Andersen  ");
+      $("teachR-11-signb").onclick();
+      ck("chws: a second tap unsigns", !W().sign && /not signed/.test(t8($("teachR-11-sign"))) && ($("teachR-11-signb") || {}).textContent === "Sign" && ($("teachR-11-signname") || {}).value === "  G. Andersen  ");
+      const nw = Store.normalize({chws: {"11": {a: {q: "x", z: 5}, log: [{id: "e", day: "2026-09-01", f: {"What I learned": "y", n: 2}, edited: "bad"}, {id: 1, day: "2026-09-02", f: {}}], sign: {name: "G", day: "bad"}}, "x": {a: {q: "y"}}, "12": null, "13": {a: {}}}, meta: {signName: 5}}), nwc = nw.chws;
       const bk = JSON.parse(Store.exportText()), bad = JSON.parse(Store.exportText()); bad.data.chws = [];
       ck("chws: normalize keeps a worksheet's own shape and drops the broken parts; a backup carries it and one with a wrong-typed chws is refused",
-        JSON.stringify(nw) === JSON.stringify({"11": {a: {q: "x"}, log: [{id: "e", day: "2026-09-01", f: {"What I learned": "y"}}]}}) && !!Store.parseBackup(JSON.stringify(bad)).err
-        && !Store.parseBackup(JSON.stringify(bk)).err && JSON.stringify(Store.normalize(bk.data).chws) === JSON.stringify(Store.data.chws) && (Store.data.chws[11].log || []).length === 2);
-      Store.data = keepW; State.teachOpen = {}; State.chwsOpen = {}; State.readChapter = null; State.tab = "today"; }
+        JSON.stringify(nwc) === JSON.stringify({"11": {a: {q: "x"}, log: [{id: "e", day: "2026-09-01", f: {"What I learned": "y"}}]}}) && !!Store.parseBackup(JSON.stringify(bad)).err
+        && !Store.parseBackup(JSON.stringify(bk)).err && JSON.stringify(Store.normalize(bk.data).chws) === JSON.stringify(Store.data.chws) && (Store.data.chws[11].log || []).length === 1);
+      ck("chws: a restored backup with a non-string signName is repaired by normalize", nw.meta.signName === undefined && Store.normalize({meta:{signName:"Coach"}}).meta.signName === "Coach");
+      Store.data = keepW; State.teachOpen = {}; State.chwsOpen = {}; State.chwsEdit = {}; State.chwsDel = {}; State.readChapter = null; State.tab = "today"; }
+    ck("motion: the self-check leaves the stored count-up memory (pdm.seen) exactly as it found it", (() => { try{ return localStorage.getItem(Seen.KEY); }catch(e){ return null; } })() === seenStored);
   } catch(e){
     fail.push("threw: " + (e && e.message || e));
   } finally {
     Store.saveLocal = realSave; Date.now = realNow; Seen.map = keepSeen; Seen.put = realSeenPut; Motion.reduced = realReduced; Motion.log = []; window.IntersectionObserver = realIO; Motion.watch = {};
     Store.data = JSON.parse(before);
     const ks = JSON.parse(keepState); State.tab = ks.tab; State.openSec = ks.openSec; State.openPri = ks.openPri; State.cpOpen = ks.cpOpen; State.readChapter = ks.readChapter; State.logFilter = ks.logFilter;
-    State.draft = Store.data.drafts.log || null; State.ratingsDraft = null; State.evOpen = {}; State.teachOpen = {}; State.cnOpen = {}; State.chwsOpen = {}; State.checkStep = null; State.checkFrom = null; State.checkOne = false; State.eveStep = null; State.eveOne = false; State.pendingImport = null; State.confirmDiscard = false; State.editWin = false; State.teamNew = {name:"", role:""}; State.teamDel = null; State.toPlan = null; State.pzFilter = {}; State.wsOpen = {}; State.setupStep = null; State.inSetup = false; State.goalNew = {type:"", what:"", min:"", target:"", stretch:"", measure:""}; State.goalDel = null; State.beat = null; State.flash = ""; clearTimeout(flashT);
+    State.draft = Store.data.drafts.log || null; State.ratingsDraft = null; State.evOpen = {}; State.teachOpen = {}; State.cnOpen = {}; State.chwsOpen = {}; State.chwsEdit = {}; State.chwsDel = {}; State.checkStep = null; State.checkFrom = null; State.checkOne = false; State.eveStep = null; State.eveOne = false; State.pendingImport = null; State.confirmDiscard = false; State.editWin = false; State.teamNew = {name:"", role:""}; State.teamDel = null; State.toPlan = null; State.pzFilter = {}; State.wsOpen = {}; State.setupStep = null; State.inSetup = false; State.goalNew = {type:"", what:"", min:"", target:"", stretch:"", measure:""}; State.goalDel = null; State.beat = null; State.flash = ""; clearTimeout(flashT);
     /* every tab was painted with seeded data above; repaint ALL of them from the real store,
        not only the visible one — on a #ratings load the seeded Today outlived the restore */
     /* motion opens here: the tab he sees is painted once, so a beat or count-up is not thrown away by a second paint */
