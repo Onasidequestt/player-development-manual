@@ -211,6 +211,8 @@ button.link.flag{display:block;text-align:left;color:var(--warn)}
 .foldline{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:44px;background:none;border:0;padding:4px 0;text-align:left;color:inherit;font:inherit;cursor:pointer}
 .foldline .ft{flex:0 0 auto;white-space:nowrap;font:700 19px/1.1 var(--disp);color:var(--gold2);text-transform:uppercase;letter-spacing:.9px}
 .foldline .fv{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right}
+/* Y2b (Simon 09-26): a folded line says it opens — a small down chevron at its right end, in the muted ink */
+.foldline .chev{flex:0 0 auto;width:8px;height:8px;margin:-5px 3px 0 0;border:solid var(--mute);border-width:0 2px 2px 0;transform:rotate(45deg)}
 .pri{border-top:1px solid var(--line);padding:4px 0}
 .pri .hd{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;background:none;border:0;padding:6px 0;text-align:left;color:inherit}
 .pri .hd .nm{flex:1}
@@ -286,7 +288,8 @@ button.link.flag{display:block;text-align:left;color:var(--warn)}
 #habitCard{position:relative}
 .card.alldone{border-color:rgba(224,166,44,.55)}
 .goalrule{height:2px;background:var(--gold);border-radius:1px;margin:-4px 0 10px;transform-origin:left center}
-.lamp{position:absolute;inset:0;border-radius:inherit;background:radial-gradient(120% 90% at 50% 0%,rgba(224,166,44,.30),rgba(224,166,44,0) 70%);opacity:0;pointer-events:none}
+/* Y2a (Simon 09-26): the goal light sits on the card BODY, over the habit rows — at the top it was lost on the gold heading */
+.lamp{position:absolute;inset:0;border-radius:inherit;background:radial-gradient(110% 75% at 50% 60%,rgba(224,166,44,.34),rgba(224,166,44,0) 72%);opacity:0;pointer-events:none}
 .hwk .mute{font-size:12px}
 .hkey{font-size:12px;margin-top:8px}
 .warnline{color:var(--warn);font-size:13px}
@@ -939,7 +942,7 @@ const Store = {
   },
   restore(d){ this.data = this.normalize(JSON.parse(JSON.stringify(d))); this.save(); }
 };
-const State = { openPri:{}, cpOpen:null, tab:"today", draft:null, ratingsDraft:null, openSec:{}, flash:"", readChapter:null, checkStep:null, checkFrom:null, checkOne:false, eveStep:null, eveOne:false, chwsOpen:{}, chwsEdit:{}, chwsDel:{}, logFilter:"all", pendingImport:null, confirmDiscard:false, editWin:false, teamNew:{name:"", role:""}, teamDel:null, toPlan:null, pzFilter:{}, wsOpen:{}, evOpen:{}, teachOpen:{}, cnOpen:{}, setupStep:null, inSetup:false, goalNew:{type:"", what:"", min:"", target:"", stretch:"", measure:""}, goalDel:null, beat:null };
+const State = { openPri:{}, cpOpen:null, tab:"today", draft:null, ratingsDraft:null, openSec:{}, flash:"", readChapter:null, checkStep:null, checkFrom:null, checkOne:false, eveStep:null, eveOne:false, chwsOpen:{}, chwsEdit:{}, chwsDel:{}, logFilter:"all", pendingImport:null, confirmDiscard:false, editWin:false, teamNew:{name:"", role:""}, teamDel:null, toPlan:null, pzFilter:{}, wsOpen:{}, evOpen:{}, teachOpen:{}, cnOpen:{}, setupStep:null, inSetup:false, goalNew:{type:"", what:"", min:"", target:"", stretch:"", measure:""}, goalDel:null, beat:null, colRun:null };
 /* score of one entry, from its 1..5 fields */
 function practiceScore(e){ return pct(PRACTICE_FIELDS.map(f => e[f[0]])); }
 function gameScore(e){ return pct(GAME_FIELDS.map(f => e[f[0]])); }
@@ -1282,11 +1285,13 @@ function renderToday(){
     const wkN = el("span", {id:"habitWeekPct"}, pctText(wkP));
     hc.appendChild(el("p", {class:"sub", id:"habitWeek"}, "Last 7 days: ", wkN, " of habits kept" + (hp === 100 ? " · all " + slots.length + " today" : "")));
     Motion.seen("today", "habitsWeek", wkN, wkP);
-    /* a tick-on that leaves the day at 100% is the tap that kept the last habit: the goal light — one gold wash over the card, the rule sweeps in under the heading */
+    /* a tick-on that leaves the day at 100% is the tap that kept the last habit: the goal light — one gold wash over the card body,
+       the rule sweeps in under the heading, and (Y2a) each habit row lights in turn, top to bottom, so the whole list reads "all kept" */
     if(beat && beat.kind === "tick" && rule){
       const lamp = el("i", {class:"lamp", "aria-hidden":"true"}); hc.appendChild(lamp);
       Motion.play("light", "habits", lamp, [{opacity:0}, {opacity:1, offset:.25}, {opacity:0}], {duration: 400, easing: "ease-out"});
       Motion.play("rule", "habits", rule, [{transform:"scaleX(0)"}, {transform:"scaleX(1)"}], {duration: 320, delay: 40, fill: "backwards"});
+      Array.from(hc.querySelectorAll(".habit")).forEach((row, i) => Motion.play("row", i, row, [{backgroundColor:"rgba(224,166,44,0)"}, {backgroundColor:"rgba(224,166,44,.24)", offset:.3}, {backgroundColor:"rgba(224,166,44,0)"}], {duration: 240, delay: 30 + i * 30}));   /* 5 habits: the last is over at 390 ms (Simon 09-24: within 400) */
     }
   }
   colA.appendChild(hc);
@@ -1345,6 +1350,38 @@ function renderToday(){
   /* part 24: ONE card wears the "now" edge — the evening check while it sits under the ring, else the morning check until all seven are in; none once both are done */
   const nowC = eveUp ? $("eveningCard") : READY_FIELDS.some(f => !((Store.data.readiness[today] || {})[f[0]] >= 1)) ? $("readyCard") : null;
   if(nowC) nowC.classList.add("now");
+  balanceCols(colA, colB, $("readyCard"));
+}
+/* Y2d (Simon 09-26): balance Today's two columns on a wide screen. Measured at 1280 (seeded, a Wednesday) the left column ran
+   1,443 px against the right's 719. On a wide screen only, a run of cards from the END of column A (never the morning check or
+   anything above it) moves to the HEAD of column B: the run that brings the two heights closest. A phone moves nothing, and
+   would read the same anyway (it stacks A then B, and a tail of A moved to the head of B keeps that order card for card).
+   The run is chosen when Today is entered (setTab clears State.colRun) and then kept by card id through his taps on Today,
+   so a card never jumps columns under his finger; the heights may drift until the next entry.
+   ponytail: no resize listener — a window dragged across 960 px keeps its split until the next tab entry; upgrade = a
+   matchMedia change listener that clears State.colRun and calls renderToday. */
+const Layout = {
+  wide(){ try{ return typeof matchMedia === "function" && matchMedia("(min-width:960px)").matches; }catch(e){ return false; } },
+  h(n){ return n.getBoundingClientRect ? n.getBoundingClientRect().height : 0; }
+};
+function balanceCols(a, b, pin){
+  const kids = Array.from(a.children), at = kids.indexOf(pin);
+  if(!Layout.wide() || at < 0) return [];
+  const tail = kids.slice(at + 1);
+  let n = 0;
+  if(State.colRun) while(n < tail.length && State.colRun.indexOf(tail[tail.length - 1 - n].id) >= 0) n++;
+  else {
+    const A = Layout.h(a), B = Layout.h(b);
+    if(!A) return [];   /* not laid out (a hidden tab): choose nothing yet, and remember nothing */
+    let best = Math.abs(A - B), s = 0;
+    for(let k = 1; k <= tail.length; k++){ s += Layout.h(tail[tail.length - k]) + 12; const d = Math.abs(A - B - 2 * s); if(d < best){ best = d; n = k; } }
+    State.colRun = tail.slice(tail.length - n).map(x => x.id);
+  }
+  const run = tail.slice(tail.length - n);
+  if(!run.length) return run;
+  const rest = Array.from(b.children);
+  run.forEach(x => x.remove()); rest.forEach(x => x.remove()); run.concat(rest).forEach(x => b.appendChild(x));
+  return run;
 }
 /* the manual's weekly template: "Choose one development behavior that would make the week productive even if statistics fluctuate" */
 const WIN_HINT = "One behaviour that makes the week productive even if the stats don't go your way.";
@@ -1427,7 +1464,7 @@ function ratingsMini(){
    the open-tap uses; Today's three original folds keep passing nothing, so they keep calling renderToday exactly as before. */
 function foldLine(key, title, value, repaint, beat){
   const b = el("button", {type:"button", class:"foldline", id:"fold" + key[0].toUpperCase() + key.slice(1), "aria-label": title + ": " + value,
-    onclick: () => { Store.touchFold(key); State.beat = {kind:"fold", key}; (repaint || renderToday)(); }}, el("span", {class:"ft"}, title), el("span", {class:"mute fv"}, value));
+    onclick: () => { Store.touchFold(key); State.beat = {kind:"fold", key}; (repaint || renderToday)(); }}, el("span", {class:"ft"}, title), el("span", {class:"mute fv"}, value), el("i", {class:"chev", "aria-hidden":"true"}));
   /* part 24: closing plays the opening's 200 ms beat in reverse direction on the line that takes the card's place — the same object both ways */
   if(beat && beat.kind === "foldclose" && beat.key === key) Motion.play("foldclose", key, b, [{opacity:0, transform:"translateY(4px)"}, {opacity:1, transform:"none"}], {duration: 200});
   return b;
@@ -1510,7 +1547,19 @@ function eveningCard(today, beat){
     STANDARD_Q.forEach((q, i) => { const nm = (STANDARD_A.find(a => a[0] === rec[q.k]) || [])[1], b = el("button", {type:"button", class:"chip" + (rec[q.k] === 0 ? " low" : ""), id:"eveChip" + i, "aria-label": "Change " + q.nm + ": " + nm, onclick: openEve(i, true)}, q.nm, el("b", null, nm));
       set.push(b); chips.appendChild(b); });
     c.appendChild(chips);
-  } else c.appendChild(el("div", {class:"row"}, el("button", {type:"button", class:"primary", id:"startEvening", onclick: openEve(firstOpen)}, done ? "Continue check" : "Start check"), el("span", {class:"mute"}, "Seven taps, one per screen.")));
+    const y = Store.data.standardCheck[addDays(today, -1)] || {};
+    if(STANDARD_Q.every(q => y[q.k] === rec[q.k])) c.appendChild(el("p", {class:"mute", id:"eveSameNote"}, "Same answers as yesterday · tap any that changed"));
+  } else {
+    c.appendChild(el("div", {class:"row"}, el("button", {type:"button", class:"primary", id:"startEvening", onclick: openEve(firstOpen)}, done ? "Continue check" : "Start check"), el("span", {class:"mute"}, "Seven taps, one per screen.")));
+    /* Y2c (Simon 09-26): "Same as yesterday" — only before he has answered anything today, and only when yesterday has all seven.
+       One tap copies the seven answers (never the written lines) and lands the check like a finished day; every chip stays one tap
+       to change, and the line under them says the day matches yesterday for as long as it does */
+    const y = Store.data.standardCheck[addDays(today, -1)] || {};
+    if(!done && STANDARD_Q.every(q => y[q.k] != null)){
+      const tally = STANDARD_A.map(a => [STANDARD_Q.filter(q => y[q.k] === a[0]).length, a[1]]).filter(t => t[0]).map(t => t.join(" ")).join(" · ");
+      c.appendChild(el("button", {type:"button", class:"link", id:"eveSame", onclick: () => { STANDARD_Q.forEach(q => Store.putStandard(today, q.k, y[q.k])); State.beat = {kind:"evening"}; renderToday(); }}, "↺ Same as yesterday: " + tally));
+    }
+  }
   /* Chapter Three's three written lines: optional, below the taps; typing never repaints, so focus stays */
   if(STANDARD_LINES.length){
     const wl = el("div", {class:"wlines", id:"eveLines"}, el("div", {class:"mute"}, "If you want to write it down (optional):"));
@@ -2442,6 +2491,7 @@ function renderRead(){
 function setTab(t){
   if(TABS.indexOf(t) < 0) t = "today";
   State.tab = t;
+  if(t === "today") State.colRun = null;   /* Y2d: entering Today chooses the column split afresh */
   document.body.setAttribute("data-tab", t);
   TABS.forEach(x => { const s = $("tab-" + x); if(s) s.classList.toggle("on", x === t); });
   renderTabBar();
@@ -2485,6 +2535,8 @@ Seen.load();
   const keepState = JSON.stringify({openPri:State.openPri, cpOpen:State.cpOpen, tab:State.tab, openSec:State.openSec, readChapter:State.readChapter, logFilter:State.logFilter});
   const realSave = Store.saveLocal; Store.saveLocal = function(){};
   const keepSeen = Seen.map, realSeenPut = Seen.put, realReduced = Motion.reduced;
+  /* Y2d: the checks below read column membership as the phone has it — the real 1280 load would otherwise balance their cards */
+  const realWide = Layout.wide, realH = Layout.h; Layout.wide = () => false;
   /* "on screen" inside the self-check: a stand-in IntersectionObserver reports a number in view at once (the stub has none; the real
      one answers a frame later, after the checks) — or, while offScreen, reports it out of view (as the real one does at once) and holds the in-view report until a check scrolls to it */
   const realIO = window.IntersectionObserver, held = []; let offScreen = false;
@@ -2657,7 +2709,7 @@ Seen.load();
       Motion.quiet = false; tk(1).onclick();
       ck("all habits kept: unticking one takes the rule away and plays nothing", !$("habitCard").querySelector(".goalrule") && !/all \d+ today/.test($("habitWeek").textContent) && played() === "");
       tk(1).onclick();
-      ck("motion: the tap that keeps the last habit plays the goal light and the rule, once", played() === "tick1,burst1,pip1,lighthabits,rulehabits" && within() && (renderToday(), played() === "tick1,burst1,pip1,lighthabits,rulehabits"));
+      ck("motion: the tap that keeps the last habit plays the goal light, the rule and each row's light in turn, once", played() === "tick1,burst1,pip1,lighthabits,rulehabits,row0,row1" && within() && (renderToday(), played() === "tick1,burst1,pip1,lighthabits,rulehabits,row0,row1"));
       Motion.log = []; tk(0).onclick(); tk(1).onclick(); tk(0).onclick();
       ck("motion: a tick that does not finish the day plays no goal light", played() === "tick0,burst0,pip0");
       Store.toggleHabit(today, 1); State.tab = "ratings"; Motion.log = []; const s0 = JSON.stringify(Seen.map); renderToday();
@@ -3677,6 +3729,67 @@ Seen.load();
       ck("p25 X3b Mark as read: a later repaint and the undo play nothing", rep0 && !Store.data.read.SIX && !Motion.log.some(x => x.kind === "read") && State.beat === null);
     } catch(e) { ck("p25 self-check block ran to its end without throwing — " + (e && e.message || e) + " @" + (e && e.stack || "").split("\n").slice(1,3).join(" "), false); }
     finally { Motion.play = keepPl25; Date.now = ckNow25; Store.data = keepD25; State.tab = keepTab25; State.readChapter = keepRc25; State.wsOpen = keepWo25; State.goalDel = null; State.teamDel = null; Motion.quiet = keepMq25; Motion.reduced = keepMr25; Seen.map = keepSm25; Seen.put = keepSp25; Motion.log = []; State.beat = null; State.flash = ""; }
+    /* part 26: Y2 (Simon 09-26) — (a) the all-habits light on the card body, (b) a chevron on every folded line, (c) "Same as
+       yesterday" on the evening check, (d) Today's two columns balanced on a wide screen. A block of its own: a throw here
+       cannot silence anything before it; everything it stubs is restored by saved reference */
+    const keepD26 = Store.data, keepTab26 = State.tab, ckNow26 = Date.now, keepMq26 = Motion.quiet, keepMr26 = Motion.reduced, keepSm26 = Seen.map, keepSp26 = Seen.put, keepPl26 = Motion.play, keepW26 = Layout.wide, keepH26 = Layout.h, keepCr26 = State.colRun;
+    try {
+      const d26 = "2026-09-23", y26 = addDays(d26, -1); Date.now = () => tsOfDay(d26) + 10 * 3600e3;   /* a Wednesday: not the Sunday loop day */
+      Store.data = Store.blank(); Store.data.meta.setupSkipped = true; State.tab = "today"; State.editWin = false; State.eveStep = null;
+      Seen.map = {}; Seen.put = () => {}; Motion.reduced = () => false; Motion.quiet = false;
+      const played = () => Motion.log.filter(x => x.kind !== "seen").map(x => x.kind + x.key).join(), t9 = x => ((x || {}).textContent || "").replace(/\s+/g, " ").trim();
+      /* (a) */
+      Store.setGoals({habits:["Bed by 10:30", "Stretch 10 min", "", "", ""]}); renderToday();
+      const tk = i => $("habitCard").querySelectorAll(".habit")[i].querySelector(".tick"), nodes = [];
+      Motion.play = function(k, key, node, fr, o){ nodes.push([k + key, node, fr]); return keepPl26.call(this, k, key, node, fr, o); };
+      tk(0).onclick(); Motion.log = []; nodes.length = 0; tk(1).onclick();
+      const rowsP = nodes.filter(x => /^row\d$/.test(x[0])), rowsD = Array.from($("habitCard").querySelectorAll(".habit")), ms = Motion.log.filter(x => x.kind === "row").map(x => x.ms);
+      ck("p26 Y2a light: the tap that keeps the last habit lights every habit row, top to bottom, each a gold wash in and out",
+        rowsP.length === 2 && rowsP.every((x, i) => x[0] === "row" + i && /\bhabit\b/.test(x[1].className) && x[1].textContent === rowsD[i].textContent && x[2].length === 3 && /224,166,44,\.2/.test(x[2][1].backgroundColor || "") && /,0\)$/.test(x[2][0].backgroundColor || "") && /,0\)$/.test(x[2][2].backgroundColor || "")) && ms.length === 2 && ms[1] > ms[0]);
+      Motion.play = keepPl26; Motion.log = []; tk(1).onclick(); tk(1).onclick(); const again = played(); Motion.log = []; renderToday();
+      ck("p26 Y2a light: untick-and-retick keeps it, a plain repaint plays none of it", again === "tick1,burst1,pip1,lighthabits,rulehabits,row0,row1" && played() === "");
+      /* (b) three folded lines on Today (cues, block, win untouched since yesterday) and one on Ratings (Evidence used) */
+      Store.setGoals({blockStart: addDays(d26, -31)}); Store.setPriority("skill", "what", "Puck protection"); Store.setCue("prep", "Feet moving"); Store.setWeek(weekEnd(d26), "win", "Three strides");
+      Store.data.meta.fold = {cues: y26, block: y26, win: y26}; renderToday();
+      const fl = Array.from($("todaySlot").querySelectorAll(".foldline")), chevOk = b => { const k = Array.from(b.children); return k.length === 3 && /\bchev\b/.test(k[2].className) && k[2].getAttribute("aria-hidden") === "true" && !t9(k[2]) && b.querySelectorAll(".chev").length === 1; };
+      ck("p26 Y2b chevron: every folded line on Today ends in one chevron, hidden from a screen reader, after its title and value", fl.length === 3 && fl.every(chevOk));
+      ck("p26 Y2b chevron: the line still reads 'title: value' aloud and opens on a tap", /^My cues: Feet moving/.test(fl[0].getAttribute("aria-label") || "") && (fl[0].onclick(), !$("cueCard").querySelector(".foldline")));
+      /* (c) the evening check */
+      const Y = {}, ans = [2, 2, 1, 2, 2, 1, 2]; STANDARD_Q.forEach((q, i) => { Y[q.k] = ans[i]; }); Y.w = {[STANDARD_LINES[0] || "x"]: "yesterday's line"};
+      Store.data.standardCheck = {[y26]: JSON.parse(JSON.stringify(Y))}; renderToday();
+      ck("p26 Y2c offer: before any answer today, a complete yesterday is one tap away, its answers counted", t9($("eveSame")) === "↺ Same as yesterday: 5 Yes · 2 Partially" && !!$("startEvening"));
+      const yk = STANDARD_Q[3].k; delete Store.data.standardCheck[y26][yk]; renderToday(); const noPart = !$("eveSame");
+      Store.data.standardCheck[y26][yk] = 2; Store.putStandard(d26, STANDARD_Q[0].k, 0); renderToday(); const noStarted = !$("eveSame");
+      ck("p26 Y2c offer: not offered when yesterday is short of seven, nor once he has answered one today", noPart && noStarted);
+      Store.data.standardCheck = {[y26]: JSON.parse(JSON.stringify(Y))}; renderToday(); Motion.log = []; $("eveSame").onclick();
+      const T = Store.data.standardCheck[d26] || {};
+      ck("p26 Y2c copy: one tap sets today's seven to yesterday's exactly, never the written lines, and lands the day's beat",
+        STANDARD_Q.every(q => T[q.k] === Y[q.k]) && !T.w && played() === "eve0,eve1,eve2,eve3,eve4,eve5,eve6,evelineevening" && !$("eveSame") && !!$("eveChips"));
+      ck("p26 Y2c copy: the chips say it matches yesterday, and each stays one tap to change", t9($("eveSameNote")) === "Same answers as yesterday · tap any that changed" && $("eveChips").querySelectorAll("button").length === 7);
+      Store.putStandard(d26, STANDARD_Q[2].k, 0); renderToday();
+      ck("p26 Y2c copy: once one answer differs from yesterday, the note goes", !$("eveSameNote") && !!$("eveChips"));
+      /* (d) balancing, driven with the heights measured at 1280 (seeded, Wed): A 1,443 against B 719 */
+      const H = {stateCard:325, backupCard:186, readyCard:325, habitCard:369, cueCard:56, blockCard:55, winCard:55, standardCard:56, eveningCard:627};
+      const col = ids => { const c = el("div"); ids.forEach(i => c.appendChild(el("div", {id: i}))); return c; }, ids = c => Array.from(c.children).map(x => x.id).join();
+      Layout.h = n => n.id in H ? H[n.id] : Array.from(n.children).reduce((a, x) => a + (H[x.id] || 0) + 12, 0);
+      const AO = ["stateCard", "backupCard", "readyCard", "habitCard", "cueCard", "blockCard", "winCard"], BO = ["standardCard", "eveningCard"];
+      Layout.wide = () => false; State.colRun = null; let a = col(AO), b = col(BO); const narrow = balanceCols(a, b, a.children[2]);
+      ck("p26 Y2d phone: a narrow screen moves nothing and remembers nothing", narrow.length === 0 && ids(a) === AO.join() && ids(b) === BO.join() && State.colRun === null);
+      Layout.wide = () => true; a = col(AO); b = col(BO); balanceCols(a, b, a.children[2]);
+      ck("p26 Y2d wide: the run from the end of A that brings the columns closest moves to the head of B (1,455 / 707 → 1,253 / 909 with gaps)",
+        ids(b) === "cueCard,blockCard,winCard,standardCard,eveningCard" && ids(a) === "stateCard,backupCard,readyCard,habitCard" && JSON.stringify(State.colRun) === '["cueCard","blockCard","winCard"]');
+      ck("p26 Y2d wide: A then B still reads in the phone's order, card for card", ids(a) + "," + ids(b) === AO.concat(BO).join());
+      /* heights where moving the check too WOULD narrow the gap (1,146 against 0: the habits alone leave 1,022, habits + check 878) */
+      State.colRun = null; Object.assign(H, {stateCard:1000, readyCard:60, habitCard:50}); a = col(["stateCard", "readyCard", "habitCard"]); b = col([]); balanceCols(a, b, a.children[1]); Object.assign(H, {stateCard:325, readyCard:325, habitCard:369});
+      ck("p26 Y2d wide: nothing at or above the morning check ever moves, however short B is", ids(a) === "stateCard,readyCard" && ids(b) === "habitCard");
+      H.standardCard = 56; H.eveningCard = 1400; State.colRun = ["cueCard", "blockCard", "winCard"]; a = col(AO); b = col(BO); balanceCols(a, b, a.children[2]);
+      ck("p26 Y2d sticky: a repaint on Today keeps the chosen run by id, even when a height changed under it", ids(b) === "cueCard,blockCard,winCard,standardCard,eveningCard");
+      H.eveningCard = 627; State.colRun = null; const LH = Layout.h; Layout.h = () => 0; a = col(AO); b = col(BO); balanceCols(a, b, a.children[2]); Layout.h = LH;
+      ck("p26 Y2d hidden: a tab not laid out (height 0) chooses nothing and remembers nothing", ids(b) === BO.join() && State.colRun === null);
+      State.colRun = ["nope"]; Store.data.meta.fold = {}; setTab("today");
+      ck("p26 Y2d entry: entering Today chooses the split afresh, on the real Today columns", Array.isArray(State.colRun) && State.colRun.indexOf("nope") < 0);
+    } catch(e) { ck("p26 self-check block ran to its end without throwing — " + (e && e.message || e) + " @" + (e && e.stack || "").split("\n").slice(1,3).join(" "), false); }
+    finally { Motion.play = keepPl26; Layout.wide = keepW26; Layout.h = keepH26; State.colRun = keepCr26; Date.now = ckNow26; Store.data = keepD26; State.tab = keepTab26; State.eveStep = null; Motion.quiet = keepMq26; Motion.reduced = keepMr26; Seen.map = keepSm26; Seen.put = keepSp26; Motion.log = []; State.beat = null; State.flash = ""; }
     /* Chapter Five: the team, conversations, the quarter-season review (a fresh store) */
     const keepD5 = Store.data; Store.data = Store.blank(); Store.data.meta.setupSkipped = true;   /* a team alone is not history: the full page */
     ck("team: Chapter Two's six coach questions and Chapter Five's seven review questions are read from the manual, the short ones too", COACH_Q.length === 6 && COACH_Q[0] === "What qualities currently make me valuable to the team?" && COACH_Q[1] === "What do you trust me to do consistently?" && COACH_Q[5] === "What should I focus on during the next four weeks?" && TEAM_REVIEW_Q.length === 7 && TEAM_REVIEW_Q[0] === "Which relationships have been most useful?" && TEAM_REVIEW_Q[1] === "Where has communication improved?" && TEAM_REVIEW_Q[6] === "Does any relationship or role need to change?");
@@ -4111,6 +4224,7 @@ Seen.load();
     fail.push("threw: " + (e && e.message || e));
   } finally {
     Store.saveLocal = realSave; Date.now = realNow; Seen.map = keepSeen; Seen.put = realSeenPut; Motion.reduced = realReduced; Motion.log = []; window.IntersectionObserver = realIO; Motion.watch = {};
+    Layout.wide = realWide; Layout.h = realH; State.colRun = null;
     Store.data = JSON.parse(before);
     const ks = JSON.parse(keepState); State.tab = ks.tab; State.openSec = ks.openSec; State.openPri = ks.openPri; State.cpOpen = ks.cpOpen; State.readChapter = ks.readChapter; State.logFilter = ks.logFilter;
     State.draft = Store.data.drafts.log || null; State.ratingsDraft = null; State.evOpen = {}; State.teachOpen = {}; State.cnOpen = {}; State.chwsOpen = {}; State.chwsEdit = {}; State.chwsDel = {}; State.checkStep = null; State.checkFrom = null; State.checkOne = false; State.eveStep = null; State.eveOne = false; State.pendingImport = null; State.confirmDiscard = false; State.editWin = false; State.teamNew = {name:"", role:""}; State.teamDel = null; State.toPlan = null; State.pzFilter = {}; State.wsOpen = {}; State.setupStep = null; State.inSetup = false; State.goalNew = {type:"", what:"", min:"", target:"", stretch:"", measure:""}; State.goalDel = null; State.beat = null; State.flash = ""; clearTimeout(flashT);
