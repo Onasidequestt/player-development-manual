@@ -131,6 +131,8 @@ label.f{display:block;margin:12px 0 4px;font-size:13px;color:var(--ink2)}
 .chip{font-size:12px;background:var(--panel2);border-radius:999px;padding:4px 10px;color:var(--ink2);border:1px solid transparent}
 .chip.low{border-color:var(--warn);color:var(--ink)}
 .chip.low b{color:var(--warn)}
+.lowkey{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mute);margin:8px 0 2px}
+.lowkey i{width:18px;height:12px;border:1.5px solid var(--warn);border-radius:7px;flex:0 0 auto}
 #readyCard .chips button.chip{cursor:pointer}
 #streakNote{color:var(--gold);font-weight:600;margin-top:2px}
 .sw{font-size:11px;color:var(--mute);margin-top:4px}
@@ -315,7 +317,10 @@ button.link.flag{display:block;text-align:left;color:var(--warn)}
 .prose .kick{font:700 14px var(--disp);letter-spacing:2px;text-transform:uppercase;color:var(--gold)}
 .prose h2.title{font:800 38px/1 var(--disp);color:var(--ink);text-transform:uppercase;margin:6px 0 18px;letter-spacing:.2px}
 .prose h3{font:700 22px/1.15 var(--disp);color:var(--gold2);margin:28px 0 8px;text-transform:uppercase;letter-spacing:.4px}
-.prose p{color:var(--ink);line-height:1.7;font-size:17px;margin:10px 0}
+.prose p{color:var(--ink);line-height:1.7;font-size:17px;margin:10px 0;max-width:30em}
+/* X3c: the measure is set on the paragraph in its own em (17 px), ~65–70 characters a line at 1280 (66ch on .prose resolved at the
+   smaller .prose font and gave 85); a chapter's opening paragraph is its lead line */
+.prose h2.title + p{font-size:20px;line-height:1.55;max-width:26em;color:var(--ink);margin:0 0 18px}
 .field{background:var(--panel2);border:1px solid var(--gold);border-radius:14px;padding:12px 14px;margin:14px 0}
 .ws{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin:14px 0;padding:0 14px}
 .ws.open{padding-bottom:14px}
@@ -679,6 +684,9 @@ function svgEl(t, a){
   return n;
 }
 function clear(node){ node.textContent = ""; }
+/* X3b: a Remove closes its gap — what moved up into the removed row's place (the next row, else what follows the list)
+   settles in 200 ms, the fold line's beat. Played by the render the tap already makes; nothing waits, nothing repaints later */
+function settle(key, node){ return Motion.play("removed", key, node, [{opacity:.4, transform:"translateY(6px)"}, {opacity:1, transform:"none"}], {duration: 200}); }
 /* ================= motion ================= */
 /* Every tap rebuilds its tab, so nothing survives to transition: a tap sets State.beat, the render that
    builds the new node takes it once and plays it on that node (Web Animations, no library).
@@ -1460,6 +1468,8 @@ function checkCard(today, beat){
     /* a chip opens that one question to change it (Simon 09-25 Q2) */
     READY_FIELDS.forEach((f, i) => chips.appendChild(el("button", {type:"button", class:"chip" + (rec[f[0]] <= 2 ? " low" : ""), id:"chip" + i, "aria-label": "Change " + f[1] + ": " + rec[f[0]], onclick: openRun(i, true)}, f[1], el("b", null, rec[f[0]]))));
     card.appendChild(chips);
+    /* X3a: the outline gets a one-line key, shown only while one of the seven is outlined */
+    if(READY_FIELDS.some(f => rec[f[0]] <= 2)) card.appendChild(el("div", {class:"lowkey", id:"lowKey"}, el("i", {"aria-hidden":"true"}), "Outlined: answered 2 or lower"));
     /* the check lands: the seven answers set down left to right (up or down, the check is done — no number is dressed here) */
     if(beat && beat.kind === "check") chips.querySelectorAll(".chip").forEach((c, i) => Motion.play(i ? "chip" : "chips", "ready", c, [{opacity:0, transform:"translateY(4px)"}, {opacity:1, transform:"none"}], {duration: 160, delay: i * 30, fill: "backwards"}));
     card.appendChild(el("button", {type:"button", class:"link", id:"changeCheck", onclick: openRun(0)}, "Change answers"));
@@ -2016,7 +2026,7 @@ function prioritizeCard(){
 /* ================= Goals ================= */
 function renderGoals(){
   const slot = $("goalsSlot"); clear(slot);
-  const f = flashBox(takeBeat()); if(f) slot.appendChild(f);
+  const beat = takeBeat(), f = flashBox(beat); if(f) slot.appendChild(f);
   const g = Store.data.goals;
   /* two columns at desktop width (Simon 09-25 round 3); on a phone A then B is the same order as before. Balanced at 1280 (T7): the
      90-day plan and its priorities close the left column, cues, the checkpoint and the team open the right (measured 1900 | 3798 px before) */
@@ -2025,7 +2035,7 @@ function renderGoals(){
   const c1 = el("div", {class:"card", id:"purposeCard"}, el("h2", null, "Season purpose"), el("p", {class:"mute"}, "At the end of the season, I want to be able to say…"));
   c1.appendChild(el("textarea", {id:"purpose", value:g.purpose, oninput: ev => Store.setGoals({purpose: ev.target.value})}));
   colA.appendChild(c1);
-  colA.appendChild(seasonCard());
+  colA.appendChild(seasonCard(beat));
   const c2 = el("div", {class:"card", id:"habitGoals"}, el("h2", null, "Habit goals"), el("p", {class:"mute"}, "Up to five. Each one becomes a daily tick on Today. Write the behaviour, not the wish."));
   for(let i=0;i<5;i++){ c2.appendChild(el("input", {type:"text", id:"habit" + i, value:g.habits[i]||"", placeholder: "Habit " + (i+1), "aria-label": "Habit " + (i+1), oninput: ev => { const h = g.habits.slice(); h[i] = ev.target.value; Store.setGoals({habits:h}); }})); }
   colA.appendChild(c2);
@@ -2064,12 +2074,12 @@ function renderGoals(){
   colB.appendChild(cc);
   /* checkpoints: Day 14, 30, 45, 60, 75, 90 */
   if(bp) colB.appendChild(checkpointCard(bp));
-  colB.appendChild(teamCard());
+  colB.appendChild(teamCard(beat));
   if(Store.teamList().length) colB.appendChild(reviewCard());
 }
 /* Chapter Five: "You are responsible for the center." Who helps, and what each one is for */
 /* Chapter Seven: season goals by type, counted against the manual's structure; habit goals ARE the daily habits */
-function seasonCard(){
+function seasonCard(beat){
   const c = el("div", {class:"card", id:"seasonCard"}, el("h2", null, "Season goals"), el("p", {class:"mute"}, "Chapter Seven: goals guide attention — they are not tests of your worth. When every area is a priority, none gets enough."), teachRows("season"));
   GOAL_TYPES.forEach(([t, nm, lo, hi]) => {
     const n = Store.goalCount(t), over = n > hi;
@@ -2082,9 +2092,10 @@ function seasonCard(){
       g.appendChild(el("div", {class:"habit member"}, el("div", {class:"nm"}, el("b", null, x.what),
         lv.length ? el("div", {class:"mute lv"}, lv.map(v => v[0] + ": " + v[1]).join(" · ")) : null,
         (x.measure||"").trim() ? el("div", {class:"mute"}, "Measured by: " + x.measure) : null),
-        State.goalDel === x.id ? el("button", {type:"button", onclick: () => { delete Store.data.goals.season[x.id]; Store.save(); State.goalDel = null; renderGoals(); }}, "Yes, remove")
+        State.goalDel === x.id ? el("button", {type:"button", onclick: () => { const at = Store.seasonGoals(t).findIndex(y => y.id === x.id); delete Store.data.goals.season[x.id]; Store.save(); State.goalDel = null; State.beat = {kind:"removed", key:"goal:" + t, at}; renderGoals(); }}, "Yes, remove")
           : el("button", {type:"button", class:"ghost", "aria-label":"Remove " + x.what, onclick: () => { State.goalDel = x.id; renderGoals(); }}, "Remove")));
     });
+    if(beat && beat.kind === "removed" && beat.key === "goal:" + t) settle(beat.key, g.querySelectorAll(".member")[beat.at] || g);
     if(t === "personal") g.appendChild(teachRows("personal"));
     c.appendChild(g);
   });
@@ -2128,14 +2139,15 @@ function seasonCard(){
   });
   return c;
 }
-function teamCard(){
+function teamCard(beat){
   const c = el("div", {class:"card", id:"teamCard"}, el("h2", null, "Development team"), el("p", {class:"mute"}, "Chapter Five: you are responsible for the center. Name who helps, and what each one is for. Log a conversation with any of them from the Log tab."));
   const team = Store.teamList(), nw = State.teamNew;
   team.forEach(m => c.appendChild(el("div", {class:"habit member"}, el("div", {class:"nm"}, el("b", null, m.name), el("div", {class:"mute"}, m.role)),
-    State.teamDel === m.id ? el("button", {type:"button", onclick: () => { delete Store.data.team[m.id]; Store.save(); State.teamDel = null; renderGoals(); }}, "Yes, remove")
+    State.teamDel === m.id ? el("button", {type:"button", onclick: () => { const at = team.findIndex(y => y.id === m.id); delete Store.data.team[m.id]; Store.save(); State.teamDel = null; State.beat = {kind:"removed", key:"team", at}; renderGoals(); }}, "Yes, remove")
       : el("button", {type:"button", class:"ghost", "aria-label":"Remove " + m.name, onclick: () => { State.teamDel = m.id; renderGoals(); }}, "Remove"))));
   if(!team.length) c.appendChild(el("div", {class:"empty"}, "No one named yet. Start with your head coach."));
-  c.appendChild(el("label", {class:"f", for:"teamName"}, "Add someone"));
+  const addL = el("label", {class:"f", for:"teamName"}, "Add someone"); c.appendChild(addL);
+  if(beat && beat.kind === "removed" && beat.key === "team") settle("team", c.querySelectorAll(".member")[beat.at] || c.querySelector(".empty") || addL);
   c.appendChild(el("input", {type:"text", id:"teamName", value: nw.name, placeholder:"Name", oninput: ev => { nw.name = ev.target.value; const b = $("teamAdd"); if(b) b.disabled = !(nw.name.trim() && nw.role); }}));
   const seg = el("div", {class:"seg wrap", id:"teamRoles"});
   TEAM_ROLES.forEach(r => { const on = nw.role === r, b = el("button", {type:"button", "aria-pressed": String(on), onclick: () => tapKey("role:", r, () => { nw.role = nw.role === r ? "" : r; renderGoals(); })}, r); seg.appendChild(b); pressIn(b, "role:", r, on); });
@@ -2207,6 +2219,9 @@ function fieldBox(fd){
    answer, kept with its chapter, section and exact prompt (so an answer never lands under another question); a worksheet
    the app asks elsewhere, and Chapters Five to Nine (their tabs do that work), show what the page asks without fields */
 const WS_ANSWER = ["ONE","TWO","THREE","FOUR"];
+/* X2 (Simon 09-26): two Chapter Six sheets that were print only are answered on Read's Chapter Six page, word for word as
+   printed (8 attributes × rating + evidence, then 4 lines; 6 role prompts). Ratings does not get longer */
+const WS_LIVE = ["SIX|Physical-Performance Assessment", "SIX|Current Role Assessment"];
 /* a worksheet the manual says to repeat ("Complete this review at scheduled points during the season"): each review is
    a dated copy — the answers written within REVIEW_WINDOW days of its first answer — and the next one starts blank */
 const WS_REPEAT = ["FOUR|Vision Review"], REVIEW_WINDOW = 14;
@@ -2224,7 +2239,7 @@ const WS_ELSEWHERE = {
    sheet's lines against the tab that asks them (HANDOFF, night 09-25); every Chapter Five to Nine worksheet has an entry (checked) */
 const WS_RATE = ["Skating","Puck-Skill","Shooting And Scoring","Offensive-Play","Defensive-Play","Hockey-Sense And Decision-Making","Practice-Habit","Game-Habit","Mental-Performance","Communication And Coachability","Team-Contribution","Recovery And Health","Nutrition And Hydration","Sleep","Professional And Personal-Conduct"];
 const WS_PRINT = ["FIVE|Development Team Map","FIVE|Responsibility Map","FIVE|Communication Preferences","FIVE|Advice Coordination Check","FIVE|Family Support Conversation","FIVE|Billet And Home Communication","FIVE|Health Communication Plan","FIVE|Development Team Warning Signs","FIVE|My Support Gaps","FIVE|My Development Team Standard",
-  "SIX|Physical-Performance Assessment","SIX|Current Role Assessment","SIX|Coach Baseline Feedback","SIX|Strength-And-Conditioning Baseline Feedback","SIX|Baseline Review Agreement",
+  "SIX|Coach Baseline Feedback","SIX|Strength-And-Conditioning Baseline Feedback","SIX|Baseline Review Agreement",
   "SEVEN|Monthly Goal Review","SEVEN|Midseason Goal Review","SEVEN|End-Of-Season Goal Review","SEVEN|My Season Goal Statement",
   "NINE|Evidence Used To Select Priorities","NINE|90-Day Action Schedule","NINE|Weekly Development Rhythm"];
 const WS_HOME = Object.assign(
@@ -2295,7 +2310,7 @@ function wsHome(base){
 }
 /* one worksheet's keys and tally: the worksheet row and the chapter list both read it */
 function wsKeys(ch, b){
-  const base = ch.n + "|" + b.h, where = WS_ELSEWHERE[base], live = WS_ANSWER.indexOf(ch.n) >= 0 && !where, rep = WS_REPEAT.indexOf(base) >= 0 && live, day = rep ? Store.wsDay(base, dayOf(Date.now())) : "";
+  const base = ch.n + "|" + b.h, where = WS_ELSEWHERE[base], live = (WS_ANSWER.indexOf(ch.n) >= 0 || WS_LIVE.indexOf(base) >= 0) && !where, rep = WS_REPEAT.indexOf(base) >= 0 && live, day = rep ? Store.wsDay(base, dayOf(Date.now())) : "";
   const key = n => (rep ? base + "@" + day : base) + "|" + n.id, has = v => Array.isArray(v) ? v.length > 0 : !!(v || "").trim();
   const qs = wsNodes(b.w).filter(n => n.id);
   return {base, where, live, rep, day, key, has, qs, done: () => qs.filter(n => has(Store.data.assess[key(n)]) || has(Store.data.assess[key(n) + "|Other"])).length};
@@ -2415,9 +2430,11 @@ function renderRead(){
   if(nc){
   nc.appendChild(el("textarea", {id:"chNote", value: Store.data.notes[ch.n]||"", placeholder: WS_ANSWER.indexOf(ch.n) >= 0 ? "Anything else this chapter made you think about." : "Answer the chapter's other questions here in your own words.", oninput: ev => Store.setNote(ch.n, ev.target.value)}));
   slot.appendChild(nc); }
-  const isRead = !!Store.data.read[ch.n];
-  slot.appendChild(el("div", {class:"row prose", style:"margin:8px 0 20px"},
-    el("button", {type:"button", class: isRead ? "ghost" : "primary", id:"markRead", onclick: () => { Store.data.read[ch.n] = !isRead; if(isRead) delete Store.data.read[ch.n]; Store.save(); renderRead(); }}, isRead ? "✓ Read — tap to undo" : "Mark as read"),
+  const isRead = !!Store.data.read[ch.n], rb = State.beat && State.beat.kind === "read" ? takeBeat() : null;
+  const mr = el("button", {type:"button", class: isRead ? "ghost" : "primary", id:"markRead", onclick: () => { Store.data.read[ch.n] = !isRead; if(isRead) delete Store.data.read[ch.n]; Store.save(); State.beat = isRead ? null : {kind:"read", key: ch.n}; renderRead(); }}, isRead ? "✓ Read — tap to undo" : "Mark as read");
+  /* X3b: marking a chapter read lands on the button that now says so; the undo plays nothing */
+  if(rb && rb.key === ch.n) Motion.play("read", ch.n, mr, [{transform:"scale(.9)", opacity:.6}, {transform:"scale(1.04)", opacity:1, offset:.6}, {transform:"scale(1)", opacity:1}], {duration: 220});
+  slot.appendChild(el("div", {class:"row prose", style:"margin:8px 0 20px"}, mr,
     i < CHAPTERS.length - 1 ? el("button", {type:"button", class:"ghost right", onclick: () => { State.readChapter = i + 1; renderRead(); window.scrollTo(0,0); }}, "Next: " + chTitle(CHAPTERS[i+1]) + " ›") : null));
 }
 
@@ -3595,6 +3612,71 @@ Seen.load();
       ck("p24 home tip: first run tells him how to put it on the home screen (not shown once installed)", !!$("suHome") && /Add to Home Screen/.test($("suHome").textContent));
     } catch(e) { ck("p24 self-check block ran to its end without throwing — " + (e && e.message || e), false); }
     finally { globalThis.setTimeout = keepST; Date.now = ckNow4; Store.data = keepD4; State.tab = keepTab4; State.editWin = false; State.setupStep = null; State.inSetup = false; Motion.quiet = keepMq; Motion.reduced = keepMr; Seen.map = keepSm; Seen.put = keepSp; Motion.log = []; State.beat = null; State.flash = ""; }
+    /* part 25: X2 (Chapter Six's Physical-Performance + Current Role answered on Read) and X3 (the low-answer key, the Remove and
+       Mark-as-read beats). A block of its own: a throw here cannot silence anything before it. Counts are pinned to the manual */
+    const keepD25 = Store.data, keepTab25 = State.tab, keepRc25 = State.readChapter, keepWo25 = State.wsOpen, ckNow25 = Date.now, keepMq25 = Motion.quiet, keepMr25 = Motion.reduced, keepSm25 = Seen.map, keepSp25 = Seen.put, keepPl25 = Motion.play;
+    try {
+      Date.now = () => tsOfDay("2026-09-23") + 10 * 3600e3;
+      Store.data = Store.blank(); Store.data.meta.setupSkipped = true; State.wsOpen = {};
+      const t9 = x => ((x || {}).textContent || "").replace(/\s+/g, " ").trim(), six = CHAPTERS.findIndex(c => c.n === "SIX"), bOf = h => CHAPTERS[six].blocks.findIndex(b => b.h === h && b.w);
+      const openSix = () => { State.tab = "read"; State.readChapter = six; renderRead(); }, tapWs = bi => { const b = $("ws" + bi) && $("ws" + bi).querySelector("button"); if(b) b.onclick(); };
+      const PP = bOf("Physical-Performance Assessment"), CR = bOf("Current Role Assessment"), CB = bOf("Coach Baseline Feedback");
+      openSix(); tapWs(PP); tapWs(CR); tapWs(CB);
+      const box = bi => $("ws" + bi) || {querySelectorAll: () => []}, labs = bi => Array.from(box(bi).querySelectorAll("label")).map(t9);
+      const ATTR = ["Strength", "Power", "Speed", "Conditioning", "Mobility", "Movement Quality", "Balance and Stability", "Recovery Capacity"];
+      const LINES4 = ["Current physical-development priority:", "Current restrictions or precautions:", "Staff member consulted:", "Next test or review date:"];
+      const ppL = labs(PP), ppF = box(PP).querySelectorAll("input").length + box(PP).querySelectorAll("textarea").length;
+      ck("p25 X2 physical: Read's Chapter Six Physical-Performance sheet takes answers, as printed — 8 attributes (Strength … Recovery Capacity) × rating + evidence, then its 4 lines (20 fields)",
+        PP >= 0 && ppF === 8 * 2 + 4 && JSON.stringify(Array.from(box(PP).querySelectorAll("h4")).map(t9)) === JSON.stringify(ATTR)
+        && ppL.filter(l => l === "Rating or staff assessment:").length === 8 && ppL.filter(l => l === "Evidence, test, or comments:").length === 8 && JSON.stringify(ppL.slice(16)) === JSON.stringify(LINES4)
+        && t9($("wsc" + PP)) === "0 of 20 answered" && !$("wsHome" + PP));
+      const ROLE6 = ["My current role", "What the team currently needs from me", "What coaches appear to trust", "What currently limits my role", "The next responsibility I hope to earn", "What I must demonstrate first"];
+      ck("p25 X2 role: Current Role asks its 6 prompts word for word, each a written answer", JSON.stringify(labs(CR)) === JSON.stringify(ROLE6) && box(CR).querySelectorAll("textarea").length === 6 && t9($("wsc" + CR)) === "0 of 6 answered");
+      ck("p25 X2 scope: Coach Baseline Feedback beside them stays print only (X2 names two sheets)", /prompts · print only$/.test(t9($("wsc" + CB))) && !box(CB).querySelectorAll("input").length && !box(CB).querySelectorAll("textarea").length);
+      const f0 = box(PP).querySelector("input"); f0.value = "Staff test: 3 of 5"; f0.oninput({target: f0});
+      const kPP = "SIX|Physical-Performance Assessment|Strength|Rating or staff assessment:";
+      ck("p25 X2 store: an answer is kept under the sheet, attribute and exact line, counted in place (1 of 20), and the Chapter Six list line counts it",
+        Store.data.assess[kPP] === "Staff test: 3 of 5" && t9($("wsc" + PP)) === "1 of 20 answered" && (State.readChapter = null, renderRead(), t9($("wsn-SIX")) === "Worksheets: 1 of 26 answered"));
+      openSix();
+      ck("p25 X2 store: it is shown again when the page opens, and survives a normalize (the backup's path)", ($("w" + PP + "-2") || {}).value === "Staff test: 3 of 5" && Store.normalize(JSON.parse(JSON.stringify(Store.data))).assess[kPP] === "Staff test: 3 of 5");
+      State.tab = "ratings"; renderRatings();
+      ck("p25 X2 Ratings does not get longer: none of the two sheets' lines is asked on Ratings", !/Rating or staff assessment|Evidence, test, or comments|My current role|What coaches appear to trust/.test(t9($("ratingsSlot"))));
+      /* X3a: the key under the morning chips */
+      State.tab = "today"; const R7 = {sleep: 4, energy: 4, body: 4, stress: 4, mood: 4, health: 4, drive: 4};
+      Store.putReadiness("2026-09-23", R7); renderToday();
+      const keyNo = !$("lowKey") && !$("readyCard").querySelectorAll(".chip.low").length;
+      Store.putReadiness("2026-09-23", {sleep: 2}); renderToday();
+      ck("p25 X3a key: with an answer of 2 or lower the outlined chip gets a one-line key under the chips; with none outlined there is no key",
+        keyNo && !!$("lowKey") && t9($("lowKey")) === "Outlined: answered 2 or lower" && $("readyCard").querySelectorAll(".chip.low").length === 1 && !!$("lowKey").querySelector("i"));
+      /* X3b: the Remove beats and the Mark-as-read beat (memory only while checking) */
+      Motion.quiet = false; Motion.reduced = () => false; Seen.map = {}; Seen.put = function(k, v){ this.map[k] = v; };
+      const ids = ["a", "b", "c"].map((w, i) => { Date.now = () => tsOfDay("2026-09-23") + (10 + i) * 3600e3; return Store.addSeasonGoal({type:"performance", what:"Goal " + w, min:"", target:"", stretch:"", measure:""}); });
+      State.tab = "goals"; State.goalDel = ids[0]; renderGoals();
+      const yes = () => Array.from($("seasonCard").querySelectorAll("button")).find(b => t9(b) === "Yes, remove");
+      Motion.log = []; const nodeLog = []; Motion.play = function(k, key, node, fr, o){ nodeLog.push([k, key, node]); return keepPl25.call(this, k, key, node, fr, o); };
+      yes().onclick();
+      const gRow = Array.from($("seasonCard").querySelectorAll(".gt")).find(g => g.getAttribute("data-t") === "performance").querySelectorAll(".member")[0];
+      ck("p25 X3b goal Remove: the row that moves up into the gap settles once (200 ms), on that goal type only", Store.seasonGoals("performance").length === 2 && Motion.log.filter(x => x.kind === "removed").length === 1 && Motion.log.some(x => x.kind === "removed" && x.key === "goal:performance" && x.ms === 200) && nodeLog.some(([k, , n]) => k === "removed" && n === gRow) && /Goal b/.test(t9(gRow)));
+      Motion.log = []; renderGoals();
+      ck("p25 X3b goal Remove: a later Goals repaint plays nothing", !Motion.log.some(x => x.kind === "removed"));
+      State.goalDel = ids[2]; renderGoals(); nodeLog.length = 0; yes().onclick();
+      ck("p25 X3b goal Remove: the last row gone, the type's group itself settles", nodeLog.some(([k, , n]) => k === "removed" && n === Array.from($("seasonCard").querySelectorAll(".gt")).find(g => g.getAttribute("data-t") === "performance")));
+      Store.data.team = {m1: {id:"m1", name:"Coach A", role: TEAM_ROLES[0], at: 1, day:"2026-09-01"}, m2: {id:"m2", name:"Coach B", role: TEAM_ROLES[0], at: 2, day:"2026-09-01"}};
+      State.teamDel = "m1"; renderGoals(); nodeLog.length = 0; Motion.log = [];
+      Array.from($("teamCard").querySelectorAll("button")).find(b => t9(b) === "Yes, remove").onclick();
+      const tRow = $("teamCard").querySelectorAll(".member")[0];
+      ck("p25 X3b team Remove: the next person moves up into the gap and settles once (200 ms)", !Store.data.team.m1 && Motion.log.filter(x => x.kind === "removed").length === 1 && nodeLog.some(([k, key, n]) => k === "removed" && key === "team" && n === tRow) && /Coach B/.test(t9(tRow)));
+      State.teamDel = "m2"; renderGoals(); nodeLog.length = 0;
+      Array.from($("teamCard").querySelectorAll("button")).find(b => t9(b) === "Yes, remove").onclick();
+      ck("p25 X3b team Remove: the last person gone, the empty line that takes the place settles", nodeLog.some(([k, , n]) => k === "removed" && n === $("teamCard").querySelector(".empty")));
+      State.tab = "read"; State.readChapter = six; renderRead(); nodeLog.length = 0; Motion.log = [];
+      $("markRead").onclick();
+      ck("p25 X3b Mark as read: the button that now says ✓ Read lands once (220 ms)", !!Store.data.read.SIX && /✓ Read/.test(t9($("markRead"))) && Motion.log.filter(x => x.kind === "read").length === 1 && nodeLog.some(([k, key, n]) => k === "read" && key === "SIX" && n === $("markRead")) && Motion.log.some(x => x.kind === "read" && x.ms === 220));
+      Motion.log = []; renderRead(); const rep0 = !Motion.log.some(x => x.kind === "read");
+      $("markRead").onclick();
+      ck("p25 X3b Mark as read: a later repaint and the undo play nothing", rep0 && !Store.data.read.SIX && !Motion.log.some(x => x.kind === "read") && State.beat === null);
+    } catch(e) { ck("p25 self-check block ran to its end without throwing — " + (e && e.message || e) + " @" + (e && e.stack || "").split("\n").slice(1,3).join(" "), false); }
+    finally { Motion.play = keepPl25; Date.now = ckNow25; Store.data = keepD25; State.tab = keepTab25; State.readChapter = keepRc25; State.wsOpen = keepWo25; State.goalDel = null; State.teamDel = null; Motion.quiet = keepMq25; Motion.reduced = keepMr25; Seen.map = keepSm25; Seen.put = keepSp25; Motion.log = []; State.beat = null; State.flash = ""; }
     /* Chapter Five: the team, conversations, the quarter-season review (a fresh store) */
     const keepD5 = Store.data; Store.data = Store.blank(); Store.data.meta.setupSkipped = true;   /* a team alone is not history: the full page */
     ck("team: Chapter Two's six coach questions and Chapter Five's seven review questions are read from the manual, the short ones too", COACH_Q.length === 6 && COACH_Q[0] === "What qualities currently make me valuable to the team?" && COACH_Q[1] === "What do you trust me to do consistently?" && COACH_Q[5] === "What should I focus on during the next four weeks?" && TEAM_REVIEW_Q.length === 7 && TEAM_REVIEW_Q[0] === "Which relationships have been most useful?" && TEAM_REVIEW_Q[1] === "Where has communication improved?" && TEAM_REVIEW_Q[6] === "Does any relationship or role need to change?");
@@ -3783,7 +3865,7 @@ Seen.load();
     openCh("ONE");
     ck("read: an answer is kept under its chapter, section and exact question, counted in place, and shown again (still open)", Store.data.assess[k1] === "I love the speed of it." && Object.keys(Store.data.assess).length === 1 && inPlace && ($("w" + pr1 + "-0") || {}).value === "I love the speed of it." && $("wsb" + pr1).hidden === false);
     ck("read: a worksheet answer is not a statement: the chapter pips and the front count stay the gold boxes only", (State.readChapter = null, renderRead(), /^0 of \d+ answers written$/.test(txt($("readAnswers")))));
-    ck("read: the chapter list says how much of each chapter's worksheets is answered (One: 1 of 5), and none for a chapter whose worksheets are read-only", txt($("wsn-ONE")) === "Worksheets: 1 of 5 answered" && !$("wsn-FIVE") && !$("wsn-SIX") && /^Worksheets: 0 of \d+ answered$/.test(txt($("wsn-FOUR"))));
+    ck("read: the chapter list says how much of each chapter's worksheets is answered (One: 1 of 5), Six's two live sheets 0 of 26 (the manual: 8 attributes × 2 + 4 lines + 6 role prompts), and none for a chapter whose worksheets are read-only", txt($("wsn-ONE")) === "Worksheets: 1 of 5 answered" && !$("wsn-FIVE") && !$("wsn-SEVEN") && txt($("wsn-SIX")) === "Worksheets: 0 of " + (8 * 2 + 4 + 6) + " answered" && /^Worksheets: 0 of \d+ answered$/.test(txt($("wsn-FOUR"))));
     Store.data.assess["FOUR|Long-Term Vision Assessment|x"] = "stray"; Store.data.assess["FOUR|Vision Review@2000-01-01||What have I learned about my game?"] = "an old review";
     const wsnList = txt($("wsn-FOUR")) === txt((renderRead(), $("wsn-FOUR")));
     openCh("FOUR"); const wsnRows = Array.from($("readSlot").querySelectorAll(".wshd .mute")).map(x => (txt(x).match(/^(\d+) of (\d+) answered$/) || [0, 0, 0]).slice(1).map(Number)).reduce((a, r) => [a[0] + r[0], a[1] + r[1]], [0, 0]);
@@ -3843,7 +3925,7 @@ Seen.load();
     const w59 = CHAPTERS.filter(ch => ["FIVE","SIX","SEVEN","EIGHT","NINE"].indexOf(ch.n) >= 0).flatMap(ch => ch.blocks.filter(b => b.w).map(b => ch.n + "|" + b.h));
     const secNames = SECTIONS.map(x => x.name), homeReal = k => { const h = WS_HOME[k], [n, hd] = k.split("|"), p = h[1] || "", tab = p.split(" · ")[0].toLowerCase();
       return wsAt(n, hd) >= 0 && (h[0] === "print" ? h.length === 1 : TABS.indexOf(tab) >= 0 && (h[0] === "in" || !!h[2]) && (tab !== "ratings" || /Overall Summary|Prioritize|Foundational|Baseline information|Evidence used/.test(p) || secNames.indexOf(p.split(" · ")[1]) >= 0)); };
-    ck("read: every Chapter Five to Nine worksheet names its home (" + new Set(w59).size + " sheets): a real tab and place, partly with what it keeps, or print only", w59.length >= 70 && w59.every(k => k in WS_HOME) && Object.keys(WS_HOME).every(homeReal) && Object.keys(WS_ELSEWHERE).every(k => (WS_HOME[k] || [])[0] === "in"));
+    ck("read: every Chapter Five to Nine worksheet names its home (" + new Set(w59).size + " sheets): a real tab and place, partly with what it keeps, print only, or answered on Read (X2)", w59.length >= 70 && w59.every(k => k in WS_HOME || WS_LIVE.indexOf(k) >= 0) && WS_LIVE.every(k => !(k in WS_HOME)) && Object.keys(WS_HOME).every(homeReal) && Object.keys(WS_ELSEWHERE).every(k => (WS_HOME[k] || [])[0] === "in"));
     const hmTap = (n, h) => { openCh(n); const i = wsAt(n, h); wsTap(i); openCh(n); return i; };
     const hmP = hmTap("FIVE", "My Support Gaps"), hmPt = txt($("wsc" + hmP)), hmPs = txt($("wsHome" + hmP));
     const hmQ = hmTap("NINE", "Hockey-Skill Priority"), hmQt = txt($("wsc" + hmQ)), hmQs = txt($("wsHome" + hmQ));
