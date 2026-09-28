@@ -73,6 +73,15 @@ button.link{background:none;border:0;color:var(--gold2);padding:6px 0;min-height
 button:disabled{opacity:.45;cursor:default}
 input,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;width:100%;min-height:44px;margin:3px 0}
 textarea{min-height:76px;resize:vertical}
+/* part 30 (Clark pdm8, "field boxes slightly out of alignment and overlap" on the phone): one box for every entry field
+   on every engine. Chromium pads a date's edit line 1 px, so Ratings' "Date completed" stood 2 px taller than "Age"
+   beside it (the fixed height evens that out); iOS draws a date as a centred inline-flex that will not shrink below its date (WebKit html.css), so at a
+   zoomed phone's 320 px it ran into "Age". Every single-line field is the same 46 px box, a date is drawn like a text
+   field (left, no native frame), no field is wider than its column, and at <= 340 px side-by-side fields stack. */
+input{height:46px;min-width:0;max-width:100%}
+input[type=date]{-webkit-appearance:none;appearance:none;display:inline-block;text-align:left}
+input::-webkit-date-and-time-value{text-align:left;margin:0}
+@media (max-width:340px){ .bigrid{grid-template-columns:minmax(0,1fr)} }
 label.f{display:block;margin:12px 0 4px;font-size:13px;color:var(--ink2)}
 .hidden{display:none !important}
 .num{font-family:var(--disp);font-variant-numeric:tabular-nums}
@@ -171,7 +180,7 @@ label.f{display:block;margin:12px 0 4px;font-size:13px;color:var(--ink2)}
 .axis .refkey{color:var(--mute)}
 .axis{display:flex;justify-content:space-between;font-size:11px;color:var(--mute);margin-top:4px}
 /* log entries: the whole row is the edit button */
-.seg{display:flex;gap:6px;margin:10px 0 4px}
+.seg{display:flex;gap:6px;margin:10px 0 4px;flex-wrap:wrap}   /* part 30: a picker that does not fit wraps; it never runs past its card (Log's Show row ran 24 px out at 320) */
 .seg button{min-height:44px;padding:6px 12px;font-size:14px;border-radius:999px}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:700}
 .entry{border-top:1px solid var(--line)}
