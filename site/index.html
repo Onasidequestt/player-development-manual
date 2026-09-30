@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Players Manual: a performance system for athletes</title>
+<meta name="description" content="Players Manual is a performance, tracking and journal system for athletes, tailored to each sport. Hockey first.">
+<style>
+@font-face{font-family:"PDM Display";font-weight:600;src:url(fonts/barlow-condensed-600.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"PDM Display";font-weight:800;src:url(fonts/barlow-condensed-800.woff2) format("woff2");font-display:swap}
+:root{--bg:#0b1630;--panel:#132447;--panel2:#1b2f57;--line:#26395f;--ink:#f2f0ea;--ink2:#c3c8d6;--mute:#9ca5ba;--gold:#e0a62c;--gold2:#f3c65b;--focus:#7fb3ff;--r:16px;
+--disp:"PDM Display","Barlow Condensed","Arial Narrow",sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+a{color:var(--gold2)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px}
+header{border-bottom:1px solid var(--line)}
+header .wrap{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;gap:12px;flex-wrap:wrap}
+.brand{font:800 26px/1 var(--disp);letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:10px}
+.brand i{width:26px;height:22px;background:repeating-linear-gradient(115deg,var(--gold) 0 5px,transparent 5px 10px)}
+nav a{margin-left:18px;text-decoration:none;color:var(--ink2);font-weight:600}
+nav a:hover{color:var(--gold2)}
+.hero{padding:72px 0 56px}
+.eyebrow{font:600 15px var(--disp);letter-spacing:.18em;text-transform:uppercase;color:var(--gold2)}
+h1{font:800 clamp(44px,9vw,84px)/.95 var(--disp);text-transform:uppercase;margin:12px 0 18px;letter-spacing:.02em}
+h1 em{font-style:normal;color:var(--gold)}
+.lead{max-width:640px;color:var(--ink2);font-size:19px}
+.btns{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.btn{display:inline-block;min-height:44px;padding:12px 22px;border-radius:12px;font:700 17px var(--disp);letter-spacing:.08em;text-transform:uppercase;text-decoration:none;border:2px solid var(--gold);color:var(--ink)}
+.btn.primary{background:var(--gold);color:#0b1630}
+.btn[aria-disabled=true]{opacity:.55;cursor:not-allowed}
+section{padding:48px 0;border-top:1px solid var(--line)}
+h2{font:800 34px/1.05 var(--disp);text-transform:uppercase;letter-spacing:.03em;margin:0 0 10px}
+.sub{color:var(--ink2);max-width:640px;margin:0 0 26px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.card h3{font:800 22px var(--disp);text-transform:uppercase;letter-spacing:.04em;margin:0 0 6px;color:var(--gold2)}
+.card p{margin:0;color:var(--ink2);font-size:16px}
+.tag{display:inline-block;font:700 13px var(--disp);letter-spacing:.14em;text-transform:uppercase;padding:3px 10px;border-radius:99px;border:1px solid var(--line);color:var(--mute);margin-bottom:10px}
+.tag.now{border-color:var(--gold);color:var(--gold2)}
+.note{background:var(--panel2);border-left:4px solid var(--gold);border-radius:8px;padding:14px 18px;color:var(--ink2);max-width:640px}
+footer{border-top:1px solid var(--line);padding:28px 0 40px;color:var(--mute);font-size:14px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="brand"><i aria-hidden="true"></i>Players Manual</div>
+  <nav aria-label="Main"><a href="#system">The system</a><a href="#sports">Sports</a><a href="#access">Sign in</a><a href="#pricing">Pricing</a></nav>
+</div></header>
+
+<main>
+<div class="wrap hero">
+  <div class="eyebrow">Performance &middot; Tracking &middot; Journal</div>
+  <h1>Train the game.<br><em>Own the record.</em></h1>
+  <p class="lead">Players Manual is a performance system for athletes: a daily journal, readiness and practice tracking, game logs and long-term goals, tailored to each sport. The hockey version comes first.</p>
+  <div class="btns"><a class="btn primary" href="#access">Sign in or get the app</a><a class="btn" href="#system">See what is inside</a></div>
+</div>
+
+<section id="system"><div class="wrap">
+  <h2>One system, built around the athlete</h2>
+  <p class="sub">The hockey version is the working model. These are the parts it already has.</p>
+  <div class="grid">
+    <div class="card"><h3>Daily check</h3><p>A short readiness check-in, then habits and the day's block, so the athlete starts from how they actually feel.</p></div>
+    <div class="card"><h3>Practice and game logs</h3><p>Write down what happened while it is fresh, with game numbers that can be tracked over a season.</p></div>
+    <div class="card"><h3>Ratings over time</h3><p>Self-ratings across the areas of the game, shown as then-versus-now so progress is visible.</p></div>
+    <div class="card"><h3>Journal and manual</h3><p>Identity, standards and long-term vision written in the athlete's own words and shown again each day.</p></div>
+  </div>
+</div></section>
+
+<section id="sports"><div class="wrap">
+  <h2>Hockey first, then every sport</h2>
+  <p class="sub">Each sport gets its own version: its own positions, skills, logs and language, on the same foundation. We finish one before starting the next.</p>
+  <div class="grid">
+    <div class="card"><span class="tag now">In build</span><h3>Hockey</h3><p>The first version, being finalized now.</p></div>
+    <div class="card"><span class="tag">Planned</span><h3>Other sports</h3><p>Chosen after the hockey version is finished. Not scheduled yet.</p></div>
+  </div>
+</div></section>
+
+<section id="access"><div class="wrap">
+  <h2>Sign in or get the app</h2>
+  <p class="sub">This is where players will sign in, or install the app on their phone.</p>
+  <div class="grid">
+    <div class="card"><h3>Sign in</h3><p style="margin-bottom:14px">Player accounts are not open yet.</p><a class="btn" role="link" aria-disabled="true" tabindex="0">Sign in (not live yet)</a></div>
+    <div class="card"><h3>Get the app</h3><p style="margin-bottom:14px">The app installs to a phone's home screen from this site once accounts are open.</p><a class="btn" role="link" aria-disabled="true" tabindex="0">Install (not live yet)</a></div>
+  </div>
+</div></section>
+
+<section id="pricing"><div class="wrap">
+  <h2>Pricing</h2>
+  <p class="note"><strong>Payments are not live yet.</strong> There is nothing to buy today and no card is taken on this site. Pricing will be published here before any payment opens.</p>
+</div></section>
+</main>
+
+<footer><div class="wrap">Players Manual is a draft in development. Domain and accounts are not set up yet. &copy; Players Manual.</div></footer>
+</body>
+</html>
